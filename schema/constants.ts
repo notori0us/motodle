@@ -27,6 +27,15 @@ export const MIN_SOURCE_WIDTH = Math.ceil(MIN_LEVEL1_PX / DEFAULT_CROP_FRACTIONS
 export const DEFAULT_FOCUS = { x: 0.5, y: 0.5 } as const;
 
 // ---------------------------------------------------------------------------------------------
+// CSP (§13.2.3 / §13.2.6 D4) — served in production by infra/variables.tf's
+// content_security_policy default, and here so vite.config.ts's `preview.headers` (§13.5.2) and
+// the app can share one string. schema/csp-contract.test.ts asserts the two never drift.
+// ---------------------------------------------------------------------------------------------
+
+export const CONTENT_SECURITY_POLICY =
+  "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'";
+
+// ---------------------------------------------------------------------------------------------
 // Budgets — every budget referenced anywhere in the plan lives HERE, one place.
 // ---------------------------------------------------------------------------------------------
 

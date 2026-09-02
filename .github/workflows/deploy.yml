@@ -1,0 +1,168 @@
+name: Deploy
+
+# Fires when CI finishes. workflow_run reads this file from the DEFAULT branch,
+# so edits to it only take effect once merged to main.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  # SECURITY-CRITIC B1 / OPS-CRITIC B1 correction: the deploy role's OIDC trust policy
+  # (infra/iam.tf) admits ONLY sub "repo:reenchree/motodle:ref:refs/heads/main" (§13.2.8).
+  # `gh workflow run deploy.yml --ref <branch-or-tag>` mints a token with that ref in the
+  # sub and AssumeRoleWithWebIdentity fails; a raw SHA isn't even a legal --ref value. So
+  # rollback dispatches stay on `main` (sub keeps refs/heads/main) and pass the target
+  # commit as an input instead of a ref.
+  workflow_dispatch:
+    inputs:
+      ref:
+        # NOT re-verified by CI: this commit is built and shipped as-is, whatever CI said about
+        # it (or didn't -- it may never have run). That's the point of a rollback lever.
+        description: 'Commit SHA to build and deploy, unverified by CI (default: main tip)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+# One deploy at a time, and never cancel one that is mid-sync.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # CI also runs on pull_request, and workflow_run fires for those too. Deploy only a
+    # successful CI run that was itself triggered by a push to main.
+    # Skips (green, not red) until the operator has applied infra/ and set the repository
+    # variables — otherwise every push to main would fail at configure-aws-credentials.
+    if: >-
+      vars.AWS_DEPLOY_ROLE_ARN != '' &&
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      AWS_REGION: us-west-2
+      SITE_BUCKET: ${{ vars.SITE_BUCKET }}
+      DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      DEPLOY_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+    steps:
+      - name: Assert the repository variables are set
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_ROLE_ARN:?set repository variable AWS_DEPLOY_ROLE_ARN (see PLAN 13.6)}"
+          : "${SITE_BUCKET:?set repository variable SITE_BUCKET (see PLAN 13.6)}"
+          : "${DISTRIBUTION_ID:?set repository variable CLOUDFRONT_DISTRIBUTION_ID (see PLAN 13.6)}"
+
+      # inputs.ref (rollback dispatch) wins if set; else the workflow_run payload's head_sha
+      # (the exact commit CI verified); else github.sha (a plain workflow_dispatch with no
+      # input, which defaults to the tip of `main` per the trigger's trust-policy note above).
+      - name: Checkout the target commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install (npm ci)
+        run: npm ci --no-audit --no-fund
+
+      - name: Build + payload budgets
+        run: npm run build
+
+      - name: Assert every built file falls into a known cache class
+        run: |
+          set -euo pipefail
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/catalog.json
+          unmatched=$(cd dist && find . -type f \
+            ! -path './assets/*' \
+            ! -path './puzzles/img/*.webp' \
+            ! -name '*.json' \
+            ! -name '*.html' -print)
+          if [ -n "$unmatched" ]; then
+            echo "::error::built files with no cache class (see PLAN 13.4):"
+            echo "$unmatched"
+            exit 1
+          fi
+
+      # v5 exists; pinned to v4 deliberately (untested here -- no network to verify it against
+      # this OIDC setup). This step holds id-token: write and mints the AWS session, so bumping
+      # the tag is a real change, not routine Renovate churn.
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: motodle-deploy-${{ github.run_id }}
+
+      # ---- Pass A-D: immutable classes. These MUST land before index.html. ----
+      - name: 'Sync A: hashed JS'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "assets/*.js" \
+            --content-type "text/javascript; charset=utf-8" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: 'Sync B: hashed CSS'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "assets/*.css" \
+            --content-type "text/css; charset=utf-8" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      # Empty today. Content type is guessed from the extension (.svg, .woff2, .png all correct).
+      - name: 'Sync C: any other hashed asset'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "assets/*" --exclude "assets/*.js" --exclude "assets/*.css" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: 'Sync D: puzzle images'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "puzzles/img/*.webp" \
+            --content-type "image/webp" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      # ---- Pass E: mutable JSON (catalog.json, manifest.json, every puzzles/<date>.json) ----
+      # --exclude "assets/*": aws s3's filters match "*" against "/" too, so an unqualified
+      # "*.json" include would also re-touch any future assets/*.json under the immutable
+      # /assets/* behaviour, downgrading it to max-age=300 with no cache-class assertion to catch it.
+      - name: 'Sync E: catalog, manifest and puzzle JSON'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "*.json" --exclude "assets/*" \
+            --content-type "application/json" \
+            --cache-control "public, max-age=300"
+
+      # ---- Pass F: the entry point, LAST of the uploads ----
+      - name: 'Sync F: index.html and 404.html'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "*.html" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "public, max-age=0, must-revalidate, s-maxage=60"
+
+      # ---- Pass G: the reaper. Unfiltered, because --delete ignores filtered-out keys. ----
+      # Every object was uploaded above with a LastModified newer than its source mtime, so this
+      # pass uploads nothing; it only deletes objects that are no longer in dist/.
+      - name: 'Sync G: delete objects no longer in the build'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress --delete
+
+      - name: Invalidate the mutable paths
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/" "/index.html" "/404.html" "/catalog.json" "/puzzles/*" \
+            --query 'Invalidation.Id' --output text

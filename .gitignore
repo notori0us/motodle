@@ -9,3 +9,9 @@ data/review/*
 # Playwright artifacts (not part of the frozen data contracts, but generated locally)
 test-results/
 playwright-report/
+
+# Terraform. infra/.terraform.lock.hcl IS committed; nothing else here is.
+infra/.terraform/
+infra/tfplan
+*.tfstate
+*.tfstate.backup

@@ -2609,6 +2609,28 @@ the frozen rules. **Nothing in §1.3, §3, §4 or the §5.3.1 DOM contract chang
 is right — never cancel `main`); §12.2a's `6.*` check is an exact-lockfile match in the workflow
 (stricter, also fine); §1.2/§2/§7.1 still carry the pre-R2 combobox wording that §5.3 supersedes.
 
+### 11.11 Revision 5 — deployment 2026-09-02
+
+Adds **§13**, the specification for `infra/` (Terraform), `.github/workflows/deploy.yml`,
+`public/404.html` and the CSP-served preview. **§13 supersedes §9.5** — §9.5 stays as written and is
+not edited; §13.1 lists every disagreement. Nothing in §1–§8 or §10–§12 changes, with the two small
+exceptions noted below. Six things are worth flagging up front:
+
+| # | Change | Why |
+|---|---|---|
+| R5-1 | New **§13**, structured like §12: topology, the literal HCL for eleven `.tf` files, the literal `deploy.yml`, the literal `404.html`, a numbered operator runbook, a 20-row verification matrix, cost, and workstream **W6** | Deployment is the last unbuilt hook; §9.5 was design-only and predates the domain, the account and the cache classes |
+| R5-2 | **`D1` — the bucket policy must grant `s3:ListBucket`, or a missing puzzle returns `403` and the game shows the error screen instead of "No Motodle today"** | AWS's canonical OAC policy grants only `s3:GetObject`, and `GetObject` answers `403` for a missing key without `ListBucket`. `src/lib/puzzle.ts` branches on status **404** alone. Reproduced against the real build. The `403 → 404` safety net (§13.2.6) means the client-facing check alone can't prove the grant exists, so §13.7 splits this into two release gates: **V9a** (bucket policy) and **V9b** (client-facing 404) |
+| R5-3 | **§9.5's `/puzzles/YYYY-MM-DD.json` = `immutable, max-age=31536000` is superseded by `max-age=300`** (operator brief), and §9.5's "Correcting a published puzzle" procedure is downgraded from mandatory to optional — a wrong JSON is now fixable by a normal deploy | A 5-minute TTL makes tomorrow's puzzle visible promptly and makes a bad puzzle a commit, not a hand-run invalidation. §9.5's new-prefix trick is still right for *images* |
+| R5-4 | **State moved from the brief's S3 backend to HCP Terraform** (org `reenchree`, new workspace `motodle`, execution mode **local**). No state bucket, no bootstrap, no `use_lockfile` | Operator amendment. The workspace must be created with `execution-mode: local` *before* the first `init`, or the plan tries to run on HCP runners with no AWS credentials — §13.6 steps 4–5 |
+| R5-5 | The CSP is **verified, not asserted**: `default-src 'none'` plus `script-src 'self'`, `style-src 'self' 'unsafe-inline'`, `img-src 'self' data:`, `connect-src 'self'`. Two independent headless probes; a strict `style-src 'self'` produces 5–10 violations from the 6 inline `style=` attributes and the `data:` favicon | §11 R4-10's inline-SVG favicon and §5.3/§5.6's inline style attributes are load-bearing facts about the built app |
+| R5-6 | Two small edits outside §13's own files: `vite.config.ts` gains `preview: { headers: … }` so the §7.4 e2e suite runs under the production CSP (a **superset** of §10.3, verified on Vite 8.2.2), and `schema/constants.ts` gains `CONTENT_SECURITY_POLICY` with a no-drift contract test against `infra/variables.tf` | Turns "the CSP works" from a one-off manual probe into something CI re-proves on every run — the §7.2 #10 pattern |
+
+Everything else stands: `ci.yml` is unchanged and keeps `permissions: contents: read` (§12.1); every
+write permission lives in the new `deploy.yml`, which only runs after a successful CI run on a push to
+`main`. §12.9's "a deploy job — out of scope, deployment needs write permissions this workflow
+deliberately does not take" is still correct: the deploy is a **separate** workflow, exactly as that
+row anticipated.
+
 ---
 
 ## 12. Continuous integration
@@ -2965,3 +2987,1739 @@ decision is a decision and not an oversight.
 
 The warm number is the steady state (both caches populate on the first run). If the total creeps past
 ~7 min, the first lever is `workers: 2` in `playwright.config.ts`, not a second job (§12.1).
+
+---
+
+## 13. Deployment — S3 + CloudFront at `playmotodle.com`
+
+**Status of this section:** the same kind of frozen contract §12 is. It specifies `infra/` (a small
+Terraform root module living in *this* repo), `.github/workflows/deploy.yml`, `public/404.html`, one
+addition to `vite.config.ts`, and one new contract test. An implementing agent should be able to
+create every file from this section literally, without design decisions.
+
+**§13 supersedes §9.5.** §9.5 was a design-only hook written before the domain, the account and the
+cache classes were decided. Where the two disagree, §13 wins; §13.1 lists every disagreement rather
+than editing §9.5 in place (the §11 R2-13 convention — supersede, don't scatter-edit).
+
+### 13.1 Conflicts and corrections — READ THIS FIRST
+
+Four of these change behaviour the rest of the plan depends on. Nothing below is optional.
+
+| # | Conflict | Evidence | Resolution — binding |
+|---|---|---|---|
+| **D1** | **OAC + the canonical AWS bucket policy makes a missing object return `403`, not `404`.** The whole "No Motodle today" screen (§5.1, `loadPuzzle` in `src/lib/puzzle.ts`) branches on **status 403 lands on "Couldn't load today's Motodle / Retry"** instead. | AWS `GetObject` docs, verbatim: "If you have the `s3:ListBucket` permission on the bucket, Amazon S3 returns an HTTP status code `404 Not Found` error. If you don't have the `s3:ListBucket` permission, Amazon S3 returns an HTTP status code `403 Access Denied` error." AWS's own OAC policy example grants **only** `s3:GetObject`. Reproduced end-to-end against the real build: a 403 renders the error screen, a 404 renders the no-puzzle screen. | The bucket policy grants **two** statements to `cloudfront.amazonaws.com` under the same `AWS:SourceArn` condition: `s3:GetObject` on `arn/*` **and `s3:ListBucket` on `arn`** (§13.2.5). Belt and braces: the distribution also maps **`403 → 404`** via `custom_error_response` (§13.2.6) — which means the client-facing check can no longer tell the two statements apart (that mapping is the whole point, and also its side effect). The gate is therefore **two** checks, both release gates (§13.7): **V9a** reads the live bucket policy directly and asserts the `ListBucket` statement is present; **V9b** is the client-facing behavioural check, `curl` on a missing puzzle returns exactly `404`. |
+| **D2** | **§9.5 says `/puzzles/YYYY-MM-DD.json` is `max-age=31536000, immutable`.** The deployment brief says ~5 minutes. | §9.5's table vs. the operator's brief. | **The brief wins: `public, max-age=300`.** §9.5's row is superseded. The consequence is deliberate — a wrong year or a bad crop on a *published* day becomes fixable by a normal commit-and-deploy instead of a hand-run invalidation. §9.5's "Correcting a published puzzle" procedure is therefore **downgraded from mandatory to optional**: republishing images under a new `/puzzles/img/NNNN-b/` prefix is still the right move when the *images* are wrong (browser caches hold them for a year), but the **JSON no longer needs a new path or a manual invalidation** — the 5-minute TTL plus the deploy's `/puzzles/*` invalidation covers it. |
+| **D3** | **`error_caching_min_ttl` is per-status-code and DISTRIBUTION-WIDE.** The brief asks for a short negative-cache TTL "for `/puzzles/*.json`". That scoping does not exist. | `custom_error_response` is a top-level block on `aws_cloudfront_distribution` (provider 5.100.0 schema), not a field inside a cache behaviour. | One value, **60 s**, applies to every path class. Recorded honestly: **CloudFront's default is 10 s**, so 60 s is a deliberate 6× *loosening* chosen to absorb a crawl (§9.5's original reasoning, which still holds). The worst case is that a puzzle published mid-day becomes visible up to 60 s after upload. Lower it to 10 s by deleting the two `error_caching_min_ttl` lines if that ever matters. |
+| **D4** | **The CSP cannot be `default-src 'none'` alone.** The built app has 6–7 inline `style="…"` attributes and a `data:` SVG favicon. | Two independent headless-Chromium probes against `dist/`: a strict policy produced 5–10 `securitypolicyviolation` events (`style-src-attr`, and `img-src` blockedURI `data`); the policy in §13.2.6 produced **0 violations, 0 console errors** across a full winning round, share, stats, archive and reload. | The exact string in §13.2.6 ships, verbatim, in **two** places (`infra/variables.tf` default and `schema/constants.ts`), kept honest by a contract test (§13.9 W6-5). |
+| **D5** | `data "aws_cloudfront_cache_policy" { name = "Managed-CachingOptimized" }` is an unverified API name. | AWS docs publish the console name and the id, not the API `Name`; the lookup could not be resolved without an AWS call. | **No managed cache policies are used at all.** Three small custom policies (`motodle-immutable`, `motodle-short`, `motodle-html`) let the object's own `Cache-Control` drive and only *bound* it. This also fixes the managed policies' two traps: `CachingOptimized` has `min_ttl = 1 s` and overrides `no-cache` from the origin; `CachingDisabled` has `max_ttl = 0`, which would silently discard `index.html`'s `s-maxage`. |
+| **D6** | `function_association` is **per cache behaviour** (max 2 each), not per distribution. | Provider 5.100.0 schema. | The www→apex function is attached to **all five** behaviours. Attaching it only to the default behaviour would leave `https://www.playmotodle.com/assets/index-*.js` serving from `www` — invisible in testing because the apex path works. |
+| **D7** | `aws s3 sync --delete` will not delete anything its filters excluded. | `aws s3 sync help`, verbatim: "Note that files excluded by filters are excluded from deletion." | The deploy is six *filtered* upload passes (no `--delete` on any of them) followed by a seventh **unfiltered reaper** pass that carries `--delete` and no metadata flags (§13.4). |
+| **D8** | `aws s3 sync` does not re-apply metadata to unchanged objects. | `aws s3 sync help`, verbatim: "In a sync, this means that files which haven't changed won't receive the new metadata." | Harmless today (`vite build` rewrites every file, so every object re-uploads), but it means **changing a `Cache-Control` class later does not re-header the objects already in the bucket**. The fix-up command is in §13.6 step 13, and nobody may add `--size-only` to a pass. |
+| **D9** | **The brief's original "S3 state bucket + `use_lockfile`" is withdrawn** by the operator's amendment. | Operator amendment, 2026-09-02. | State lives in **HCP Terraform**, org `reenchree`, a new workspace `motodle`, **execution mode `local`**. There is no state bucket, no bootstrap, no DynamoDB, no `use_lockfile`. §13.3 is the whole story, and the workspace's execution mode must be set to `local` **before the first `terraform init`** or the first plan tries to run on HCP runners with no AWS credentials. |
+| **D10** | `terraform init -backend=false` does **not** validate the backend/cloud block. | Proven: a bogus attribute inserted into the block still produced "Terraform has been successfully initialized!" and `terraform validate` still reported success. | An agent's `fmt` + `validate` pass is **not** evidence that the `cloud {}` block is right. The operator's first real `terraform init` (§13.6 step 6) is the first test of it. |
+| **D11** | `public/404.html` does not exist in the repo. | `ls public/404.html dist/404.html` → both missing. | The implementer creates it (§13.5). Vite copies `public/**` to `dist/` verbatim, so it needs no build wiring. `--delete` in the reaper pass means a hand-uploaded 404 page would be deleted on the next deploy; it **must** come from the build. |
+
+Two smaller notes, recorded so they are decisions and not oversights:
+
+- **Provider pin `~> 5.0` resolves to 5.100.0, the last 5.x release** (the live line is 6.x). Every
+  resource this section needs exists in 5.100.0 and the whole configuration validates against it. The
+  pin is **deliberate** — it matches `terraform-core/main.tf`, which is the only other Terraform in the
+  homelab. Moving to `~> 6.0` is a later, separate change.
+- **`style-src 'self' 'unsafe-inline'` beats the tighter `style-src-attr 'unsafe-inline'`.** The
+  granular CSP3 form was verified to work in Chromium and is strictly tighter, but WebKit support could
+  not be verified from this network. A browser that ignores `style-src-attr` falls back to
+  `style-src 'self'` and silently breaks the Stats bar and the Help table on iOS. The blanket form is
+  verified and has no such exposure. Deleting the 6 inline `style=` attributes from the components is
+  the real hardening path, and it is an **app** change, not an infra one — out of scope here.
+
+### 13.2 `infra/` — the Terraform root module
+
+Eleven files, one concern each. **Every block below is literal** and was validated as a set with
+`terraform 1.16.1` + `hashicorp/aws 5.100.0`: `terraform fmt -check -diff` clean,
+`terraform init -backend=false && terraform validate` → *"Success! The configuration is valid."*
+
+```
+infra/
+  versions.tf     terraform{} required_version + required_providers; both provider blocks
+  backend.tf      the HCP Terraform cloud{} block (a second, separate terraform{} block)
+  variables.tf    every input, all defaulted — `terraform apply` needs no -var
+  locals.tf       derived names
+  data.tf         account id, the existing hosted zone, the existing GitHub OIDC provider
+  s3.tf           bucket, public-access block, ownership controls, SSE, the OAC bucket policy
+  acm.tf          the us-east-1 certificate and its validation
+  route53.tf      ACM validation records + apex/www A and AAAA aliases
+  cloudfront.tf   OAC, the www→apex function, the response-headers policy, 3 cache policies, the distribution
+  iam.tf          the GitHub OIDC deploy role, its trust policy and its inline least-privilege policy
+  outputs.tf      what the operator needs after apply
+```
+
+`infra/.terraform.lock.hcl` **is committed** (it is created by the first `terraform init`).
+`infra/.terraform/`, `*.tfstate*` and `tfplan` are **not** — add them to `.gitignore` (§13.9 W6-1).
+
+#### 13.2.1 `infra/versions.tf`
+
+Two `terraform` blocks across two files is legal and was verified — Terraform merges them.
+
+```hcl
+terraform {
+  # D9 withdrew use_lockfile, so the cloud{} block only truly needs >= 1.1; pinned to match the
+  # pinned operator/agent install (§13.6 step 1) rather than left as a stale, non-load-bearing floor.
+  required_version = ">= 1.16"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# CloudFront viewer certificates must live in us-east-1.
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+```
+
+#### 13.2.2 `infra/backend.tf`
+
+```hcl
+terraform {
+  cloud {
+    organization = "reenchree"
+
+    workspaces {
+      name = "motodle"
+    }
+  }
+}
+```
+
+No `AWS_*` credentials are ever set in the HCP workspace: execution mode is **local**, so plan
+and apply run on the operator's laptop against the `default` SSO profile. HCP holds state only.
+
+#### 13.2.3 `infra/variables.tf`
+
+Every variable is defaulted, so `terraform plan` takes no `-var` and there is no `.tfvars` file
+to keep in sync. The CSP default is the **verified** string from D4.
+
+```hcl
+variable "aws_region" {
+  description = "Region for the site bucket and all non-CloudFront resources."
+  type        = string
+  default     = "us-west-2"
+}
+
+variable "domain_name" {
+  description = "Apex domain; the canonical origin for the site."
+  type        = string
+  default     = "playmotodle.com"
+}
+
+variable "github_repository" {
+  description = "owner/repo allowed to assume the deploy role."
+  type        = string
+  default     = "reenchree/motodle"
+}
+
+variable "github_branch" {
+  description = "Branch ref allowed to assume the deploy role."
+  type        = string
+  default     = "main"
+}
+
+variable "name_prefix" {
+  description = "Prefix for every named resource."
+  type        = string
+  default     = "motodle"
+}
+
+variable "content_security_policy" {
+  description = "CSP served on every response. Verified against the built app."
+  type        = string
+  default     = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'"
+}
+```
+
+#### 13.2.4 `infra/locals.tf` and `infra/data.tf`
+
+```hcl
+locals {
+  www_domain = "www.${var.domain_name}"
+  origin_id  = "${var.name_prefix}-s3-origin"
+  github_sub = "repo:${var.github_repository}:ref:refs/heads/${var.github_branch}"
+}
+```
+
+```hcl
+# used for getting current account ID
+data "aws_caller_identity" "current" {}
+
+# The hosted zone already exists and is empty; Terraform owns the records in it.
+data "aws_route53_zone" "this" {
+  name         = "${var.domain_name}."
+  private_zone = false
+}
+
+# Created by terraform-core. Referenced, never managed here.
+data "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
+}
+```
+
+The OIDC provider is **looked up, never created** — `terraform-core/iam_github.tf` owns it
+(`arn:aws:iam::051946164308:oidc-provider/token.actions.githubusercontent.com`). Looking it up by
+`url` rather than by ARN keeps the account id out of this repo.
+
+#### 13.2.5 `infra/s3.tf` — private bucket, OAC-only policy, and the `ListBucket` grant that makes 404 real
+
+```hcl
+resource "aws_s3_bucket" "site" {
+  bucket = "${var.name_prefix}-site-${data.aws_caller_identity.current.account_id}"
+
+  # §13.8: no S3 versioning here (git is the true source of truth; every deploy is --delete), so a
+  # non-empty bucket is never the only copy of anything. force_destroy lets `terraform destroy`
+  # (the realistic teardown path) work without a manual `aws s3 rm --recursive` first.
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_public_access_block" "site" {
+  bucket                  = aws_s3_bucket.site.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# OAC requires ACLs to be disabled on the bucket.
+resource "aws_s3_bucket_ownership_controls" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+data "aws_iam_policy_document" "site_bucket" {
+  statement {
+    sid     = "AllowCloudFrontServicePrincipalReadOnly"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    resources = ["${aws_s3_bucket.site.arn}/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.site.arn]
+    }
+  }
+
+  # Load-bearing: without s3:ListBucket, S3 answers 403 for a missing key and
+  # the game shows "couldn't load" instead of "no puzzle today" (PLAN 5.1).
+  statement {
+    sid     = "AllowCloudFrontListBucketSoMissingKeysAre404"
+    effect  = "Allow"
+    actions = ["s3:ListBucket"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    resources = [aws_s3_bucket.site.arn]
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.site.arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "site" {
+  bucket = aws_s3_bucket.site.id
+  policy = data.aws_iam_policy_document.site_bucket.json
+
+  depends_on = [aws_s3_bucket_public_access_block.site]
+}
+```
+
+Three things here are load-bearing and must not be "cleaned up":
+
+- **`BucketOwnerEnforced`** — AWS's OAC documentation requires ACLs disabled. It is the default
+  for new buckets; it is set explicitly so a future console change cannot drift it.
+- **The second policy statement (`s3:ListBucket` on the bucket ARN, no `/*`)** — this is D1. Without
+  it the game's "no puzzle today" screen never renders. It does **not** expose a bucket listing to
+  visitors: a listing needs a request to the bucket root with query parameters (`?list-type=2` etc),
+  and every path here goes through CloudFront, where `default_root_object` rewrites the bare `/` to
+  `index.html` and every one of the three cache policies (§13.2.6) sets
+  `query_string_behavior = "none"` — so no request CloudFront will forward ever reaches S3 with the
+  query string a listing needs. A future change to any cache policy's `query_string_behavior` is
+  exactly the kind of edit that would need this reasoning re-checked.
+- **`bucket_regional_domain_name`** as the origin, not the website endpoint. A website-endpoint
+  origin is a *custom* origin and cannot use OAC at all.
+
+There is no dependency cycle even though the policy names the distribution: the distribution
+references only the bucket's domain name, never the policy.
+
+#### 13.2.6 `infra/cloudfront.tf` — OAC, the function, headers, cache classes, behaviours, error responses
+
+This is the load-bearing file. Read the four notes after it before changing a line.
+
+```hcl
+resource "aws_cloudfront_origin_access_control" "site" {
+  name                              = "${var.name_prefix}-site-oac"
+  description                       = "OAC for the ${var.name_prefix} site bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_function" "www_to_apex" {
+  name    = "${var.name_prefix}-www-to-apex"
+  runtime = "cloudfront-js-2.0"
+  comment = "301 www.${var.domain_name} -> ${var.domain_name}, query string preserved"
+  publish = true
+
+  code = <<-JS
+    function handler(event) {
+      var request = event.request;
+      var hostHeader = request.headers.host;
+      // .toLowerCase(): Host is case-insensitive (RFC 9110); without it "WWW.playmotodle.com"
+      // falls through unredirected instead of matching www_domain below.
+      var host = hostHeader ? hostHeader.value.toLowerCase() : '';
+      if (host !== '${local.www_domain}') {
+        return request;
+      }
+      var params = [];
+      var qs = request.querystring;
+      for (var key in qs) {
+        var entry = qs[key];
+        if (entry.multiValue) {
+          for (var i = 0; i < entry.multiValue.length; i++) {
+            params.push(key + '=' + entry.multiValue[i].value);
+          }
+        } else if (entry.value === '') {
+          params.push(key);
+        } else {
+          params.push(key + '=' + entry.value);
+        }
+      }
+      var suffix = params.length > 0 ? '?' + params.join('&') : '';
+      return {
+        statusCode: 301,
+        statusDescription: 'Moved Permanently',
+        headers: {
+          location: { value: 'https://${var.domain_name}' + request.uri + suffix }
+        }
+      };
+    }
+  JS
+}
+
+resource "aws_cloudfront_response_headers_policy" "site" {
+  name    = "${var.name_prefix}-security-headers"
+  comment = "CSP verified against the built app; HSTS, nosniff, DENY, strict-origin-when-cross-origin"
+
+  security_headers_config {
+    content_security_policy {
+      content_security_policy = var.content_security_policy
+      override                = true
+    }
+
+    content_type_options {
+      override = true
+    }
+
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+
+    strict_transport_security {
+      access_control_max_age_sec = 63072000
+      include_subdomains         = true
+      preload                    = false
+      override                   = true
+    }
+  }
+}
+
+# Origin Cache-Control drives every class; these policies only bound it.
+resource "aws_cloudfront_cache_policy" "immutable" {
+  name        = "${var.name_prefix}-immutable"
+  comment     = "Content-hashed assets and per-puzzle image prefixes"
+  min_ttl     = 0
+  default_ttl = 31536000
+  max_ttl     = 31536000
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
+resource "aws_cloudfront_cache_policy" "short" {
+  name        = "${var.name_prefix}-short"
+  comment     = "Puzzle JSON, manifest and catalog: 5 minutes"
+  min_ttl     = 0
+  default_ttl = 300
+  max_ttl     = 300
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
+resource "aws_cloudfront_cache_policy" "html" {
+  name        = "${var.name_prefix}-html"
+  comment     = "index.html and 404.html: no browser cache, small edge cache"
+  min_ttl     = 0
+  default_ttl = 0
+  max_ttl     = 300
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
+resource "aws_cloudfront_distribution" "site" {
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = var.name_prefix
+  default_root_object = "index.html"
+  price_class         = "PriceClass_100"
+  http_version        = "http2and3"
+  aliases             = [var.domain_name, local.www_domain]
+
+  origin {
+    origin_id                = local.origin_id
+    domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+  }
+
+  default_cache_behavior {
+    target_origin_id           = local.origin_id
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = aws_cloudfront_cache_policy.html.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_to_apex.arn
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "/assets/*"
+    target_origin_id           = local.origin_id
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = aws_cloudfront_cache_policy.immutable.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_to_apex.arn
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "/puzzles/img/*"
+    target_origin_id           = local.origin_id
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = aws_cloudfront_cache_policy.immutable.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_to_apex.arn
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "/puzzles/*.json"
+    target_origin_id           = local.origin_id
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = aws_cloudfront_cache_policy.short.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_to_apex.arn
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "/catalog.json"
+    target_origin_id           = local.origin_id
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = aws_cloudfront_cache_policy.short.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_to_apex.arn
+    }
+  }
+
+  # Real 404 status, HTML body. NEVER rewrite to index.html (PLAN 9.5).
+  custom_error_response {
+    error_code            = 404
+    response_code         = 404
+    response_page_path    = "/404.html"
+    error_caching_min_ttl = 60
+  }
+
+  # Safety net: if the ListBucket grant is ever lost, S3 returns 403 for a
+  # missing key. Map it to 404 so "no puzzle today" still works.
+  custom_error_response {
+    error_code            = 403
+    response_code         = 404
+    response_page_path    = "/404.html"
+    error_caching_min_ttl = 60
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn      = aws_acm_certificate_validation.site.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+}
+```
+
+**Note 1 — the CSP string.** Reproduced here so it can be diffed by eye. It is the default of
+`var.content_security_policy`, and the identical string ships in `schema/constants.ts` (§13.9 W6-5):
+
+```
+default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
+```
+
+Why each allowance exists, all empirically established against `dist/`:
+
+| Directive | Why it is not `'none'` |
+|---|---|
+| `script-src 'self'` | One external module bundle. No inline `<script>`, no `eval(`, no `new Function` anywhere in the build. |
+| `style-src 'self' 'unsafe-inline'` | One external stylesheet, plus 6 inline `style="…"` attributes in `HelpModal` (4 `<col>` widths), `ResultModal` and `App` (`aspect-ratio: 4 / 3`), and the dynamic bar width in `StatsModal`. No runtime `<style>` element is ever injected — `'unsafe-inline'` is here for **attributes**, not elements. |
+| `img-src 'self' data:` | `data:` is for the inline SVG favicon in `index.html` (§11 R4-10) — nothing else. All puzzle WebPs are same-origin. |
+| `connect-src 'self'` | `catalog.json`, `puzzles/<date>.json`, `puzzles/manifest.json`. Every fetch is root-relative and same-origin (§10.6). |
+| `font-src 'self'` | No web fonts today (system-ui stack). Present so a self-hosted font is a build change, not an infra change. |
+| `frame-ancestors 'none'` | Redundant with `X-Frame-Options: DENY`, which the same policy also sends. Both ship; the brief allows either. |
+
+**Note 2 — cache classes.** The distribution never invents a TTL; the object's own `Cache-Control`
+(set at upload, §13.4) drives, and the policy only bounds it.
+
+| Behaviour | Path pattern | Cache policy | `min`/`default`/`max` TTL | Object `Cache-Control` uploaded by the deploy |
+|---|---|---|---|---|
+| ordered #1 | `/assets/*` | `motodle-immutable` | 0 / 31536000 / 31536000 | `public, max-age=31536000, immutable` |
+| ordered #2 | `/puzzles/img/*` | `motodle-immutable` | 0 / 31536000 / 31536000 | `public, max-age=31536000, immutable` |
+| ordered #3 | `/puzzles/*.json` | `motodle-short` | 0 / 300 / 300 | `public, max-age=300` |
+| ordered #4 | `/catalog.json` | `motodle-short` | 0 / 300 / 300 | `public, max-age=300` |
+| default | everything else (`/`, `/index.html`, `/404.html`) | `motodle-html` | 0 / 0 / 300 | `public, max-age=0, must-revalidate, s-maxage=60` |
+
+**Order matters.** `ordered_cache_behavior` blocks are evaluated in the order written; keep the
+four `ordered_cache_behavior` blocks in the sequence above and do not reorder them on a future edit.
+
+`/index.html` gets `max-age=0, must-revalidate` for browsers **and** `s-maxage=60` for the edge:
+a player always revalidates, the edge absorbs a burst for a minute. `motodle-html`'s `max_ttl = 300`
+is the ceiling that keeps a mistyped `s-maxage` from pinning a stale entry point.
+
+**Note 3 — the two `custom_error_response` blocks.** `404 → 404 /404.html` is the whole point:
+the **status is preserved**, only a readable body is added. Nothing anywhere rewrites a missing
+object to `index.html` — `default_root_object` affects the bare `/` request only. `403 → 404` is
+the D1 safety net. Both carry `error_caching_min_ttl = 60` (D3: distribution-wide, per status code).
+AWS caches `404` unconditionally, so `error_caching_min_ttl = 60` governs the normal path. It caches
+`403` only when the origin sends `Cache-Control`, and S3's `AccessDenied` sends none — so if the
+`ListBucket` grant is ever lost, every missing-key request reaches S3 uncached. The 403 mapping
+keeps the game working; it does not protect the origin. That is why V9a checks the bucket policy
+directly.
+
+`error_caching_min_ttl` is also not the last word on the observed TTL: `/404.html` itself matches
+the **default** cache behaviour (`motodle-html`, §13.2.6), which carries its own `s-maxage=60` —
+and AWS documents that a cache behaviour matching the custom error page's `response_page_path` wins
+over `error_caching_min_ttl` for how long the *response* is held at the edge. Deleting the two
+`error_caching_min_ttl` lines (the D3 escape hatch) would therefore likely leave the observed TTL at
+~60 s from `motodle-html`'s `s-maxage`, not drop it to CloudFront's 10 s default. V11 (§13.7) is
+written to measure this empirically rather than assume either number.
+
+**Note 4 — the www→apex function** runs at `viewer-request` on **every** behaviour (D6) and
+reconstructs the query string by hand, because `event.request.querystring` is a parsed object, not
+a string — without the loop, `?d=2026-09-01` (the archive/practice link, §4.6) would be dropped on
+redirect. `.toLowerCase()` on the `Host` header value is load-bearing too: `Host` is
+case-insensitive (RFC 9110) and without it a request for `WWW.playmotodle.com` (a real browser
+autocomplete/bookmark artifact, not a hypothetical) falls through the `!==` check unredirected. The
+function body was syntax-checked under `'use strict'` and exercised for five cases: apex
+pass-through, bare `/`, single-value query, a flag plus a multi-value query (`/a?flag&x=1&x=2`), and
+an uppercase `Host: WWW.playmotodle.com`. The `cloudfront-js-2.0` runtime is always strict-mode; the
+body uses only `var`, `for…in`, `.toLowerCase()` and string concatenation, so nothing in it depends
+on the ES6+ subset.
+
+#### 13.2.7 `infra/acm.tf` and `infra/route53.tf`
+
+```hcl
+resource "aws_acm_certificate" "site" {
+  provider = aws.us_east_1
+
+  domain_name               = var.domain_name
+  subject_alternative_names = [local.www_domain]
+  validation_method         = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate_validation" "site" {
+  provider = aws.us_east_1
+
+  certificate_arn         = aws_acm_certificate.site.arn
+  validation_record_fqdns = [for r in aws_route53_record.acm_validation : r.fqdn]
+}
+```
+
+```hcl
+# allow_overwrite because apex and www can resolve to the same validation record.
+resource "aws_route53_record" "acm_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.site.domain_validation_options :
+    dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  zone_id         = data.aws_route53_zone.this.zone_id
+  name            = each.value.name
+  type            = each.value.type
+  records         = [each.value.record]
+  ttl             = 60
+  allow_overwrite = true
+}
+
+resource "aws_route53_record" "apex_a" {
+  zone_id = data.aws_route53_zone.this.zone_id
+  name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "apex_aaaa" {
+  zone_id = data.aws_route53_zone.this.zone_id
+  name    = var.domain_name
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "www_a" {
+  zone_id = data.aws_route53_zone.this.zone_id
+  name    = local.www_domain
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "www_aaaa" {
+  zone_id = data.aws_route53_zone.this.zone_id
+  name    = local.www_domain
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+```
+
+Three details that are easy to get wrong:
+
+- The distribution consumes **`aws_acm_certificate_validation.site.certificate_arn`**, not the
+  certificate's own ARN. That is what makes the apply *wait* for DNS validation instead of failing
+  with an unvalidated certificate.
+- `allow_overwrite = true` on the validation records — apex and `www` can hash to the **same**
+  validation record, and `for_each` would otherwise fight itself.
+- The alias records use `aws_cloudfront_distribution.site.hosted_zone_id`, not the hardcoded
+  `Z2FDTNDATAQYW2`. Same value, one fewer magic string.
+
+Both `www` records exist so that `www.playmotodle.com` **resolves** and reaches the distribution —
+which is the only way the CloudFront function can 301 it. A CNAME-less `www` would fail at DNS and
+never redirect.
+
+#### 13.2.8 `infra/iam.tf` — the GitHub OIDC deploy role
+
+```hcl
+data "aws_iam_policy_document" "deploy_assume" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = [local.github_sub]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "deploy" {
+  name                 = "${var.name_prefix}-github-deploy"
+  description          = "GitHub Actions deploy role for ${var.github_repository} (${var.github_branch} only)"
+  assume_role_policy   = data.aws_iam_policy_document.deploy_assume.json
+  max_session_duration = 3600
+}
+
+data "aws_iam_policy_document" "deploy" {
+  statement {
+    sid       = "ListSiteBucket"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = [aws_s3_bucket.site.arn]
+  }
+
+  statement {
+    sid    = "WriteSiteObjects"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+    ]
+    resources = ["${aws_s3_bucket.site.arn}/*"]
+  }
+
+  statement {
+    sid       = "InvalidateThisDistribution"
+    effect    = "Allow"
+    actions   = ["cloudfront:CreateInvalidation"]
+    resources = [aws_cloudfront_distribution.site.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "deploy" {
+  name   = "${var.name_prefix}-deploy"
+  role   = aws_iam_role.deploy.id
+  policy = data.aws_iam_policy_document.deploy.json
+}
+```
+
+The rendered trust policy — this is the shape to eyeball in the plan output:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Principal": {
+        "Federated": "arn:aws:iam::051946164308:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:sub": "repo:reenchree/motodle:ref:refs/heads/main",
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
+```
+
+`StringEquals` on a single literal `sub`, **not** `StringLike` with a wildcard.
+`terraform-core`'s existing `GitHubOIDCECRPushRole` trusts `repo:reenchree/*:*`; this role
+deliberately does not follow that precedent — only `main` of this one repo can assume it, so a
+pull-request run, a tag build and a fork can never touch the bucket.
+
+The rendered permission policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListSiteBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::motodle-site-051946164308"
+    },
+    {
+      "Sid": "WriteSiteObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::motodle-site-051946164308/*"
+    },
+    {
+      "Sid": "InvalidateThisDistribution",
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateInvalidation",
+      "Resource": "arn:aws:cloudfront::051946164308:distribution/EXAMPLEDISTID"
+    }
+  ]
+}
+```
+
+`s3:ListBucket` is needed by `aws s3 sync` (it lists the destination to decide what to upload and
+what `--delete` should reap) and `s3:GetObject` by its comparator. `cloudfront:GetInvalidation` is
+**deliberately absent** — which is why the workflow fires an invalidation and does not wait on it
+(§13.4). No `cloudfront:*`, no `iam:*`, no other bucket, no other distribution.
+
+#### 13.2.9 `infra/outputs.tf`
+
+```hcl
+output "site_bucket" {
+  description = "S3 bucket holding the built site."
+  value       = aws_s3_bucket.site.bucket
+}
+
+output "distribution_id" {
+  description = "CloudFront distribution id (GitHub variable CLOUDFRONT_DISTRIBUTION_ID)."
+  value       = aws_cloudfront_distribution.site.id
+}
+
+output "distribution_domain_name" {
+  description = "CloudFront domain name, for debugging before DNS propagates."
+  value       = aws_cloudfront_distribution.site.domain_name
+}
+
+output "deploy_role_arn" {
+  description = "Role GitHub Actions assumes (GitHub variable AWS_DEPLOY_ROLE_ARN)."
+  value       = aws_iam_role.deploy.arn
+}
+
+output "gh_variable_commands" {
+  description = "Paste these into a shell at the repo root after apply."
+  value = join("\n", [
+    "gh variable set AWS_DEPLOY_ROLE_ARN --body '${aws_iam_role.deploy.arn}'",
+    "gh variable set SITE_BUCKET --body '${aws_s3_bucket.site.bucket}'",
+    "gh variable set CLOUDFRONT_DISTRIBUTION_ID --body '${aws_cloudfront_distribution.site.id}'",
+  ])
+}
+```
+
+### 13.3 State — HCP Terraform, workspace `motodle`, execution mode **local**
+
+The brief's original S3 state bucket is **withdrawn** (D9). There is **no state bucket, no bootstrap
+`aws s3api` command, no DynamoDB table and no `use_lockfile`**. If any of those words appear in an
+implementation, it is wrong.
+
+State lives in HCP Terraform:
+
+| Setting | Value |
+|---|---|
+| Organization | `reenchree` (the same org `terraform-core` uses) |
+| Workspace | `motodle` — **new** |
+| Workflow | CLI-driven |
+| Execution mode | **`local`** |
+| Workspace variables | **none** — no AWS credentials in HCP |
+
+The backend block is §13.2.2, repeated here because it is the one thing that must be exact:
+
+```hcl
+terraform {
+  cloud {
+    organization = "reenchree"
+
+    workspaces {
+      name = "motodle"
+    }
+  }
+}
+```
+
+**The one trap.** A workspace that `terraform init` auto-creates defaults to **remote** execution.
+Remote execution would run the plan on HCP's runners, which have no AWS credentials and no SSO
+session, and it would fail. The workspace must therefore exist with `execution-mode: local`
+**before the first `terraform init`** — §13.6 steps 4–5 do exactly that, with `curl` against the HCP
+API using the token `terraform login` wrote. A PATCH recovery path is given for the case where an
+`init` already created it.
+
+`terraform-core` uses the *other* pattern (remote execution + HCP dynamic credentials against the
+`app.terraform.io` OIDC provider that already exists in account `051946164308`). Moving `motodle` to
+that pattern later is a real, documented upgrade — it needs its own IAM role with a trust policy
+scoped to the HCP workspace — but it is **not built now**, because local execution needs no AWS
+identity for HCP at all and this is a hobby site the operator applies by hand.
+
+### 13.4 `.github/workflows/deploy.yml`
+
+One new file. It does **not** modify `ci.yml`. CI stays `permissions: contents: read` (§12.1) — every
+write permission lives here, in a workflow that only runs after CI is green.
+
+```yaml
+name: Deploy
+
+# Fires when CI finishes. workflow_run reads this file from the DEFAULT branch,
+# so edits to it only take effect once merged to main.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  # SECURITY-CRITIC B1 / OPS-CRITIC B1 correction: the deploy role's OIDC trust policy
+  # (infra/iam.tf) admits ONLY sub "repo:reenchree/motodle:ref:refs/heads/main" (§13.2.8).
+  # `gh workflow run deploy.yml --ref <branch-or-tag>` mints a token with that ref in the
+  # sub and AssumeRoleWithWebIdentity fails; a raw SHA isn't even a legal --ref value. So
+  # rollback dispatches stay on `main` (sub keeps refs/heads/main) and pass the target
+  # commit as an input instead of a ref.
+  workflow_dispatch:
+    inputs:
+      ref:
+        # NOT re-verified by CI: this commit is built and shipped as-is, whatever CI said about
+        # it (or didn't -- it may never have run). That's the point of a rollback lever.
+        description: 'Commit SHA to build and deploy, unverified by CI (default: main tip)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+# One deploy at a time, and never cancel one that is mid-sync.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # CI also runs on pull_request, and workflow_run fires for those too. Deploy only a
+    # successful CI run that was itself triggered by a push to main.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      AWS_REGION: us-west-2
+      SITE_BUCKET: ${{ vars.SITE_BUCKET }}
+      DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      DEPLOY_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+    steps:
+      - name: Assert the repository variables are set
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_ROLE_ARN:?set repository variable AWS_DEPLOY_ROLE_ARN (see PLAN 13.6)}"
+          : "${SITE_BUCKET:?set repository variable SITE_BUCKET (see PLAN 13.6)}"
+          : "${DISTRIBUTION_ID:?set repository variable CLOUDFRONT_DISTRIBUTION_ID (see PLAN 13.6)}"
+
+      # inputs.ref (rollback dispatch) wins if set; else the workflow_run payload's head_sha
+      # (the exact commit CI verified); else github.sha (a plain workflow_dispatch with no
+      # input, which defaults to the tip of `main` per the trigger's trust-policy note above).
+      - name: Checkout the target commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install (npm ci)
+        run: npm ci --no-audit --no-fund
+
+      - name: Build + payload budgets
+        run: npm run build
+
+      - name: Assert every built file falls into a known cache class
+        run: |
+          set -euo pipefail
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/catalog.json
+          unmatched=$(cd dist && find . -type f \
+            ! -path './assets/*' \
+            ! -path './puzzles/img/*.webp' \
+            ! -name '*.json' \
+            ! -name '*.html' -print)
+          if [ -n "$unmatched" ]; then
+            echo "::error::built files with no cache class (see PLAN 13.4):"
+            echo "$unmatched"
+            exit 1
+          fi
+
+      # v5 exists; pinned to v4 deliberately (untested here -- no network to verify it against
+      # this OIDC setup). This step holds id-token: write and mints the AWS session, so bumping
+      # the tag is a real change, not routine Renovate churn.
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: motodle-deploy-${{ github.run_id }}
+
+      # ---- Pass A-D: immutable classes. These MUST land before index.html. ----
+      - name: 'Sync A: hashed JS'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "assets/*.js" \
+            --content-type "text/javascript; charset=utf-8" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: 'Sync B: hashed CSS'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "assets/*.css" \
+            --content-type "text/css; charset=utf-8" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      # Empty today. Content type is guessed from the extension (.svg, .woff2, .png all correct).
+      - name: 'Sync C: any other hashed asset'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "assets/*" --exclude "assets/*.js" --exclude "assets/*.css" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: 'Sync D: puzzle images'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "puzzles/img/*.webp" \
+            --content-type "image/webp" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      # ---- Pass E: mutable JSON (catalog.json, manifest.json, every puzzles/<date>.json) ----
+      # --exclude "assets/*": aws s3's filters match "*" against "/" too, so an unqualified
+      # "*.json" include would also re-touch any future assets/*.json under the immutable
+      # /assets/* behaviour, downgrading it to max-age=300 with no cache-class assertion to catch it.
+      - name: 'Sync E: catalog, manifest and puzzle JSON'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "*.json" --exclude "assets/*" \
+            --content-type "application/json" \
+            --cache-control "public, max-age=300"
+
+      # ---- Pass F: the entry point, LAST of the uploads ----
+      - name: 'Sync F: index.html and 404.html'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "*.html" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "public, max-age=0, must-revalidate, s-maxage=60"
+
+      # ---- Pass G: the reaper. Unfiltered, because --delete ignores filtered-out keys. ----
+      # Every object was uploaded above with a LastModified newer than its source mtime, so this
+      # pass uploads nothing; it only deletes objects that are no longer in dist/.
+      - name: 'Sync G: delete objects no longer in the build'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress --delete
+
+      - name: Invalidate the mutable paths
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/" "/index.html" "/404.html" "/catalog.json" "/puzzles/*" \
+            --query 'Invalidation.Id' --output text
+```
+
+**Repository variables it reads** (plain variables, not secrets — none of these are sensitive, and
+being able to read them in the run log is a feature):
+
+| Variable | Value comes from | Example |
+|---|---|---|
+| `AWS_DEPLOY_ROLE_ARN` | `terraform output deploy_role_arn` | `arn:aws:iam::051946164308:role/motodle-github-deploy` |
+| `SITE_BUCKET` | `terraform output site_bucket` | `motodle-site-051946164308` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `terraform output distribution_id` | `E1EXAMPLE2DIST` |
+
+Seven things in that file are deliberate and must survive review:
+
+1. **The `if:` gate is three conditions, not one.** `workflow_run` fires for CI's `pull_request` runs
+   as well as its pushes, and a `workflow_run` `branches:` filter matches the PR's *head* branch, not
+   its base. Gating on `conclusion == 'success'` alone would deploy a pull-request head — including a
+   fork's — straight to production. `event == 'push'` **and** `head_branch == 'main'` are both required.
+2. **`ref: ${{ inputs.ref || github.event.workflow_run.head_sha || github.sha }}`.** Three terms, in
+   priority order: `inputs.ref` is set only on a rollback dispatch (§13.6 "Rollback") and wins when
+   present; `github.event.workflow_run.head_sha` is the commit CI actually verified, for the normal
+   automatic trigger; `github.sha` is the fallback for a plain `workflow_dispatch` with no input
+   (there is no `workflow_run` payload on that trigger, so the middle term would otherwise be empty
+   and checkout would silently take the default branch tip). `github.sha` on `workflow_dispatch`
+   resolves to the tip of whatever ref the dispatch itself ran from — always `main` here, since
+   `inputs.ref` carries the target *commit* instead of the dispatch *ref* (see the trigger's
+   trust-policy comment in the shipped `deploy.yml`, and §13.6 "Rollback").
+3. **`persist-credentials: false`.** The job never pushes; leaving a `GITHUB_TOKEN` in the local git
+   config of a job that also assumes an AWS role is free risk.
+4. **The build happens here.** `dist/` is in `.gitignore`; there is no artifact hand-off from CI (that
+   would need `actions/download-artifact` plus a `workflow_run`-scoped artifact lookup, and the build
+   is ~25 s).
+5. **The cache-class assertion.** It fails the deploy if `vite build` ever emits a file that none of the
+   six filtered passes would match — the exact failure mode that would otherwise let pass G upload a
+   stray file with no `Cache-Control` and a guessed content type.
+6. **Pass ordering is the deploy's correctness argument.** `index.html` is unhashed and names the hashed
+   bundle; a player who fetches the new `index.html` before the new `/assets/*` exists gets a hard 404
+   on the bundle and no retry (§13.7). Passes A–E therefore all precede F, and `--delete` appears on
+   **neither** — it is confined to pass G, which runs after everything is up.
+7. **No invalidation wait.** The role has `CreateInvalidation` but not `GetInvalidation` (§13.2.8), so
+   `aws cloudfront wait invalidation-completed` would fail with AccessDenied. Invalidations take
+   ~30–60 s; the workflow fires and exits. Five paths per deploy against a 1,000-path free monthly
+   allowance is ~200 free deploys a month.
+
+Two cosmetic notes: YAML 1.1 parses the bare key `on:` as boolean `true` (harmless — GitHub's own
+parser does not), so nobody should "fix" it by quoting; and `${{ vars.* }}` is read once into job-level
+`env` so the step scripts use ordinary shell variables rather than expression interpolation.
+
+### 13.5 `public/404.html` and the CSP-served preview
+
+#### 13.5.1 The page
+
+Create it at **`public/404.html`**. Vite copies `public/**` into `dist/` verbatim with no config
+change and no build wiring — the file simply appears at `dist/404.html`, which is exactly where the
+distribution's `response_page_path = "/404.html"` looks. It must come from the build, never from a
+hand-upload: pass G's `--delete` would reap a hand-placed object on the next deploy (D11).
+
+It is served for two quite different things: a human who typed a wrong URL, and the app's own
+`fetch('/puzzles/2099-01-01.json')` for a day with no puzzle. The second caller reads only the status
+code and throws the body away (§5.1), so an HTML body is harmless — what matters is that the status
+stays `404`.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <title>Not found — Motodle</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: #fafafa;
+        color: #1a1a1a;
+      }
+      main { max-width: 32rem; text-align: center; }
+      h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
+      p { margin: 0 0 1.5rem; line-height: 1.5; }
+      a {
+        display: inline-block;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        background: #3b7d22;
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { background: #121212; color: #ededed; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Nothing here</h1>
+      <p>That page doesn&rsquo;t exist. There may also be no Motodle for the day you asked for.</p>
+      <a href="/">Play today&rsquo;s Motodle</a>
+    </main>
+  </body>
+</html>
+```
+
+`1.4 KB`, no external requests, no `/assets/*` reference (those filenames change every build), theme
+aware, `noindex`. The inline `<style>` element is permitted by `style-src 'self' 'unsafe-inline'` —
+it is the one place in the repo that depends on the *element* half of that allowance rather than the
+attribute half, and it is why hardening `style-src` later (D4's closing note) has to consider this
+file too.
+
+#### 13.5.2 Serving the production headers in `vite preview`
+
+Add a `preview` block to `vite.config.ts`. This is the only edit to an existing source file that §13
+requires, and it turns "the app works under the production CSP" from a one-off manual probe into
+something the whole Playwright suite (§7.4) re-proves on every CI run — `playwright.config.ts`'s
+`webServer` already runs `vite preview` on 4173.
+
+```ts
+import { CONTENT_SECURITY_POLICY } from './schema/constants';
+
+// … inside defineConfig({ … })
+  preview: {
+    // The exact headers CloudFront serves in production (PLAN §13.2.6), so the e2e
+    // suite runs under the real policy instead of an unheadered preview.
+    headers: {
+      'Content-Security-Policy': CONTENT_SECURITY_POLICY,
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
+    },
+  },
+```
+
+Verified on this repo's Vite 8.2.2: `preview.headers` is applied to every response (checked on `/`
+and on `/assets/index-*.js`). `appType: 'mpa'` stays exactly where it is — it is what makes the
+preview server 404 a missing puzzle instead of falling back to `index.html`, which is the same
+contract CloudFront has to honour, and a preview run without it silently returns `200`.
+
+`CONTENT_SECURITY_POLICY` is a new export in `schema/constants.ts` (§13.9 W6-5), carrying the D4
+string byte for byte, with a contract test asserting `infra/variables.tf`'s default matches it.
+
+### 13.6 Operator runbook
+
+Every command is run by the **operator**, from the repo root, on the workstation. Agents cannot run
+any of steps 2–9 or 12: they require an SSO session, an HCP token, `gh` auth and AWS writes.
+
+**Step 1 — install Terraform (once; no sudo, no package manager).**
+`~/.local/bin` is already on PATH. The checksum line below is the real one for 1.16.1.
+
+```bash
+cd /tmp
+curl -fLO https://releases.hashicorp.com/terraform/1.16.1/terraform_1.16.1_linux_amd64.zip
+curl -fLO https://releases.hashicorp.com/terraform/1.16.1/terraform_1.16.1_SHA256SUMS
+sha256sum -c --ignore-missing terraform_1.16.1_SHA256SUMS   # expect: terraform_1.16.1_linux_amd64.zip: OK
+unzip -o terraform_1.16.1_linux_amd64.zip -d /tmp/tfbin
+install -m 0755 /tmp/tfbin/terraform ~/.local/bin/terraform
+terraform version            # Terraform v1.16.1 on linux_amd64
+```
+
+Expected SHA-256 of the zip: `745d33b4b02b7980c62a38ec1beea24ee084ea8caf3f503c200554bd9a0cbe49`.
+
+**Step 2 — AWS session (~30 s, opens a browser).**
+
+```bash
+aws sso login --profile default
+export AWS_PROFILE=default
+aws sts get-caller-identity     # Account must read 051946164308
+```
+
+**Step 3 — HCP Terraform login (once; interactive).** Writes a token to
+`~/.terraform.d/credentials.tfrc.json`.
+
+```bash
+terraform login
+```
+
+**Step 4 — create the workspace with LOCAL execution, BEFORE any `init`.** This is the step that
+cannot be skipped: an auto-created workspace defaults to *remote* execution and the first plan would
+try to run on HCP's runners with no AWS credentials (§13.3). Needs `jq` (installed already on most
+workstations; `apt`/`brew install jq` otherwise).
+
+```bash
+TFC_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' ~/.terraform.d/credentials.tfrc.json)
+
+curl -sS \
+  --header "Authorization: Bearer ${TFC_TOKEN}" \
+  --header "Content-Type: application/vnd.api+json" \
+  --request POST \
+  --data '{"data":{"type":"workspaces","attributes":{"name":"motodle","execution-mode":"local"}}}' \
+  https://app.terraform.io/api/v2/organizations/reenchree/workspaces | jq '.data.attributes'
+```
+
+Expect `"execution-mode": "local"` and `"name": "motodle"` in the response.
+
+If the org's default execution mode is itself the problem (a project-level default overriding what
+a plain workspace create would otherwise get), the fallback is a project settings-overwrite:
+`{"data":{"type":"projects","attributes":{"setting-overwrites":{"execution-mode":true}}}}` PATCHed
+to that project's `/api/v2/projects/<id>` — only needed if step 4's `POST` result does not already
+show `"execution-mode": "local"`.
+
+**Step 5 — only if step 4 said the workspace already exists** (because an `init` created it first).
+Likely a separate terminal from step 4 — re-derive `TFC_TOKEN` if so:
+
+```bash
+TFC_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' ~/.terraform.d/credentials.tfrc.json)
+```
+
+```bash
+curl -sS \
+  --header "Authorization: Bearer ${TFC_TOKEN}" \
+  --header "Content-Type: application/vnd.api+json" \
+  --request PATCH \
+  --data '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}' \
+  https://app.terraform.io/api/v2/organizations/reenchree/workspaces/motodle | jq '.data.attributes["execution-mode"]'
+```
+
+Expect `"local"`. The UI equivalent is **Settings → General → Execution Mode → Local → Save**.
+
+**Step 6 — init (~20 s).** This is the first thing that actually reads the `cloud {}` block; an
+agent's `terraform validate` cannot have caught a typo in it (D10).
+
+```bash
+cd infra
+terraform init
+```
+
+**Step 7 — plan (~30 s).**
+
+```bash
+terraform plan -out=tfplan
+```
+
+Expect **22 resources to add and 0 to change/destroy** (counted off the shipped HCL: 21 `resource`
+blocks, of which `aws_route53_record.acm_validation` expands to 2 instances — one per SAN, apex and
+`www` — for 22): 5 S3 (bucket + 4 sub-resources), 2 ACM (certificate + validation), 6 Route53 (2
+`acm_validation` instances + 4 alias records), 7 CloudFront (OAC, function, response-headers policy,
+3 cache policies, distribution), 2 IAM (role + role policy). If the plan proposes to *create* an IAM
+OIDC provider, stop — the data source is misconfigured and you are about to collide with
+`terraform-core`.
+
+If instead the plan **errors** with `Invalid for_each argument … cannot be determined until apply`
+on `aws_route53_record.acm_validation`, that's the well-known trap in the
+`domain_validation_options`-keyed `for_each` pattern (its keys are `(known after apply)` on a
+greenfield certificate): run `terraform apply -target=aws_acm_certificate.site` once to materialize
+the certificate, then re-run the full `terraform plan -out=tfplan`.
+
+If instead `terraform plan -out=tfplan` is **rejected outright** with "Saving a generated plan is
+currently not supported", the workspace is still in **remote** execution — steps 4–5 did not stick.
+Recheck via `curl` (step 4's `GET` equivalent, or the UI: Settings → General → Execution Mode) before
+retrying.
+
+**Step 8 — apply (~8–12 minutes; most of it is CloudFront).**
+
+```bash
+terraform apply tfplan
+```
+
+Timing to expect: Route53 records seconds; `aws_acm_certificate_validation` **2–5 min** (it polls
+until DNS validation completes and will look hung — it is not); `aws_cloudfront_distribution`
+**5–10 min** to reach Deployed. Do not interrupt it. If the apply is killed mid-distribution, re-run
+`terraform plan`/`apply` — the state is in HCP and the operation is resumable.
+
+**Step 9 — read the outputs and set the GitHub variables (~1 min).**
+
+```bash
+terraform output
+terraform output -raw gh_variable_commands     # prints the three lines below, filled in
+```
+
+```bash
+cd ..
+gh variable set AWS_DEPLOY_ROLE_ARN --body 'arn:aws:iam::051946164308:role/motodle-github-deploy'
+gh variable set SITE_BUCKET --body 'motodle-site-051946164308'
+gh variable set CLOUDFRONT_DISTRIBUTION_ID --body '<E…, from terraform output distribution_id>'
+gh variable list
+```
+
+**Step 9.5 — land W6 on `main`, and only now.** Everything above ran `infra/` from a working tree;
+nothing has been pushed yet, and `deploy.yml` does not exist on `main` until this step. The ordering
+is load-bearing in **both** directions: merging `infra/`, `.github/workflows/deploy.yml` and
+`public/404.html` to `main` *before* step 9 (the GitHub variables) fires an automatic deploy the
+moment CI goes green, and it dies at "Assert the repository variables are set" with nothing to
+retry cleanly; landing them *after* the bucket and distribution exist but *before* the variables are
+set means the same failure on the very next push. Step 9.5 is deliberately between the two.
+
+Before committing, confirm the B1 fix is in the same commit — `git status --porcelain -uall infra/`
+must list exactly the 11 `.tf` files plus `.terraform.lock.hcl`, nothing under `infra/.terraform/`.
+Committing `infra/.terraform/` (~675 MB of provider binary) to an otherwise ~2 MB repo is not
+practically recoverable without a history rewrite; getting the `.gitignore` edit into the *same*
+commit as the rest of W6, not a follow-up, is the only cheap way to avoid it.
+
+Commit and push `infra/`, `.github/workflows/deploy.yml`, `public/404.html` and everything else W6
+touched (§13.9 file set) to `main` through the repo's normal PR/merge path, then confirm CI is green
+on the resulting commit. If the automatic `workflow_run` deploy fires anyway before step 9's
+variables are set (a push landed the workflow file and its own CI run raced this runbook), it will
+fail fast at the first step with a clear error naming the missing variable — that failure is
+harmless and expected; after step 9, re-run it with `gh run rerun <run-id>` (from `gh run list
+--workflow deploy.yml`) rather than waiting for the next push.
+
+**Step 10 — first deploy.** The bucket is empty at this point, so the site is a 404 until this runs.
+Step 9.5's push may already have triggered (and failed, per above) or succeeded here — check `gh run
+list --workflow deploy.yml` first. `gh workflow run deploy.yml` (no `--ref`, no `-f ref=`) is only
+needed if no run exists yet or the existing one needs a fresh attempt with the variables now set:
+
+```bash
+gh workflow run deploy.yml
+gh run watch
+```
+
+Expect **~3 minutes** (checkout + `npm ci` + build + seven syncs + invalidation). Thereafter every
+push to `main` that passes CI deploys automatically.
+
+**Step 11 — wait for the invalidation** (~30–60 s after the run goes green) before curling.
+
+**Step 12 — verify.** Run every command in §13.7. **V9a** (the bucket policy actually grants
+`ListBucket`) and **V9b** (a missing puzzle returns `404` client-side) are both **release gates**
+(D1), not formalities — and they are not redundant: the `403 → 404` `custom_error_response`
+(§13.2.6) makes V9b pass identically whether or not V9a's grant exists, so V9b alone proves nothing
+about D1.
+
+**Step 13 — changing a `Cache-Control` class later.** `aws s3 sync` will not re-header objects it
+considers unchanged (D8). After editing a pass in `deploy.yml`, re-header what is already in the
+bucket with a `cp`, not a `sync`:
+
+```bash
+aws s3 cp "s3://motodle-site-051946164308/puzzles/" "s3://motodle-site-051946164308/puzzles/" \
+  --recursive --exclude "*" --include "*.json" \
+  --metadata-directive REPLACE \
+  --content-type "application/json" --cache-control "public, max-age=300"
+```
+
+**Rollback.** The site is whatever the last successful deploy uploaded, so a rollback is a redeploy
+of an older commit:
+
+```bash
+gh workflow run deploy.yml -f ref=<good-sha>   # runs FROM main; OIDC sub stays refs/heads/main
+gh run watch
+```
+
+`gh workflow run deploy.yml --ref <branch>` fails at the AssumeRole step by design — the trust
+policy is `StringEquals` on `refs/heads/main` only (`infra/iam.tf`, §13.2.8); `--ref` also cannot
+take a SHA. The commit to deploy is an **input** (`inputs.ref`), never a ref: the dispatch itself
+always runs from `main` (so the OIDC `sub` stays `repo:reenchree/motodle:ref:refs/heads/main`), and
+the workflow's checkout step resolves `inputs.ref || github.event.workflow_run.head_sha ||
+github.sha` (§13.4 note 2) to pick the commit it actually builds. Expect the same ~3 minutes plus
+~60 s of invalidation. Two caveats: hashed `/assets/*` files from the newer build are deleted, so
+any browser still holding the newer `index.html` (up to 60 s of edge cache, then a revalidate) will
+404 on its bundle and needs one reload; and rolling back **content** (a bad puzzle) is better done as a
+forward commit, since puzzle JSON is only 5-minute-cached (D2) and a revert deploy is the slower path.
+Infrastructure rollback is `git revert` on `infra/` plus `terraform apply` — never a console edit,
+which would drift the HCP state.
+
+### 13.7 Verification matrix
+
+Every row is a command. Run them after the first deploy and after any change to `deploy.yml` or
+`infra/cloudfront.tf`. `H='https://playmotodle.com'` throughout.
+
+Every 200 response on every path class carries the same five security headers, because one
+response-headers policy is attached to all five behaviours:
+
+```
+content-security-policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
+strict-transport-security: max-age=63072000; includeSubDomains
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+```
+
+| # | Path class | Command | Expected status | Expected `cache-control` | Expected `content-type` |
+|---|---|---|---|---|---|
+| V1 | entry point | `curl -sI "$H/"` | `200` | `public, max-age=0, must-revalidate, s-maxage=60` | `text/html; charset=utf-8` |
+| V2 | hashed JS | `A=$(curl -s "$H/" \| grep -o '/assets/[^"]*\.js'); curl -sI "$H$A"` | `200` | `public, max-age=31536000, immutable` | `text/javascript; charset=utf-8` |
+| V3 | hashed CSS | `C=$(curl -s "$H/" \| grep -o '/assets/[^"]*\.css'); curl -sI "$H$C"` | `200` | `public, max-age=31536000, immutable` | `text/css; charset=utf-8` |
+| V4 | puzzle image | `curl -sI "$H/puzzles/img/0001/l1.webp"` | `200` | `public, max-age=31536000, immutable` | `image/webp` |
+| V5 | today's puzzle | `curl -sI "$H/puzzles/2026-09-02.json"` | `200` | `public, max-age=300` | `application/json` |
+| V6 | archive manifest | `curl -sI "$H/puzzles/manifest.json"` | `200` | `public, max-age=300` | `application/json` |
+| V7 | catalog | `curl -sI "$H/catalog.json"` | `200` | `public, max-age=300` | `application/json` |
+| V8 | static 404 page | `curl -sI "$H/404.html"` | `200` | `public, max-age=0, must-revalidate, s-maxage=60` | `text/html; charset=utf-8` |
+
+Behavioural checks — these are the ones that catch real breakage:
+
+| # | What | Command | Expected |
+|---|---|---|---|
+| **V9a** | **The `ListBucket` grant is actually present (D1 — RELEASE GATE, policy)** | `aws s3api get-bucket-policy --bucket motodle-site-051946164308 --query Policy --output text \| jq -e '[.Statement[] \| select((.Action\|type=="array" and index("s3:ListBucket")) or .Action=="s3:ListBucket")] \| length >= 1' >/dev/null && echo "D1 ok: ListBucket grant present"` | prints the `ok` line. This is the check that actually exercises D1 — see the note after V9b. |
+| **V9b** | **Missing puzzle is a real 404, client-facing (D1 — RELEASE GATE, behavioural)** | `curl -s -o /dev/null -w '%{http_code}\n' "$H/puzzles/2099-01-01.json"` | exactly `404`. Proves the client contract only — the `403 → 404` `custom_error_response` (§13.2.6) means this passes identically whether or not the `ListBucket` grant exists, so it does **not** substitute for V9a; see Note 3 in §13.2.6. |
+| V10 | …and it carries the 404 page body, not a JSON parse trap | `curl -s "$H/puzzles/2099-01-01.json" \| head -1` | `<!doctype html>` — fine; the client only reads the status |
+| V11 | Negative cache is short, empirically (D3) | Two timed `GET`s: `curl -s -o /dev/null -w '%{http_code} %{time_total}\n' "$H/puzzles/2099-01-01.json"` at `t=0`, again at `t=70`, comparing `x-cache` on each (`curl -sI ... \| grep -i x-cache`) | `x-cache: Hit from cloudfront` (or `Error from cloudfront`, cached) on a call shortly after the first; a call **after 70 s** shows a fresh `x-cache: Miss from cloudfront`/`Error from cloudfront` with a new response, i.e. it re-hit the origin. Don't rely on the `Age` header — CloudFront does not reliably emit it on error responses. See Note 3 in §13.2.6 for why this measures ≈60 s, not 10 s. |
+| V12 | Missing page → 404, never `index.html` | `curl -s -o /dev/null -w '%{http_code}\n' "$H/no-such-page"` | `404` (and the body is the 404 page, **not** the app) |
+| V13 | `www` → apex, 301 | `curl -sI "https://www.playmotodle.com/"` | `301`, `location: https://playmotodle.com/` |
+| V14 | `www` redirect preserves the query string | `curl -sI "https://www.playmotodle.com/?d=2026-09-01"` | `location: https://playmotodle.com/?d=2026-09-01` |
+| V15 | `www` redirect covers assets too (D6) | `curl -sI "https://www.playmotodle.com/catalog.json"` | `301` to the apex path — **not** a `200` |
+| V16 | http → https, both hops | `curl -sIL "http://www.playmotodle.com/"` | Two hops: `301` to `https://www.playmotodle.com/`, then `301` to `https://playmotodle.com/`. `curl -sIL` follows and terminates at the apex; don't expect a single 301 straight to the apex over `http`. |
+| V17 | IPv6 | `curl -6 -sI "$H/"` | `200` (the box needs working IPv6; `dig AAAA playmotodle.com +short` should return CloudFront addresses either way) |
+| V18 | TLS floor | `curl --tlsv1.3 -sI "$H/" >/dev/null && echo ok` and `openssl s_client -connect playmotodle.com:443 -tls1_1 </dev/null 2>&1 \| grep -i 'handshake failure\|no protocols available\|alert'` | first succeeds; second shows a handshake failure (`TLSv1.2_2021`). Don't use `curl --tls-max 1.1` for the negative half — OpenSSL 3 refuses to even offer TLS 1.1 locally, so that command fails before it reaches the network and proves nothing about the distribution. |
+| V19 | Bucket is not public | `curl -sI "https://motodle-site-051946164308.s3.us-west-2.amazonaws.com/index.html"` | `403` — direct S3 access must be denied; only CloudFront's signed OAC requests work |
+| V20 | Compression | `curl -sI -H 'Accept-Encoding: br' "$H/catalog.json" \| grep -i content-encoding`, repeated once | `br` (or `gzip`) on the repeat — compression is negotiated when the object is cached from a `GET`; a `HEAD`-only single call can miss it on a cold cache |
+| V21 | Security headers present on every class | `curl -sI "$H/" \| grep -icE 'content-security-policy\|strict-transport-security\|x-content-type-options\|x-frame-options\|referrer-policy'` | `5` — one hit per header. Repeat against `$H/catalog.json`, `$H/puzzles/img/0001/l1.webp`, and `$H/404.html` — same policy is attached to all five behaviours (§13.2.6). |
+| V22 | Served CSP matches the shipped string | `curl -sI "$H/" \| grep -i content-security-policy` | byte-identical to the string in §13.2.3 / Note 1 below — a stale edge distribution config would drift silently otherwise |
+
+If V9a or V9b fails, do not launch. If V15 fails, the function is attached to only some behaviours.
+
+### 13.8 Cost, accepted trade-offs, and what is deliberately not built
+
+**Cost — about $0.50/month.**
+
+| Line | Monthly |
+|---|---|
+| Route53 hosted zone (`playmotodle.com`) | **$0.50** |
+| Route53 queries | **$0.00**, exactly — an alias record resolving to a CloudFront distribution is not billed per query at all (only non-alias queries are); the "$0.40/M at volume" line from the original brief draft doesn't apply here |
+| CloudFront data transfer + requests | **$0.00** — the *always-free* tier covers 1 TB out and 10 M requests per month; a 1.2 MB site at hobby traffic is nowhere near it |
+| ACM public certificate | $0.00 |
+| S3 storage (~1.2 MB, growing ~350 KB per puzzle) | < $0.01 |
+| S3 requests (a deploy is ~26 PUTs) | < $0.01 |
+| CloudFront invalidations | $0.00 — 1,000 paths/month free **per AWS account** (account `051946164308` also carries `terraform-core`'s workloads, so this line is shared, not exclusive to `motodle`); 5 paths per deploy ≈ 200 free deploys before any other account activity is counted |
+| www→apex CloudFront Function | $0.00 — runs on every viewer request across all five behaviours (D6), but Functions get 2 M free invocations/month; listed so it's a decision, not an omission |
+| HCP Terraform | $0.00 on the free tier |
+| **Total** | **≈ $0.50** (exact — every other line is genuinely $0.00 or a rounding error, not just "small") |
+
+**Accepted: future puzzles are publicly readable before their date.** Content publishing is just a
+commit — `npm run generate` writes `public/puzzles/<date>.json` and `public/puzzles/img/NNNN/*` for
+days ahead, and the deploy uploads all of them. `dist/` today already contains 2026-09-03 and
+2026-09-04. Worse, `/puzzles/manifest.json` publishes the list and the `latest` date, so a determined
+player does not even have to guess a URL — they can read tomorrow's answer with two `curl`s. This is
+**accepted** for a casual game: hiding it would mean a scheduled publish step, which means a server,
+which is the one thing this design does not have. Nothing in the client leaks it — the app never
+fetches a future date (§4.6 strips a future `?d=`), so a normal player never sees it.
+
+**Operational corollary: nothing deploys on a schedule either.** The committed puzzle runway is
+whatever `npm run generate` last produced and a human pushed — `dist/` as of this writing holds
+`2026-09-02..04`, three days. The moment that runway is exhausted the site silently starts showing
+"No Motodle today" at local midnight, with no alert, because there is no server to notice. Check the
+runway with `curl -s "$H/puzzles/manifest.json" | jq -r .latest` and compare against today's date;
+keeping at least a week ahead is a reasonable target given the fetcher/review loop (§6.3) is a manual
+step, not a cron job.
+
+**Related, and worth knowing:** `/puzzles/img/NNNN/*` is keyed by puzzle **number**, not content, and
+future-dated images ship before their date — so bytes at an "immutable" path can legitimately change
+if the operator re-crops a not-yet-live puzzle. The deploy's `/puzzles/*` invalidation clears the edge,
+so the change does propagate; the residual exposure is the browser cache of anyone who already fetched
+that future image, which in practice is nobody. For an **already-published** day, §9.5's procedure
+still applies: republish under a new prefix (`/puzzles/img/NNNN-b/…`) and let the 5-minute JSON TTL do
+the rest.
+
+**Deliberately not built.** Each of these is a decision, not an oversight.
+
+| Not built | Why | Revisit when |
+|---|---|---|
+| AWS WAF | ~$5–8/month floor — more than 10× the rest of the stack — to protect a bucket of public static files with no origin logic and no write path | Never, for this site |
+| CloudFront standard/real-time logging | Costs S3 storage and buys nothing at hobby traffic; there is no dashboard to feed it | A real traffic question exists (e.g. "did the launch land?") |
+| Origin Shield | An extra per-request charge for a single-region origin with a tiny working set | Never |
+| S3 versioning on the site bucket | Every deploy is `--delete`; versions would accumulate for a site whose true source of truth is git | Never |
+| Amplify / S3 website hosting / any PaaS | Website endpoints cannot use OAC, and the bucket must stay private | Never |
+| The S3 + `use_lockfile` state backend from the original brief | Withdrawn by the operator (D9) in favour of HCP Terraform | It is already replaced |
+| HCP **remote** execution with dynamic AWS credentials | It is `terraform-core`'s pattern and the `app.terraform.io` OIDC provider already exists in the account — but it needs its own IAM role, and local execution needs no AWS identity in HCP at all | A second person or a CI job needs to apply this module |
+| A deploy-time smoke test that auto-rolls-back | The §13.7 matrix is a human gate; automating a rollback needs a health signal this site does not have | The site earns an uptime expectation |
+| `robots.txt`, `sitemap.xml`, an OG/social image | None exist in the repo (§13 recon); they are content decisions, not deploy plumbing. Note `robots.txt` specifically interacts with the future-puzzle exposure above: it wouldn't change what's fetchable, but a `Disallow: /puzzles/` would keep tomorrow's answer out of search-engine indexes, which is a step beyond "a determined player can curl it." Deferred with the rest of this row, not forgotten. | Launch marketing |
+| Staging / preview environments | One distribution, one bucket, one domain. `vite preview` under the production headers (§13.5.2) is the pre-merge check | Never, for this site |
+
+### 13.9 Workstream W6 — deployment *(owner: `deploy`)*
+
+Runs after §12; depends on nothing in §1–§11 except that the build is green. It is the only
+workstream that touches `infra/` and `.github/workflows/deploy.yml`.
+
+#### File set — exactly what W6 creates and edits
+
+**Creates (15 files):**
+
+```
+infra/versions.tf          §13.2.1
+infra/backend.tf           §13.2.2
+infra/variables.tf         §13.2.3
+infra/locals.tf            §13.2.4
+infra/data.tf              §13.2.4
+infra/s3.tf                §13.2.5
+infra/cloudfront.tf        §13.2.6
+infra/acm.tf               §13.2.7
+infra/route53.tf           §13.2.7
+infra/iam.tf               §13.2.8
+infra/outputs.tf           §13.2.9
+public/404.html            §13.5.1
+.github/workflows/deploy.yml   §13.4
+schema/csp-contract.test.ts    W6-5 below
+e2e/csp.spec.ts                W6-4 below
+```
+
+`infra/.terraform.lock.hcl` appears after the first `terraform init -backend=false` and **is
+committed**.
+
+**Edits (4 files):**
+
+| File | Change |
+|---|---|
+| `vite.config.ts` | add the `preview: { headers: … }` block and the `CONTENT_SECURITY_POLICY` import (§13.5.2). Change nothing else — `appType: 'mpa'`, the plugins and the `test` block are §10.3-frozen |
+| `schema/constants.ts` | add `export const CONTENT_SECURITY_POLICY = "…";` — the D4 string, byte for byte |
+| `.gitignore` | add a Terraform block: `infra/.terraform/`, `infra/tfplan`, `*.tfstate`, `*.tfstate.backup` (`infra/.terraform.lock.hcl` is deliberately **not** in this list — it's committed) |
+| `README.md` | add a `## Deploying` section (W6-6) |
+
+Nothing else. W6 does **not** touch `ci.yml`, any `src/**` file, any puzzle content, or
+`terraform-core`.
+
+#### W6-1 … W6-6, in order
+
+- **W6-1 — `infra/`.** Create the eleven `.tf` files literally from §13.2. Then, from `infra/`:
+  `terraform init -backend=false && terraform validate && terraform fmt -check -diff`. Commit
+  `.terraform.lock.hcl`; add the ignores. Remember D10: this proves the resources, **not** the
+  `cloud {}` block. `.terraform.lock.hcl` as generated is `linux_amd64`-only, which is fine while the
+  operator applies from this workstation; if that ever changes, regenerate it first with
+  `terraform providers lock -platform=linux_amd64 -platform=darwin_arm64` (or whatever platforms
+  apply) before committing, so a different machine's `init` doesn't silently need network access it
+  might not have.
+- **W6-2 — `public/404.html`.** Literal from §13.5.1. Then `npm run build` and confirm
+  `dist/404.html` exists and is byte-identical (Vite copies `public/**` verbatim).
+- **W6-3 — `deploy.yml`.** Literal from §13.4. It must parse and the `if:` gate must keep all three
+  conditions.
+- **W6-4 — `vite.config.ts` preview headers** (§13.5.2) **and `e2e/csp.spec.ts`**, then
+  `npm run build && npm run test:e2e`. `csp.spec.ts` installs a `securitypolicyviolation` listener
+  via `page.addInitScript` before navigation, plays a full winning round (help modal close, three
+  guesses, win, share/clipboard, stats reload) plus a direct visit to `/404.html` for its inline
+  `<style>` element, and asserts zero violations and zero console/page errors across all of it —
+  without it, (a) buys nothing: the CSP would be wired but nothing would fail if it were wrong. All
+  nine spec files (the eight scripted-playthrough specs plus this one) must pass **under the
+  production CSP**. A failure here means the CSP is wrong, not that the test is wrong. Note: `vite
+  preview`'s `appType: 'mpa'` returns a bare, empty-body `404` for an unmatched path — it does not
+  replicate CloudFront's `custom_error_response` rewrite to `/404.html`'s body (that's an
+  infra-only behaviour, covered instead by V9b/V12 in §13.7) — so the spec probes the 404 page's CSP
+  compliance by visiting `/404.html` directly (a real 200 response locally, matching V8), not by
+  navigating to a nonexistent path and expecting its body.
+- **W6-5 — the CSP no-drift contract test.** Add `CONTENT_SECURITY_POLICY` to `schema/constants.ts`
+  and create `schema/csp-contract.test.ts`. It is picked up by the existing
+  `schema/**/*.test.ts` vitest include, so `npm test` and CI run it with no config change. The
+  regex below was verified against the §13.2.3 file:
+
+  ```ts
+  /**
+   * §13.9 W6-5 — the CSP the app is tested under and the CSP CloudFront serves must be the same
+   * string. Same no-drift pattern as the normalizeId test (§7.2 #10).
+   */
+  import { readFileSync } from 'node:fs';
+  import path from 'node:path';
+  import { describe, expect, it } from 'vitest';
+  import { CONTENT_SECURITY_POLICY } from './constants';
+
+  const ROOT = path.join(__dirname, '..');
+
+  describe('CSP no-drift', () => {
+    it('infra/variables.tf ships exactly CONTENT_SECURITY_POLICY', () => {
+      const tf = readFileSync(path.join(ROOT, 'infra/variables.tf'), 'utf8');
+      const block = tf
+        .split(/^variable /m)
+        .find((b) => b.startsWith('"content_security_policy"'));
+      expect(block, 'variable "content_security_policy" missing from infra/variables.tf').toBeDefined();
+      const match = /^\s*default\s*=\s*"([^"]*)"\s*$/m.exec(block as string);
+      expect(match, 'no default = "…" inside the content_security_policy variable').not.toBeNull();
+      expect((match as RegExpExecArray)[1]).toBe(CONTENT_SECURITY_POLICY);
+    });
+  });
+  ```
+
+- **W6-6 — `README.md` `## Deploying`.** Short — a pointer, not a copy. It must say: the site is S3 +
+  CloudFront at `https://playmotodle.com`; infrastructure is `infra/` (Terraform, HCP state, workspace
+  `motodle`, **local** execution); deploys are automatic on a green CI run on `main` via
+  `.github/workflows/deploy.yml`; the three repository variables and where they come from; and
+  "full runbook and verification commands: `docs/PLAN.md` §13.6–§13.7". Do not restate the HCL or the
+  curl matrix in the README.
+
+#### Definition of done
+
+| # | Check | Command |
+|---|---|---|
+| 1 | Terraform is formatted | `terraform fmt -check -recursive infra/` → no output, exit 0 |
+| 2 | Terraform is valid | `cd infra && terraform init -backend=false && terraform validate` → *"Success! The configuration is valid."* |
+| 3 | `deploy.yml` parses, **and the deploy gate survives** | `python3 -c "import yaml; g=yaml.safe_load(open('.github/workflows/deploy.yml'))['jobs']['deploy']['if']; assert all(s in g for s in ['workflow_dispatch', \"conclusion == 'success'\", \"event == 'push'\", \"head_branch == 'main'\"])"` — parsing alone doesn't prove the three-condition `if:` (§13.4 item 1) survived an edit; this asserts all four substrings are still present in whatever the parser hands back |
+| 4 | The 404 page ships | `npm run build && test -f dist/404.html` |
+| 5 | The app works under the production CSP | `npm run test:e2e` (with W6-4 applied) — 9 spec files green (the pre-existing 8 plus `e2e/csp.spec.ts`), and **zero** `securitypolicyviolation` / console errors in the run |
+| 6 | CSP cannot drift | `npm test` — `schema/csp-contract.test.ts` green |
+| 7 | Existing gates still green | `npx svelte-check --tsconfig ./tsconfig.json`, `npx tsc --noEmit`, `npm run build` (budgets) |
+| 8 | README section added | `grep -q '^## Deploying' README.md` |
+
+Checks 1–8 are all runnable by an agent with no AWS session and no network beyond the Terraform
+registry.
+
+#### What only the operator can do
+
+Agents cannot and must not attempt any of these — the SSO session is expired, and every one of them
+is a write to something outside the repo:
+
+1. `aws sso login` and anything requiring AWS credentials, read or write.
+2. `terraform login`, and the two HCP API `curl`s that create the workspace with **local** execution
+   (§13.6 steps 3–5). **Nothing works until the workspace exists in `local` mode** (D9).
+3. `terraform init` (real), `terraform plan`, `terraform apply` — and only the operator will ever see
+   whether the `cloud {}` block is right (D10).
+4. `gh variable set` ×3 — the workflow fails its first step until all three exist.
+5. Triggering the first deploy and running the §13.7 verification matrix. **V9a (the bucket policy
+   actually grants `s3:ListBucket`) and V9b (a missing puzzle returns `404` client-side) are both
+   the release gate — V9b alone cannot prove V9a, because the `403 → 404` custom error response
+   makes it pass either way.**
+6. Deciding whether the 60 s negative-cache TTL (D3) stays, once real traffic exists.

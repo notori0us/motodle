@@ -170,3 +170,25 @@ and 10 stay manual.
 Note on step 5: `npm run generate`'s byte-for-byte determinism holds only for a fixed sharp/libvips
 build; if a future sharp bump makes the WebPs differ, the meaningful guarantee becomes "schema +
 budget valid" (the `schema/*.test.ts` contract suite), not "no diff".
+
+## Deploying
+
+The site is S3 + CloudFront at `https://playmotodle.com` (apex canonical; `www` 301s to it).
+Infrastructure is the Terraform root module in `infra/` — state lives in HCP Terraform,
+organization `reenchree`, workspace `motodle`, **execution mode `local`** (plan/apply run on the
+operator's laptop against the AWS SSO `default` profile; no AWS credentials are ever stored in HCP).
+
+Deploys are automatic: `.github/workflows/deploy.yml` fires on every CI run that succeeds on
+`main`, builds, and syncs `dist/` to the bucket with per-path-class `Cache-Control` headers, then
+invalidates the mutable paths. It reads three repository variables, set once after the first
+`terraform apply` from that run's `terraform output`:
+
+| Variable | Source |
+|---|---|
+| `AWS_DEPLOY_ROLE_ARN` | `terraform output deploy_role_arn` |
+| `SITE_BUCKET` | `terraform output site_bucket` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `terraform output distribution_id` |
+
+Full operator runbook (Terraform install, AWS SSO, HCP Terraform login and workspace setup,
+`init`/`plan`/`apply`, setting the variables above, first deploy, and rollback) and the full
+verification matrix: `docs/PLAN.md` §13.6–§13.7.
