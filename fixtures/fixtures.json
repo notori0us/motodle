@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "fixtures": [
+    {
+      "id": "mtd-0001",
+      "file": "images/2004-suzuki-gsxr750.jpg",
+      "date": "2026-09-02",
+      "answer": {
+        "makeId": "suzuki",
+        "make": "Suzuki",
+        "modelId": "suzuki-gsxr750",
+        "model": "GSX-R750",
+        "year": 2004,
+        "acceptModelIds": ["suzuki-gsxr750"]
+      },
+      "focus": { "x": 0.52, "y": 0.55 },
+      "sourceCrop": null,
+      "cropFractions": [0.40, 0.52, 0.66, 0.82, 1.00],
+      "credit": {
+        "fileTitle": "File:2004 Suzuki GSXR-750 Left SIde.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2004_Suzuki_GSXR-750_Left_SIde.jpg",
+        "author": "Pawlex",
+        "license": {
+          "id": "PD",
+          "name": "Public domain",
+          "url": "https://commons.wikimedia.org/wiki/Template:PD-user",
+          "jurisdiction": null
+        },
+        "attributionRequired": false,
+        "modified": "cropped, resized, re-encoded to WebP",
+        "creditNote": null
+      },
+      "yearEvidence": {
+        "confidence": "high",
+        "source": "title+description",
+        "note": "Leading \"2004\" in the file title; description repeats \"2004 Suzuki GSXR-750\".",
+        "approvedBy": "operator",
+        "approvedOn": "2026-09-02"
+      }
+    },
+    {
+      "id": "mtd-0002",
+      "file": "images/2002-kawasaki-zx6r.jpg",
+      "date": "2026-09-03",
+      "answer": {
+        "makeId": "kawasaki",
+        "make": "Kawasaki",
+        "modelId": "kawasaki-ninja-zx6r",
+        "model": "Ninja ZX-6R",
+        "year": 2002,
+        "acceptModelIds": ["kawasaki-ninja-zx6r"]
+      },
+      "focus": { "x": 0.5, "y": 0.55 },
+      "sourceCrop": null,
+      "cropFractions": [0.30, 0.44, 0.60, 0.78, 0.96],
+      "credit": {
+        "fileTitle": "File:2002 kawasaki zx-6r.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2002_kawasaki_zx-6r.jpg",
+        "author": "uploader was User:HellbillyD at en.wikipedia",
+        "license": {
+          "id": "PD",
+          "name": "Public domain",
+          "url": "https://commons.wikimedia.org/wiki/Template:PD-user",
+          "jurisdiction": null
+        },
+        "attributionRequired": false,
+        "modified": "cropped, resized, re-encoded to WebP",
+        "creditNote": null
+      },
+      "yearEvidence": {
+        "confidence": "high",
+        "source": "title+description",
+        "note": "Leading \"2002\" in the file title; description reads \"2002 Kawasaki ZX-6R, U.S. model\".",
+        "approvedBy": "operator",
+        "approvedOn": "2026-09-02"
+      }
+    },
+    {
+      "id": "mtd-0003",
+      "file": "images/1995-ducati-916.jpg",
+      "date": "2026-09-04",
+      "answer": {
+        "makeId": "ducati",
+        "make": "Ducati",
+        "modelId": "ducati-916",
+        "model": "916",
+        "year": 1995,
+        "acceptModelIds": ["ducati-916"]
+      },
+      "focus": { "x": 0.56, "y": 0.55 },
+      "sourceCrop": { "x": 0.08, "y": 0.02, "w": 0.71, "h": 0.72 },
+      "cropFractions": [0.22, 0.36, 0.52, 0.72, 0.96],
+      "credit": {
+        "fileTitle": "File:Ducati 916.JPG",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Ducati_916.JPG",
+        "author": "Przemysław Jahr",
+        "license": {
+          "id": "PD",
+          "name": "Public domain",
+          "url": "https://commons.wikimedia.org/wiki/Template:PD-self",
+          "jurisdiction": null
+        },
+        "attributionRequired": false,
+        "modified": "cropped, resized, re-encoded to WebP",
+        "creditNote": "Przemysław Jahr / Wikimedia Commons"
+      },
+      "yearEvidence": {
+        "confidence": "operator",
+        "source": "description",
+        "note": "Description reads \"1995 Ducati 916, National Motor Museum in Beaulieu\"; the on-image museum placard also reads \"1995 DUCATI 916\" but is cropped out of the puzzle image by sourceCrop, so the shipped evidence is the description text, confirmed by the operator.",
+        "approvedBy": "operator",
+        "approvedOn": "2026-09-02"
+      }
+    }
+  ]
+}

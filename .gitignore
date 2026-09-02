@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.cache/
+data/*
+!data/review/
+data/review/*
+!data/review/.gitkeep
+
+# Playwright artifacts (not part of the frozen data contracts, but generated locally)
+test-results/
+playwright-report/

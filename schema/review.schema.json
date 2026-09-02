@@ -1,0 +1,115 @@
+{
+  "type": "object",
+  "required": ["schema", "batch", "generatedAt", "userAgent", "candidates"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": 1 },
+    "batch": { "type": "string" },
+    "generatedAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "userAgent": { "type": "string" },
+    "candidates": { "type": "array", "items": { "$ref": "#/$defs/candidate" } }
+  },
+  "$defs": {
+    "candidateLicense": {
+      "type": "object",
+      "required": ["id", "name", "url", "jurisdiction", "sdcP275", "attributionRequired"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "enum": [
+            "PD", "CC0",
+            "CC-BY-2.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0",
+            "CC-BY-SA-2.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0", "CC-BY-SA-4.0"
+          ]
+        },
+        "name": { "type": "string" },
+        "url": { "type": "string" },
+        "jurisdiction": { "type": ["string", "null"] },
+        "sdcP275": { "type": "array", "items": { "type": "string" } },
+        "attributionRequired": { "type": "boolean" }
+      }
+    },
+    "yearCandidate": {
+      "type": "object",
+      "required": ["year", "source", "pattern", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "year": { "type": "integer" },
+        "source": { "type": "string" },
+        "pattern": { "type": "string" },
+        "confidence": { "enum": ["high", "medium", "low", "none"] }
+      }
+    },
+    "operatorFocus": {
+      "type": ["object", "null"],
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "operatorSourceCrop": {
+      "type": ["object", "null"],
+      "required": ["x", "y", "w", "h"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "w": { "type": "number", "minimum": 0, "maximum": 1 },
+        "h": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "operatorOverride": {
+      "type": "object",
+      "required": ["year", "focus", "sourceCrop", "cropFractions", "modelIdOverride", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "year": { "type": ["integer", "null"] },
+        "focus": { "$ref": "#/$defs/operatorFocus" },
+        "sourceCrop": { "$ref": "#/$defs/operatorSourceCrop" },
+        "cropFractions": {
+          "type": ["array", "null"],
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "modelIdOverride": { "type": ["string", "null"] },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "required": [
+        "candidateId", "decision", "makeId", "modelId", "sourceCategory", "fileTitle",
+        "descriptionUrl", "thumbUrl", "originalUrl", "width", "height", "mime", "license",
+        "author", "creditNote", "restrictions", "yearCandidates", "yearProposed",
+        "yearConfidence", "warnings", "operator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "candidateId": { "type": "string", "pattern": "^M[0-9]+$" },
+        "decision": { "enum": ["pending", "approve", "reject"] },
+        "makeId": { "type": "string" },
+        "modelId": { "type": "string" },
+        "sourceCategory": { "type": "string" },
+        "fileTitle": { "type": "string" },
+        "descriptionUrl": { "type": "string" },
+        "thumbUrl": { "type": "string" },
+        "originalUrl": { "type": "string" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "mime": { "type": "string" },
+        "license": { "$ref": "#/$defs/candidateLicense" },
+        "author": { "type": "string" },
+        "creditNote": { "type": ["string", "null"] },
+        "restrictions": { "type": "array", "items": { "type": "string" } },
+        "yearCandidates": { "type": "array", "items": { "$ref": "#/$defs/yearCandidate" } },
+        "yearProposed": { "type": ["integer", "null"] },
+        "yearConfidence": { "enum": ["high", "medium", "low", "none"] },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "operator": { "$ref": "#/$defs/operatorOverride" }
+      }
+    }
+  }
+}

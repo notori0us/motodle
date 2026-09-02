@@ -1,0 +1,153 @@
+{
+  "type": "object",
+  "required": ["schema", "id", "number", "date", "answer", "image", "credit", "yearEvidence"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": 1 },
+    "id": { "type": "string", "pattern": "^mtd-[0-9]{4}$" },
+    "number": { "type": "integer", "minimum": 1 },
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "answer": { "$ref": "#/$defs/answer" },
+    "image": { "$ref": "#/$defs/image" },
+    "credit": { "$ref": "#/$defs/credit" },
+    "yearEvidence": { "$ref": "#/$defs/yearEvidence" }
+  },
+  "$defs": {
+    "answer": {
+      "type": "object",
+      "required": ["makeId", "make", "modelId", "model", "year", "acceptModelIds"],
+      "additionalProperties": false,
+      "properties": {
+        "makeId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "make": { "type": "string" },
+        "modelId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "model": { "type": "string" },
+        "year": { "type": "integer", "minimum": 1885, "maximum": 2200 },
+        "acceptModelIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+        }
+      }
+    },
+    "focus": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "sourceCrop": {
+      "type": ["object", "null"],
+      "required": ["x", "y", "w", "h"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "w": { "type": "number", "minimum": 0, "maximum": 1 },
+        "h": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "rect": {
+      "type": "object",
+      "required": ["w", "h"],
+      "additionalProperties": false,
+      "properties": {
+        "w": { "type": "integer", "minimum": 1 },
+        "h": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "cropLevel": {
+      "type": "object",
+      "required": ["level", "src", "w", "h", "rect", "bytes"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "src": { "type": "string" },
+        "w": { "type": "integer", "minimum": 1 },
+        "h": { "type": "integer", "minimum": 1 },
+        "rect": { "$ref": "#/$defs/rect" },
+        "bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "full": {
+      "type": "object",
+      "required": ["src", "w", "h", "bytes"],
+      "additionalProperties": false,
+      "properties": {
+        "src": { "type": "string" },
+        "w": { "type": "integer", "minimum": 1 },
+        "h": { "type": "integer", "minimum": 1 },
+        "bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "image": {
+      "type": "object",
+      "required": ["aspect", "focus", "sourceCrop", "cropFractions", "levels", "full"],
+      "additionalProperties": false,
+      "properties": {
+        "aspect": { "const": "4:3" },
+        "focus": { "$ref": "#/$defs/focus" },
+        "sourceCrop": { "$ref": "#/$defs/sourceCrop" },
+        "cropFractions": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "levels": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/cropLevel" }
+        },
+        "full": { "$ref": "#/$defs/full" }
+      }
+    },
+    "license": {
+      "type": "object",
+      "required": ["id", "name", "url", "jurisdiction"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "enum": [
+            "PD", "CC0",
+            "CC-BY-2.0", "CC-BY-2.5", "CC-BY-3.0", "CC-BY-4.0",
+            "CC-BY-SA-2.0", "CC-BY-SA-2.5", "CC-BY-SA-3.0", "CC-BY-SA-4.0"
+          ]
+        },
+        "name": { "type": "string" },
+        "url": { "type": "string", "pattern": "^https?://" },
+        "jurisdiction": { "type": ["string", "null"] }
+      }
+    },
+    "credit": {
+      "type": "object",
+      "required": ["fileTitle", "descriptionUrl", "author", "license", "attributionRequired", "modified", "creditNote"],
+      "additionalProperties": false,
+      "properties": {
+        "fileTitle": { "type": "string" },
+        "descriptionUrl": { "type": "string" },
+        "author": { "type": "string", "pattern": "^.+$" },
+        "license": { "$ref": "#/$defs/license" },
+        "attributionRequired": { "type": "boolean" },
+        "modified": { "type": "string", "pattern": "^.+$" },
+        "creditNote": { "type": ["string", "null"] }
+      }
+    },
+    "yearEvidence": {
+      "type": "object",
+      "required": ["confidence", "source", "note", "approvedBy", "approvedOn"],
+      "additionalProperties": false,
+      "properties": {
+        "confidence": { "enum": ["high", "medium", "operator"] },
+        "source": { "type": "string" },
+        "note": { "type": "string" },
+        "approvedBy": { "const": "operator" },
+        "approvedOn": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "motodle",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsx tools/check-budget.ts",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "test": "npm run test:unit && npm run test:tz",
+    "test:unit": "vitest run",
+    "test:tz": "TZ=America/Los_Angeles vitest run src/lib/date.test.ts && TZ=Australia/Lord_Howe vitest run src/lib/date.test.ts",
+    "test:e2e": "playwright test",
+    "check": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
+    "generate": "tsx tools/generate.ts",
+    "catalog": "tsx tools/catalog.ts",
+    "fetch": "tsx tools/fetch.ts",
+    "crop": "tsx tools/crop.ts",
+    "schedule": "tsx tools/schedule.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/svelte": "^5.4.2",
+    "@types/node": "^26.4.1",
+    "jsdom": "^30.0.1",
+    "playwright": "^1.62.1",
+    "sharp": "^0.35.4",
+    "svelte": "^5.57.0",
+    "svelte-check": "^4.7.6",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  }
+}

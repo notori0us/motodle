@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "launchDate": "2026-09-02",
+  "latest": {
+    "date": "2026-09-04",
+    "number": 3
+  },
+  "puzzles": [
+    {
+      "date": "2026-09-02",
+      "number": 1,
+      "id": "mtd-0001"
+    },
+    {
+      "date": "2026-09-03",
+      "number": 2,
+      "id": "mtd-0002"
+    },
+    {
+      "date": "2026-09-04",
+      "number": 3,
+      "id": "mtd-0003"
+    }
+  ]
+}

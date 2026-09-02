@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "id": "mtd-0003",
+  "number": 3,
+  "date": "2026-09-04",
+  "answer": {
+    "makeId": "ducati",
+    "make": "Ducati",
+    "modelId": "ducati-916",
+    "model": "916",
+    "year": 1995,
+    "acceptModelIds": [
+      "ducati-916"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.56,
+      "y": 0.55
+    },
+    "sourceCrop": {
+      "x": 0.08,
+      "y": 0.02,
+      "w": 0.71,
+      "h": 0.72
+    },
+    "cropFractions": [
+      0.22,
+      0.36,
+      0.52,
+      0.72,
+      0.96
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0003/l1.webp",
+        "w": 320,
+        "h": 240,
+        "rect": {
+          "w": 320,
+          "h": 240
+        },
+        "bytes": 5932
+      },
+      {
+        "level": 2,
+        "src": "img/0003/l2.webp",
+        "w": 523,
+        "h": 392,
+        "rect": {
+          "w": 523,
+          "h": 392
+        },
+        "bytes": 18120
+      },
+      {
+        "level": 3,
+        "src": "img/0003/l3.webp",
+        "w": 756,
+        "h": 567,
+        "rect": {
+          "w": 756,
+          "h": 567
+        },
+        "bytes": 44002
+      },
+      {
+        "level": 4,
+        "src": "img/0003/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1047,
+          "h": 785
+        },
+        "bytes": 71568
+      },
+      {
+        "level": 5,
+        "src": "img/0003/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1396,
+          "h": 1047
+        },
+        "bytes": 83978
+      }
+    ],
+    "full": {
+      "src": "img/0003/full.webp",
+      "w": 1400,
+      "h": 1065,
+      "bytes": 146700
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Ducati 916.JPG",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Ducati_916.JPG",
+    "author": "Przemysław Jahr",
+    "license": {
+      "id": "PD",
+      "name": "Public domain",
+      "url": "https://commons.wikimedia.org/wiki/Template:PD-self",
+      "jurisdiction": null
+    },
+    "attributionRequired": false,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Przemysław Jahr / Wikimedia Commons"
+  },
+  "yearEvidence": {
+    "confidence": "operator",
+    "source": "description",
+    "note": "Description reads \"1995 Ducati 916, National Motor Museum in Beaulieu\"; the on-image museum placard also reads \"1995 DUCATI 916\" but is cropped out of the puzzle image by sourceCrop, so the shipped evidence is the description text, confirmed by the operator.",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-02"
+  }
+}

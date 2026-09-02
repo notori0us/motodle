@@ -1,0 +1,111 @@
+/*
+ * Colour + spacing tokens (§5.7). Light palette lives on bare :root; the dark palette is
+ * redefined only under prefers-color-scheme, guarded so an explicit [data-theme] always wins in
+ * both directions (light-in-dark-OS and dark-in-light-OS).
+ *
+ * Colourblind mode (§5.7) swaps the tile palette (green->orange, yellow->blue, red->near-black)
+ * via [data-colorblind="true"]; components additionally render a glyph so colour is never the
+ * only signal (that glyph is markup, not CSS content, so it stays in the accessibility tree).
+ */
+
+:root {
+  color-scheme: light dark;
+
+  --color-bg: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-surface: #f4f4f5;
+  --color-fg: #18181b;
+  --color-muted: #6b6b70;
+  --color-border: #d9d9de;
+  --color-accent: #2563eb;
+  --color-accent-fg: #ffffff;
+  --color-danger: #b91c1c;
+  --color-overlay: rgb(0 0 0 / 45%);
+
+  --tile-green-bg: #4c9a2a;
+  --tile-green-fg: #ffffff;
+  --tile-yellow-bg: #b8860b;
+  --tile-yellow-fg: #ffffff;
+  --tile-red-bg: #b32222;
+  --tile-red-fg: #ffffff;
+  --tile-empty-bg: var(--color-surface);
+  --tile-empty-fg: var(--color-muted);
+  --tile-empty-border: var(--color-border);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --content-max-width: 30rem;
+  --touch-target: 44px;
+
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji';
+
+  --shadow-modal: 0 10px 40px rgb(0 0 0 / 25%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #121214;
+    --color-bg-elevated: #1c1c1f;
+    --color-surface: #232327;
+    --color-fg: #f2f2f4;
+    --color-muted: #a3a3a9;
+    --color-border: #3a3a40;
+    --color-accent: #6d9bff;
+    --color-accent-fg: #0b1220;
+    --color-danger: #ff8a8a;
+    --color-overlay: rgb(0 0 0 / 65%);
+
+    --tile-green-bg: #4c9a2a;
+    --tile-yellow-bg: #b8860b;
+    --tile-red-bg: #a13a3a;
+    --tile-empty-bg: var(--color-surface);
+    --tile-empty-border: var(--color-border);
+
+    --shadow-modal: 0 10px 40px rgb(0 0 0 / 60%);
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #121214;
+  --color-bg-elevated: #1c1c1f;
+  --color-surface: #232327;
+  --color-fg: #f2f2f4;
+  --color-muted: #a3a3a9;
+  --color-border: #3a3a40;
+  --color-accent: #6d9bff;
+  --color-accent-fg: #0b1220;
+  --color-danger: #ff8a8a;
+  --color-overlay: rgb(0 0 0 / 65%);
+
+  --tile-green-bg: #4c9a2a;
+  --tile-yellow-bg: #b8860b;
+  --tile-red-bg: #a13a3a;
+  --tile-empty-bg: var(--color-surface);
+  --tile-empty-border: var(--color-border);
+
+  --shadow-modal: 0 10px 40px rgb(0 0 0 / 60%);
+}
+
+/* Colourblind palette (§5.7): green->orange, yellow->blue, red->near-black. Wins regardless of
+   light/dark theme: the :root prefix brings this to (0,2,0), tying both theme blocks' specificity
+   so source order (last in the file) decides and this block always wins. A bare [data-colorblind]
+   selector is (0,1,0) and silently loses to both theme blocks — that was the bug (review B1). */
+:root[data-colorblind='true'] {
+  --tile-green-bg: #d2691e;
+  --tile-green-fg: #ffffff;
+  --tile-yellow-bg: #1d4ed8;
+  --tile-yellow-fg: #ffffff;
+  --tile-red-bg: #17171a;
+  --tile-red-fg: #ffffff;
+}

@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "tileStates": {
+      "type": "object",
+      "required": ["make", "model", "year"],
+      "additionalProperties": false,
+      "properties": {
+        "make": { "enum": ["green", "yellow", "red"] },
+        "model": { "enum": ["green", "yellow", "red"] },
+        "year": { "enum": ["green", "yellow", "red"] }
+      }
+    },
+    "guessRecord": {
+      "type": "object",
+      "required": ["modelId", "make", "model", "year", "result"],
+      "additionalProperties": false,
+      "properties": {
+        "modelId": { "type": "string" },
+        "make": { "type": "string" },
+        "model": { "type": "string" },
+        "year": { "type": "integer" },
+        "result": { "$ref": "#/$defs/tileStates" }
+      }
+    },
+    "locks": {
+      "type": "object",
+      "required": ["makeId", "modelId", "year"],
+      "additionalProperties": false,
+      "properties": {
+        "makeId": { "type": ["string", "null"] },
+        "modelId": { "type": ["string", "null"] },
+        "year": { "type": ["integer", "null"] }
+      }
+    },
+    "today": {
+      "type": "object",
+      "required": [
+        "schemaVersion", "date", "number", "puzzleId", "status", "guesses", "locks",
+        "viewLevel", "endedAtGuess", "score"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "number": { "type": "integer", "minimum": 1 },
+        "puzzleId": { "type": "string", "pattern": "^mtd-[0-9]{4}$" },
+        "status": { "enum": ["in_progress", "won", "lost"] },
+        "guesses": { "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/guessRecord" } },
+        "locks": { "$ref": "#/$defs/locks" },
+        "viewLevel": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "endedAtGuess": { "type": ["integer", "null"], "minimum": 1, "maximum": 5 },
+        "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 15 }
+      }
+    },
+    "practice": {
+      "type": "object",
+      "required": [
+        "schemaVersion", "date", "number", "puzzleId", "status", "guesses", "locks",
+        "viewLevel", "endedAtGuess", "score", "practice"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "number": { "type": "integer", "minimum": 1 },
+        "puzzleId": { "type": "string", "pattern": "^mtd-[0-9]{4}$" },
+        "status": { "enum": ["in_progress", "won", "lost"] },
+        "guesses": { "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/guessRecord" } },
+        "locks": { "$ref": "#/$defs/locks" },
+        "viewLevel": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "endedAtGuess": { "type": ["integer", "null"], "minimum": 1, "maximum": 5 },
+        "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 15 },
+        "practice": { "const": true }
+      }
+    },
+    "scoreDistribution": {
+      "type": "object",
+      "required": ["0", "1", "2", "3", "6", "9", "12", "15"],
+      "additionalProperties": false,
+      "properties": {
+        "0": { "type": "integer", "minimum": 0 },
+        "1": { "type": "integer", "minimum": 0 },
+        "2": { "type": "integer", "minimum": 0 },
+        "3": { "type": "integer", "minimum": 0 },
+        "6": { "type": "integer", "minimum": 0 },
+        "9": { "type": "integer", "minimum": 0 },
+        "12": { "type": "integer", "minimum": 0 },
+        "15": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": [
+        "schemaVersion", "played", "wins", "currentStreak", "maxStreak", "lastWinDate",
+        "lastCompletedDate", "scoreDistribution"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "played": { "type": "integer", "minimum": 0 },
+        "wins": { "type": "integer", "minimum": 0 },
+        "currentStreak": { "type": "integer", "minimum": 0 },
+        "maxStreak": { "type": "integer", "minimum": 0 },
+        "lastWinDate": { "type": ["string", "null"] },
+        "lastCompletedDate": { "type": ["string", "null"] },
+        "scoreDistribution": { "$ref": "#/$defs/scoreDistribution" }
+      }
+    },
+    "prefs": {
+      "type": "object",
+      "required": ["schemaVersion", "theme", "colorblind", "seenHelp"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "theme": { "enum": ["system", "light", "dark"] },
+        "colorblind": { "type": "boolean" },
+        "seenHelp": { "type": "boolean" }
+      }
+    }
+  }
+}
