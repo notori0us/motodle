@@ -1383,15 +1383,19 @@ opener, background scroll locked via `overscroll-behavior: contain`.
   Motodle every day at midnight, your time". Auto-opens on first visit. It must explain **all three
   yellow bands in a player's words**, using `COUNTRY_NAMES` (§4.7) so a country code is never shown:
 
-  > **Make** — 🟩 you named the right make. 🟨 wrong make, but **from the same country** (you
-  > guessed Honda, the answer is a different **Japanese** make). 🟥 wrong country.
-  >
-  > **Model** — 🟩 that's the bike. 🟨 wrong bike, but **one that was on sale the year the answer was
-  > built**. 🟥 not on sale that year (or we don't know when it was built).
-  >
-  > **Year** — 🟩 within 2 years. 🟨 within 10. 🟥 further off.
-  >
-  > Only 🟩 counts towards your score, and only 🟩 locks a field in.
+  Laid out as a 3×3 grid (rows Make / Model / Year; columns Right / Close / Wrong, each headed by
+  a real tile swatch so colourblind mode carries through), one short cell per rule — prose with
+  inline emoji squares read as a jumble (user feedback 2026-09-02):
+
+  | | ✓ Right | ~ Close | ✗ Wrong |
+  |---|---|---|---|
+  | **Make** | right make | same country | other country |
+  | **Model** | that's the bike | on sale the year the answer was built | different era |
+  | **Year** | within 2 years | within 10 years | further off |
+
+  > Only a green tile scores a point and locks that field in. Yellow is just a hint. Example: you
+  > guess Honda and the answer is a Kawasaki, so the make tile turns yellow because both are from
+  > **Japan**.
 
   The model paragraph must say **"the year the answer was built"**, not "the year you guessed" — that
   is the one thing players will get wrong about RULE B (§4.2).

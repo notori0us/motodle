@@ -1,5 +1,6 @@
-<!-- First-visit how-to-play (§5.6). Must explain all three yellow bands in the exact wording
-     given there, using COUNTRY_NAMES so a raw country code never appears. -->
+<!-- First-visit how-to-play (§5.6). Explains all three yellow bands in a player's words, using
+     COUNTRY_NAMES so a raw country code never appears. Laid out as a 3×3 grid (category × colour)
+     rather than prose, so each rule is one short cell. -->
 <script lang="ts">
   import { COUNTRY_NAMES } from '../../schema/constants';
   import Modal from './Modal.svelte';
@@ -16,29 +17,55 @@
 <Modal {open} titleId="help-title" onclose={() => onclose()}>
   <h2 id="help-title">How to play</h2>
   <p>
-    A new motorbike photo, revealed a little more with every wrong guess. Guess its <strong>make</strong>,
-    <strong>model</strong> and <strong>year</strong> in up to 5 tries.
+    Guess the motorbike's <strong>make</strong>, <strong>model</strong> and <strong>year</strong> in
+    5 tries. Every wrong guess zooms the photo out a little.
   </p>
 
   <h3>Tile colours</h3>
-  <dl class="help-rules">
-    <dt><span class="swatch" data-color="green">✓</span> Make</dt>
-    <dd>
-      🟩 you named the right make. 🟨 wrong make, but <strong>from the same country</strong> (you
-      guessed Honda, the answer is a different make from <strong>{exampleCountry}</strong>). 🟥 wrong country.
-    </dd>
-    <dt><span class="swatch" data-color="yellow">~</span> Model</dt>
-    <dd>
-      🟩 that's the bike. 🟨 wrong bike, but <strong>one that was on sale the year the answer was built</strong>.
-      🟥 not on sale that year (or we don't know when it was built).
-    </dd>
-    <dt><span class="swatch" data-color="red">✗</span> Year</dt>
-    <dd>🟩 within 2 years. 🟨 within 10. 🟥 further off.</dd>
-  </dl>
-  <p><strong>Only 🟩 counts towards your score, and only 🟩 locks a field in.</strong></p>
+  <table class="help-grid">
+    <colgroup>
+      <col style="width: 19%" />
+      <col style="width: 24%" />
+      <col style="width: 35%" />
+      <col style="width: 22%" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th scope="col"><span class="visually-hidden">Category</span></th>
+        <th scope="col"><span class="swatch" data-color="green">✓</span> Right</th>
+        <th scope="col"><span class="swatch" data-color="yellow">~</span> Close</th>
+        <th scope="col"><span class="swatch" data-color="red">✗</span> Wrong</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Make</th>
+        <td>right make</td>
+        <td>same country</td>
+        <td>other country</td>
+      </tr>
+      <tr>
+        <th scope="row">Model</th>
+        <td>that's the bike</td>
+        <td>on sale the year the answer was built</td>
+        <td>different era</td>
+      </tr>
+      <tr>
+        <th scope="row">Year</th>
+        <td>within 2 years</td>
+        <td>within 10 years</td>
+        <td>further off</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="help-note">
+    Only a green tile scores a point and locks that field in. Yellow is just a hint. Example: you
+    guess Honda and the answer is a Kawasaki, so the make tile turns yellow because both are from
+    <strong>{exampleCountry}</strong>.
+  </p>
 
   <h3>Scoring</h3>
-  <p>Each green category is worth 1 point (0–3), multiplied by how quickly you finished:</p>
+  <p>Green tiles at the end (0–3) times a multiplier for how fast you finished. Best possible: 15.</p>
   <table class="help-table">
     <thead>
       <tr><th scope="col">Finished on</th><th scope="col">Multiplier</th></tr>
@@ -59,30 +86,57 @@
 </Modal>
 
 <style>
-  .help-rules {
-    margin: 0 0 var(--space-3);
+  .help-grid,
+  .help-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-3);
+    font-size: 0.9rem;
   }
 
-  .help-rules dt {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+  .help-grid th,
+  .help-grid td,
+  .help-table th,
+  .help-table td {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--space-2) var(--space-1);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .help-grid thead th {
     font-weight: 600;
-    margin-top: var(--space-3);
   }
 
-  .help-rules dd {
-    margin: var(--space-1) 0 0;
+  .help-grid thead .swatch {
+    display: flex;
+    margin: 0 0 var(--space-1);
+  }
+
+  .help-grid tbody th {
+    font-weight: 600;
+    white-space: nowrap;
+    padding-right: var(--space-2);
+  }
+
+  .help-grid {
+    table-layout: fixed;
+  }
+
+  .help-note {
+    margin-top: 0;
   }
 
   .swatch {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
     border-radius: var(--radius-sm);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    vertical-align: -0.2em;
+    margin-right: var(--space-1);
   }
 
   .swatch[data-color='green'] {
@@ -98,16 +152,12 @@
     color: var(--tile-red-fg);
   }
 
-  .help-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: var(--space-3);
-  }
-
-  .help-table th,
-  .help-table td {
-    text-align: left;
-    padding: var(--space-1) var(--space-2);
-    border-bottom: 1px solid var(--color-border);
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 </style>
