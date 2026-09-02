@@ -4,6 +4,7 @@ import { svelteTesting } from '@testing-library/svelte/vite';
 
 export default defineConfig({
   plugins: [svelte(), svelteTesting()],                // svelteTesting() is MANDATORY (probe §3a)
+  appType: 'mpa',                                      // no client router: missing puzzle JSON must 404, not fall back to index.html
   test: {
     environment: 'jsdom',
     globals: true,
