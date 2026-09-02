@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Catalog, OperatorOverride, ReviewCandidate, ReviewFile } from '../schema/types';
@@ -14,7 +15,7 @@ import {
   type ScheduleOptions,
 } from './schedule';
 
-const SCRATCH_ROOT = '/tmp/claude-1000/-home-chris-workspace/852d5747-63d4-4155-bc73-5cf062e93be6/scratchpad/build-w2';
+const SCRATCH_ROOT = os.tmpdir();
 const ROOT = path.join(__dirname, '..');
 const FIXTURE_IMAGE = path.join(ROOT, 'fixtures/images/2004-suzuki-gsxr750.jpg');
 const PUZZLE_SCHEMA_PATH = path.join(ROOT, 'schema/puzzle.schema.json');

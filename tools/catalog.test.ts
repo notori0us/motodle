@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Catalog } from '../schema/types';
@@ -14,7 +15,7 @@ import {
 } from './catalog';
 import { WikimediaClient } from './lib/wikimedia';
 
-const SCRATCH_ROOT = '/tmp/claude-1000/-home-chris-workspace/852d5747-63d4-4155-bc73-5cf062e93be6/scratchpad/build-w2';
+const SCRATCH_ROOT = os.tmpdir();
 
 // -----------------------------------------------------------------------------------------
 // Pure helpers

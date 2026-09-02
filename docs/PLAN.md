@@ -2562,3 +2562,375 @@ make's models, all years**. Both decisions are **fixed**; they are not design op
 Everything not listed here is unchanged: `evaluateGuess` and both yellow rules, scoring and the 8-bucket
 distribution, share text, stats and streak arithmetic, storage schema, the image stage, the modals, the
 payload budgets, and the mobile rules (form reachable at 360×640 without scrolling, pinch zoom on).
+
+### 11.9 Revision 3 — continuous integration 2026-09-02
+
+Adds **§12**, the specification for `.github/workflows/ci.yml`. Nothing in §1–§10 changes; CI is a
+*second driver* of the §7.5 checklist, not a new contract. Three things are worth flagging up front:
+
+| # | Change | Why |
+|---|---|---|
+| R3-1 | New **§12** — one workflow, one job, running §7.5 rows 1–8 headless on `ubuntu-24.04` | The §7.5 checklist was written to be machine-runnable ("runnable on any date", every spec clock-pinned §7.4a); CI is the payoff for that discipline |
+| R3-2 | **BLOCKER `B-CI-1`** (§12.8): four test files hard-code a session-specific `SCRATCH_ROOT` under `/tmp/claude-1000/…/build-w2`. `fs.mkdtemp()` on a non-existent parent is `ENOENT`, so `npm test` is **red on any machine but this one** — CI included. Must be fixed *before* the first workflow run | "Green on the first run" is the acceptance bar for §12, and this is the one thing in the repo that guarantees it would not be |
+| R3-3 | §7.5 rows **0, 5, 7, 9, 10** behave differently under CI (browser install becomes a cached step; `unshare -rn` is dropped; the preview smoke test is absorbed into Playwright's `webServer`; rows 9–10 are not automatable). Every divergence is enumerated in §12.6 rather than silently ignored | A CI run that quietly skips a checklist row is worse than one that says which rows it does not cover |
+
+No §7.5 row is *weakened* by CI. Row 5's offline guarantee, which locally comes from `unshare -rn`,
+comes in CI from the §7.2 #14 import-graph contract test — which is the durable guard anyway (§7.5's
+own note), and which row 4 has already run by the time row 5 executes.
+
+---
+
+## 12. Continuous integration
+
+**Deliverable:** exactly one new file, `.github/workflows/ci.yml` (the repo has no `.github/` yet),
+plus a one-line badge edit at the top of `README.md` (§12.7). Nothing else in the repo changes —
+**no linter, no formatter, no coverage threshold, no config edits**. §12.9 lists the tools that were
+considered and deliberately *not* added.
+
+**Acceptance:** the first push runs green, in **under ~6 minutes** wall time, with `permissions:
+contents: read`.
+
+### 12.1 Shape — triggers, permissions, concurrency, one job
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+```
+
+Decisions, each with its reason:
+
+- **`push: branches: [main]` + bare `pull_request`.** No branch filter on `pull_request` (it defaults
+  to every target branch), and `push` restricted to `main` so a PR branch is **not** built twice —
+  the classic duplicate-run waste. A PR is verified by the `pull_request` event; the merge is
+  verified by the `push` event.
+- **`permissions: contents: read`**, declared at workflow level so every job inherits it. The workflow
+  reads code and writes nothing back — no releases, no gh-pages, no PR comments. It does not need
+  `actions: write` (the cache action works with the default token under `contents: read`).
+- **`concurrency` keyed on `${{ github.workflow }}-${{ github.ref }}`**, `cancel-in-progress: true`.
+  Per-ref: a force-push to a PR cancels that PR's in-flight run, and never cancels `main`'s.
+- **`runs-on: ubuntu-24.04`, pinned, not `ubuntu-latest`.** `ubuntu-latest` *is* 24.04 today, but the
+  §7.5 row-5 byte-identity gate depends on a fixed `sharp`/libvips build (§12.4); a silent runner-image
+  migration is exactly the kind of change that should be a deliberate one-line edit, not a surprise.
+- **One job, not two.** The e2e half cannot start until `dist/` exists (`playwright.config.ts`'s
+  `webServer.command` is `npx vite preview`, which serves `dist/`), so a parallel `e2e` job would have
+  to repeat `npm ci` (~35 s) **and** `npm run build` (~20 s), or upload/download `dist/` +
+  `node_modules/` as an artifact (~40 s each way). Both cost more than the ~90 s of e2e they would
+  overlap. The suite is also `fullyParallel: false, workers: 1` (§7.4), so there is no shard to split
+  either. **Revisit only if the e2e step passes ~3 minutes**, at which point the honest fix is
+  `workers: 2` in `playwright.config.ts`, not a second job.
+- **`timeout-minutes: 12`** on the job — a hard stop at roughly 2× the ~5 min target, generous enough
+  that a cold Playwright cache (§12.3) does not trip it, tight enough that a hung `webServer` fails in
+  minutes rather than burning the 360-minute default.
+
+### 12.2 Steps, in order, mapped to the §7.5 rows
+
+Each row of this table is one step in `ci.yml`, in this order. The **Row** column is the §7.5
+acceptance-checklist row the step discharges.
+
+| # | Step (`name`) | Command | Row | Notes |
+|---|---|---|---|---|
+| 1 | Checkout | `actions/checkout@v5` | — | Default `fetch-depth: 1` is enough: the row-5 gate diffs the **working tree against `HEAD`**, not against history. No `lfs:` — the repo uses none (no `.gitattributes`; `fixtures/images/*.jpg` and `public/puzzles/img/**/*.webp` are plain committed blobs). |
+| 2 | Setup Node | `actions/setup-node@v5` with `node-version: '22'`, `cache: 'npm'` | 1 (prep) | Node 22 matches the verified local toolchain (v22.23.2). `cache: 'npm'` keys the **npm download cache** (`~/.npm`) on `package-lock.json`'s hash automatically — it does **not** cache `node_modules/`, which is correct: `npm ci` must keep deleting and rebuilding the tree. |
+| 3 | Install | `npm ci --no-audit --no-fund` (piped to a log, see §12.2a) | **1** | `ci`, never `install` (§7.5 row 1, §10.1). |
+| 4 | Assert no ERESOLVE / TypeScript 6 | see §12.2a | **1** | The C5 TS-7 trap. |
+| 5 | svelte-check | `npx svelte-check --tsconfig ./tsconfig.json` | **2** | Run separately from `tsc`, **not** as `npm run check`, so the Actions log shows which of the two failed. |
+| 6 | tsc | `npx tsc --noEmit` | **3** | |
+| 7 | Unit + contract + component + two-timezone tests | `npm test` | **4** | Runs `test:unit` then `test:tz` (§10.2) — the `America/Los_Angeles` + `Australia/Lord_Howe` pair is two extra processes, ~10 s. `tzdata` is present on the runner image; no setup needed. |
+| 8 | Generate + idempotency gate | see §12.4 | **5** | |
+| 9 | Build + payload budgets | `npm run build` | **6** | `vite build && tsx tools/check-budget.ts` (§5.9). **Must precede step 11** — Playwright's `webServer` serves `dist/`. |
+| 10 | Playwright browser (version, cache, install) | three steps, see §12.3 | **0** | |
+| 11 | E2E | see §12.5 | **7 + 8** | |
+| 12 | Upload Playwright report on failure | `actions/upload-artifact@v4`, `if:` guarded | — | §12.5. |
+
+§7.5 rows **9** (offline `npm run dev`) and **10** (operator plays a round by hand) are **not** run in
+CI — see §12.6.
+
+#### 12.2a Steps 3–4 verbatim — the C5 guard
+
+Row 1 has two assertions beyond "exit 0": *no `ERESOLVE` warning*, and *TypeScript resolves to 6.x*.
+Both are the same trap (C5: `typescript@7.0.2` hard-crashes `svelte-check` 4.7.6, and npm's warning
+text is actively misleading). Neither is checkable by exit code alone, so:
+
+```yaml
+      - name: Install (npm ci)
+        run: |
+          set -o pipefail
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/npm-ci.log
+
+      - name: Assert clean resolution (C5 guard)
+        run: |
+          if grep -q ERESOLVE /tmp/npm-ci.log; then
+            echo "::error::npm ci emitted ERESOLVE — see plan §10.1 C5 (the TypeScript 7 trap)"
+            exit 1
+          fi
+          ts=$(node -p "JSON.parse(require('node:fs').readFileSync('node_modules/typescript/package.json','utf8')).version")
+          echo "typescript: $ts"
+          case "$ts" in
+            6.*) ;;
+            *) echo "::error::typescript resolved to $ts, expected 6.x (plan §10.1 C5)"; exit 1 ;;
+          esac
+```
+
+Three details that are not incidental:
+
+1. **`set -o pipefail` is mandatory.** GitHub's default shell for `run:` is `bash -e {0}` — `-e` but
+   **not** `-o pipefail` — so `npm ci | tee` would report `tee`'s exit code and a failed install would
+   pass. (`shell: bash` would give pipefail for free, but stating it explicitly documents the intent.)
+2. **`grep` reads a file, never a pipe.** Per the workspace's own `pipefail + grep -q` lesson,
+   `npm ci … | grep -q ERESOLVE` makes `grep -q` `SIGPIPE` the producer the moment it matches. Capture
+   to `/tmp/npm-ci.log` first, then grep the file.
+3. **Read `typescript/package.json` off disk, not via `require('typescript/package.json')`** — §10.7
+   gotcha 6: strict `exports` maps make that throw `ERR_PACKAGE_PATH_NOT_EXPORTED`. And **do not** use
+   `npm ls typescript`: §10.7 gotcha 7 documents `npm ls` exiting non-zero over benign
+   `@img/sharp-wasm32` / `@emnapi/runtime` / `tslib` optional-dependency residue, which is a false red
+   waiting to happen. The `case 6.*` match — rather than a literal `6.0.3` — keeps an intended future
+   patch bump from turning CI red while still catching the only failure that matters (a 7.x resolve).
+
+### 12.3 Playwright browser cache — step 10, three parts
+
+`npm ci` never fetches browsers (§7.5 row 0), so this is required, and it is the one step whose cost
+varies. Cache path `~/.cache/ms-playwright`, keyed on the **exact** `@playwright/test` version read
+from the lockfile:
+
+```yaml
+      - name: Resolve Playwright version
+        id: pw
+        run: |
+          echo "version=$(jq -r '.packages["node_modules/@playwright/test"].version' package-lock.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.pw.outputs.version }}
+
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+```
+
+- **The key is computed from `package-lock.json`, not `package.json`.** `package.json` says
+  `^1.62.1` — a range, which would keep a stale browser build alive across a minor bump and produce
+  the "Executable doesn't exist at …/chromium-XXXX" failure. The lockfile says `1.62.1`, exactly.
+  `jq` is preinstalled on the runner image and this step runs after checkout, so no ordering trap.
+  (`node -p "require('./package-lock.json')…"` returns the same string and is a valid fallback; `jq`
+  is preferred because it does not depend on how Node treats `--eval` under `"type": "module"`.)
+- **`${{ runner.os }}-playwright-<version>`, and no `restore-keys`.** A partial restore from a
+  *different* Playwright version is worse than a miss: it populates the cache directory with a browser
+  revision this version will not use, `playwright install` downloads the right one anyway, and the
+  saved cache then carries both. Exact key or nothing.
+- **`--with-deps` runs unconditionally, even on a cache hit** — and it is *not* redundant. The cache
+  holds the browser bundle under `~/.cache/ms-playwright`; it does **not** hold the system libraries
+  `install-deps` installs via `apt-get`, which live in `/usr/lib` and are not part of any cached path.
+  On a hit, `playwright install` sees the browser already present and skips the ~130 MB download,
+  leaving only the apt half (~15–25 s). On a miss it does both (~45–60 s). This is why the step is not
+  wrapped in `if: steps.cache.outputs.cache-hit != 'true'`.
+- **`--with-deps` needs the runner's `apt`**, i.e. passwordless `sudo`. That is available on
+  GitHub-hosted runners and is the reason this flag appears in CI and never in a local instruction
+  (§12.6, and the workflow's "no sudo" rail applies to the operator's machine, not the ephemeral VM).
+- **`chromium` only.** `playwright.config.ts` declares exactly one project, `chromium`. Installing all
+  three engines would triple the cold cost for browsers nothing runs.
+
+### 12.4 The generate idempotency gate — step 8
+
+```yaml
+      - name: Generate (offline) and prove the committed output is byte-identical
+        run: |
+          npm run generate
+          git diff --exit-code -- public/puzzles docs/ATTRIBUTION.md
+          untracked=$(git status --porcelain --untracked-files=all -- public/puzzles docs/ATTRIBUTION.md)
+          if [ -n "$untracked" ]; then
+            echo "::error::generate produced files that are not committed:"
+            echo "$untracked"
+            exit 1
+          fi
+```
+
+- **`npm run generate` is `tsx tools/generate.ts`, no arguments** (§6.1). Its only inputs are
+  `fixtures/fixtures.json` and `fixtures/images/*` — both committed, neither touched by `.gitignore`
+  (which ignores only `node_modules/`, `dist/`, `.cache/`, `data/*`, `test-results/`,
+  `playwright-report/`). It writes `public/puzzles/**` (3 JSON + `manifest.json` + 18 WebPs across
+  `img/0001…0003/`) and `docs/ATTRIBUTION.md`, wholesale, every run.
+- **`git diff --exit-code -- public/puzzles docs/ATTRIBUTION.md`** — scoped to exactly the paths
+  `generate` owns. Scoped, not bare, on purpose: a bare `git diff --exit-code` would also fail on any
+  unrelated tree dirt (and would say nothing useful about *which* contract broke). `--exit-code` makes
+  `git` exit 1 on any difference and prints the diff into the log, which for the JSON files is
+  directly readable; for the WebPs git prints `Binary files … differ`, which is the signal the
+  encoder drifted.
+- **The second half is not optional.** `git diff` only compares *tracked* paths — a `generate` that
+  emitted a **new** file (say `img/0004/l1.webp`) would leave `git diff` clean and the gate would pass
+  on output nobody committed. `git status --porcelain --untracked-files=all`, scoped the same way,
+  closes that hole.
+- **Determinism across machines.** §7.5's note is explicit that byte-identity holds only for a fixed
+  `sharp`/libvips build. The lockfile pins `sharp` 0.35.4 → `@img/sharp-linux-x64` 0.35.4 →
+  `@img/sharp-libvips-linux-x64` 1.3.3, and both the local host and the runner are glibc `x86_64`, so
+  both resolve the same prebuilt binary and the same libvips 8.18.6. **This is the workflow's one
+  environment-coupled step**; if a future `sharp` bump makes it red on a diff no human authored, the
+  correct response is the one §7.5 already prescribes — demote the gate to "schema + budget valid"
+  (which the `schema/*.test.ts` suite in row 4 already enforces) — **not** to weaken the contract
+  tests.
+- **No `unshare -rn`.** See §12.6.
+
+### 12.5 E2E and the failure artifact — steps 11–12
+
+```yaml
+      - name: E2E (Playwright chromium)
+        id: e2e
+        timeout-minutes: 6
+        run: npm run test:e2e -- --reporter=list,html --trace=retain-on-failure
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+```
+
+- **The two CLI overrides exist so that no config file has to change.** `playwright.config.ts` ships
+  `reporter: 'list'` and `trace: 'on-first-retry'` with no `retries`, which in CI means *no HTML report
+  is ever written and no trace is ever captured* — there is nothing to upload. `--reporter=list,html`
+  keeps the streaming console output **and** writes `playwright-report/`;
+  `--trace=retain-on-failure` captures a trace for failing tests without introducing retries (retries
+  would mask flake, which is the opposite of what this suite is for). Both are flags, not edits: the
+  local `npm run test:e2e` behaviour is untouched.
+- **The HTML reporter does not try to open a browser here.** Its `open: 'on-failure'` default is
+  suppressed whenever `process.env.CI` is set, which GitHub Actions sets for every step.
+- **`npm run test:e2e -- <flags>`**, with the `--` separator, so npm forwards them to
+  `playwright test` rather than consuming them.
+- **`steps.e2e.outcome == 'failure'`, not a bare `if: failure()`.** A bare `failure()` would fire when
+  `svelte-check` or the budget check failed, uploading an empty or stale report. `!cancelled()` keeps
+  a cancelled run (concurrency, §12.1) from producing a junk artifact.
+- **`if-no-files-found: ignore`** because `test-results/` exists only when something failed; without
+  it, upload-artifact warns on every partial upload.
+- **Both directories are already in `.gitignore`**, so they cannot dirty the row-5 gate — which is
+  moot anyway, since the gate runs three steps earlier.
+- **`timeout-minutes: 6`** on this step alone: it is the only step that can hang (a `webServer` that
+  never binds), and the job-level 12 is too coarse to fail fast.
+- **`workers: 1` and `reuseExistingServer: !process.env.CI` are both already correct for a runner.**
+  `CI` is set, so Playwright always starts its **own** `vite preview` on `127.0.0.1:4173` rather than
+  adopting a stray one — and the runner has no stray one. The `--host 127.0.0.1` in
+  `webServer.command` is the §10.7-gotcha-1 fix and is exactly as necessary on the runner (Playwright
+  polls `http://127.0.0.1:4173`, which an IPv6-only bind would never answer). `webServer.timeout` of
+  60 s is ample for `vite preview` over a pre-built `dist/`.
+
+**Clock pinning — verified, not assumed.** Every spec in `e2e/` calls `page.clock.install(...)` (or
+`pauseAt`) before its first `page.goto`, with dates from `e2e/helpers.ts`: `blocked-submit`,
+`colorblind`, `giveup`, `loss`, `mobile-layout`, `playthrough`, `rollover` pin `DAY1` (2026-09-02);
+`practice` pins `NO_PUZZLE_DAY` (2099-01-01). `localTime()` builds a **local** wall-clock `Date` with
+no `Z` suffix, matching `todayKey()`'s semantics (§4.1). Consequences for CI, both good: the suite
+does **not** depend on the runner's clock or on `TZ` (runners are UTC; the specs never assume
+otherwise), and it will not start failing on 2026-09-05 the way an unpinned suite would.
+
+### 12.6 Where CI differs from the §7.5 local checklist
+
+| §7.5 row | Local | CI | Why the difference is safe |
+|---|---|---|---|
+| **0** — `npx playwright install chromium` | One-time, manual; a no-op once `~/.cache/ms-playwright` is warm | A cached step running `--with-deps` every time (§12.3) | The runner is ephemeral: there is no "one-time". `--with-deps` adds the apt libraries a fresh VM lacks and a local Debian workstation already has. |
+| **1** | `npm ci`, eyeball the output for `ERESOLVE`, `npm ls typescript` | `npm ci` + a scripted grep + an on-disk version read (§12.2a) | Machine-checkable versions of the same two assertions; both local forms are non-mechanical or (per §10.7 gotcha 7) false-red-prone. |
+| **5** — `unshare -rn npm run generate` | `unshare -rn` proves "no network" mechanically | **Plain `npm run generate`**, plus the diff gate | Two reasons. (a) Ubuntu 24.04 restricts unprivileged user namespaces by AppArmor (`kernel.apparmor_restrict_unprivileged_userns=1`), so `unshare -rn` is unreliable on this image — and "wrap it in `sudo`" would defeat the point. (b) It is redundant here: `generate`'s offline guarantee is **structural**, proved statically by the §7.2 #14 import-graph contract test, which row 4 ran one step earlier. §7.5 itself says the contract test is the durable guard. |
+| **7** — `npm run preview` + `curl` for a 200 | A separate manual step | **Absorbed into row 8** | Playwright's `webServer` starts the identical command (`npx vite preview --port 4173 --strictPort --host 127.0.0.1`) and blocks until `http://127.0.0.1:4173` answers, failing the step if it does not. A standalone `curl` step would start a second server on a `--strictPort` port and fail. The row is *covered*, not skipped. |
+| **9** — offline `npm run dev` in a namespace | Runs, needs `ip link set lo up` and an in-namespace browser | **Not run** | Same userns restriction as row 5, and the check's real content — "the app works with no network" — needs a browser *inside* the namespace to be meaningful. Rows 4, 5 and 8 already cover offline generation, contract validity and a full in-browser playthrough against a local `vite preview`. |
+| **10** — operator plays a round by hand | The final gate, includes 360×640 **with the on-screen keyboard open** | **Not run — by definition** | §5.8 states headless Chromium cannot simulate the keyboard-open viewport. `e2e/mobile-layout.spec.ts` covers the unfocused 360×640 case; the keyboard case stays a human gate. CI does not claim it. |
+
+Everything else — rows 2, 3, 4, 6, 8 — is the *same command* locally and in CI.
+
+### 12.7 README badge
+
+Immediately under the `# Motodle` H1, before the description paragraph:
+
+```markdown
+[![CI](https://github.com/reenchree/motodle/actions/workflows/ci.yml/badge.svg)](https://github.com/reenchree/motodle/actions/workflows/ci.yml)
+```
+
+- The path segment is the **workflow file name** (`ci.yml`), not the `name:` field — GitHub accepts
+  either, but the filename is stable across a rename of the workflow's display name.
+- Default branch only. Add `?branch=<name>` only if a release branch ever appears; it does not exist.
+- **The repo is private**, so the badge image renders only for viewers authenticated with access;
+  an anonymous or logged-out viewer sees a broken image. That is expected and is not a reason to
+  route the badge through a third-party shield.
+- While at it, `README.md`'s §7.5 mirror (its "Runs great locally" table) should gain a one-line
+  pointer: *"CI runs rows 1–8 of this table headless on every push and PR — see `docs/PLAN.md` §12;
+  rows 9 and 10 stay manual."* One sentence, no table changes.
+
+### 12.8 `B-CI-1` — the blocker that must be fixed before the first run
+
+**`npm test` cannot pass on any machine except this workstation.** Four test files hard-code a
+session-scoped scratch path:
+
+```
+tools/catalog.test.ts:17       const SCRATCH_ROOT = '/tmp/claude-1000/-home-chris-workspace/852d5747-…/scratchpad/build-w2';
+tools/fetch.test.ts:18         (identical)
+tools/schedule.test.ts:17      (identical)
+tools/lib/wikimedia.test.ts:6  (identical)
+```
+
+Each `beforeEach` then calls `fs.mkdtemp(path.join(SCRATCH_ROOT, '<prefix>-'))`. **`mkdtemp` does not
+create parents** — on a runner (or any clean clone) that is `ENOENT: no such file or directory`, and
+every test in all four files fails at setup. This is not a CI-only defect; it is a portability defect
+that CI is simply the first thing to expose, and it also breaks §7.5's own "from a clean clone"
+premise.
+
+**Fix — owner: whoever implements §12, applied to all four files, before the workflow's first run:**
+
+```ts
+import os from 'node:os';
+const SCRATCH_ROOT = os.tmpdir();
+```
+
+`os.tmpdir()` exists on every platform, needs no `mkdir`, and each file's existing `mkdtemp` prefix
+(`catalog-`, `fetch-`, `schedule-`, …) already keeps the four suites from colliding — prefix them
+`motodle-` for legibility if desired. The existing `afterEach` `fs.rm(workDir, …)` cleanup is
+unchanged and still correct. **No other change to those files.** Verify locally with `npm test`
+before pushing; the four suites must stay green on this host too.
+
+### 12.9 Considered and deliberately NOT added
+
+Recommendations only — **none of these belong in this milestone's `ci.yml`**, and adding one would
+violate the "no linters or formatters that are not already in the repo" rail. Recorded here so the
+decision is a decision and not an oversight.
+
+| Tool | Why it was not added | Worth revisiting when |
+|---|---|---|
+| ESLint / Prettier | Neither is in `devDependencies`; adding one means a config file, a lockfile change, and a first run that reformats the whole tree — a large diff, zero defects caught that `tsc` + `svelte-check` miss | Any second contributor joins |
+| Coverage thresholds (`vitest --coverage`) | Needs `@vitest/coverage-v8` (a new dependency) and an arbitrary number; the §7.2 contract suite is a stronger guarantee than a percentage | A threshold would gate something real, e.g. `src/lib/` before a refactor |
+| Dependabot / Renovate | Real value (the C5 trap is exactly the class of thing a bot surfaces), but it is a *policy* change — it opens PRs, needs `permissions` beyond `contents: read`, and every bump must be re-validated against §10.1's pinned matrix | Post-launch, and only with the §10.1 table treated as the review checklist |
+| `actions/cache` for the Vite build | `vite build` is ~20 s; a cache round trip is not obviously cheaper and adds a staleness failure mode | Build passes ~60 s |
+| Playwright sharding / a matrix | The config is `fullyParallel: false, workers: 1` (§7.4, deliberate); sharding would fight it | The e2e step passes ~3 min — and then `workers: 2` first |
+| A deploy job (S3 + CloudFront) | Out of scope — §9.5 is an explicit later-phase hook, and deployment needs write permissions this workflow deliberately does not take | §9.5 is built |
+
+### 12.10 Expected timings (ubuntu-24.04, warm caches)
+
+| Step | Cold | Warm |
+|---|---|---|
+| checkout + setup-node | ~15 s | ~10 s |
+| `npm ci` | ~60 s | ~35 s |
+| svelte-check + tsc | ~35 s | ~35 s |
+| `npm test` (unit + contract + component + 2×tz) | ~60 s | ~60 s |
+| generate + gate | ~20 s | ~20 s |
+| `npm run build` + budgets | ~25 s | ~25 s |
+| playwright install (`--with-deps`) | ~55 s | ~20 s |
+| `npm run test:e2e` (8 spec files, `workers: 1`) | ~90 s | ~90 s |
+| **Total** | **~6 min** | **~5 min** |
+
+The warm number is the steady state (both caches populate on the first run). If the total creeps past
+~7 min, the first lever is `workers: 2` in `playwright.config.ts`, not a second job (§12.1).

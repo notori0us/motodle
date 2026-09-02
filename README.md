@@ -1,5 +1,10 @@
 # Motodle
 
+[![CI](https://github.com/reenchree/motodle/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/reenchree/motodle/actions/workflows/ci.yml)
+
+This repo is private, so the badge image above only renders for viewers authenticated with repo
+access — it shows as broken in an anonymous or mirrored context. That's expected, not a config bug.
+
 A daily motorbike-guessing game, in the shape of Wordle/Cardle: guess the make, model and year
 of a motorbike from a progressively-revealed photo. Fully static — Vite + TypeScript + Svelte 5,
 no runtime dependencies, no backend, no third-party scripts. See `docs/PLAN.md` for the full
@@ -140,10 +145,14 @@ From a clean clone, in order (`docs/PLAN.md` §7.5). Every command must exit 0, 
 e2e spec pins its own clock — this checklist is runnable on any date, not only the ones with a
 fixture puzzle.
 
+CI runs rows 0–6 and 8 of this table headless on every push and PR — see `docs/PLAN.md` §12; row
+7's `preview` is what row 8's Playwright `webServer` starts, so it isn't a separate CI step. Rows 9
+and 10 stay manual.
+
 | # | Command | Expected |
 |---|---|---|
 | 0 | `npx playwright install chromium` | One-time, needs network; a no-op once `~/.cache/ms-playwright` is populated. |
-| 1 | `npm ci` | Exit 0, no `ERESOLVE` warning. `npm ls typescript` reports `6.0.3`. |
+| 1 | `npm ci` | Exit 0, no `ERESOLVE` warning. `node -p "require('./node_modules/typescript/package.json').version"` reports `6.0.3` — not `npm ls typescript`, which can exit non-zero over benign `sharp` optional-dep residue (§10.7 gotcha 7); CI reads the version off disk for the same reason. |
 | 2 | `npx svelte-check --tsconfig ./tsconfig.json` | 0 errors. |
 | 3 | `npx tsc --noEmit` | Clean. |
 | 4 | `npm test` | All unit + tool + contract + component tests pass, including the two-timezone `test:tz` run. |

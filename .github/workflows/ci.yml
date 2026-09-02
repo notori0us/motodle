@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install (npm ci)
+        run: |
+          set -o pipefail
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/npm-ci.log
+
+      - name: Assert clean resolution (C5 guard)
+        run: |
+          if grep -q ERESOLVE /tmp/npm-ci.log; then
+            echo "::error::npm ci emitted ERESOLVE — see plan §10.1 C5 (the TypeScript 7 trap)"
+            exit 1
+          fi
+          ts=$(node -p "JSON.parse(require('node:fs').readFileSync('node_modules/typescript/package.json','utf8')).version")
+          want=$(jq -r '.packages["node_modules/typescript"].version' package-lock.json)
+          echo "typescript: $ts (lockfile pins $want)"
+          if [ "$ts" != "$want" ]; then
+            echo "::error::typescript resolved to $ts, expected $want per package-lock.json (plan §10.1 C5)"
+            exit 1
+          fi
+
+      - name: svelte-check
+        run: npx svelte-check --tsconfig ./tsconfig.json
+
+      - name: tsc --noEmit
+        run: npx tsc --noEmit
+
+      - name: Unit + contract + component + two-timezone tests
+        run: npm test
+
+      - name: Generate (offline) and prove the committed output is byte-identical
+        run: |
+          npm run generate
+          if ! git diff --exit-code -- public/puzzles docs/ATTRIBUTION.md; then
+            echo "::error::generate produced output that differs from the committed tree (see diff above)"
+            git diff --stat -- public/puzzles docs/ATTRIBUTION.md || true
+            node -p "require('sharp').versions" || true
+            exit 1
+          fi
+          untracked=$(git status --porcelain --untracked-files=all -- public/puzzles docs/ATTRIBUTION.md)
+          if [ -n "$untracked" ]; then
+            echo "::error::generate produced files that are not committed:"
+            echo "$untracked"
+            exit 1
+          fi
+
+      - name: Build + payload budgets
+        run: npm run build
+
+      - name: Resolve Playwright version
+        id: pw
+        run: |
+          echo "version=$(jq -r '.packages["node_modules/@playwright/test"].version' package-lock.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-${{ runner.arch }}-playwright-${{ steps.pw.outputs.version }}
+
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E (Playwright chromium)
+        id: e2e
+        timeout-minutes: 6
+        run: npm run test:e2e -- --reporter=list,html --trace=retain-on-failure
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
