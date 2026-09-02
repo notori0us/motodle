@@ -188,7 +188,14 @@
 <style>
   .app-header__actions {
     display: flex;
+    flex: 0 0 auto;
     gap: var(--space-2);
+  }
+
+  @media (max-width: 380px) {
+    .app-header__actions {
+      gap: 2px; /* 5 x 44px buttons must fit beside the title at 360px under DejaVu Sans (CI runner) */
+    }
   }
 
   .skeleton {
