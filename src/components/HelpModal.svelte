@@ -24,7 +24,7 @@
   <dl class="help-rules">
     <dt><span class="swatch" data-color="green">✓</span> Make</dt>
     <dd>
-      🟩 you named the right marque. 🟨 wrong marque, but <strong>from the same country</strong> (you
+      🟩 you named the right make. 🟨 wrong make, but <strong>from the same country</strong> (you
       guessed Honda, the answer is a different make from <strong>{exampleCountry}</strong>). 🟥 wrong country.
     </dd>
     <dt><span class="swatch" data-color="yellow">~</span> Model</dt>

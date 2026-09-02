@@ -107,12 +107,12 @@ three of them.
 
 | Spec | Proves |
 |---|---|
-| `playthrough.spec.ts` | Full win playthrough (§7.4 steps 1-9): first-visit help modal, level unlock/scrub, all three RULE A/B tile colours across 3 guesses, make-lock filtering the combobox, score, byte-exact share text, stats-modal numbers, and that a reload restores the finished game instead of replaying it. |
+| `playthrough.spec.ts` | Full win playthrough (§7.4 steps 1-9): first-visit help modal, level unlock/scrub, all three RULE A/B tile colours across 3 guesses, the make/model cascade and the make-lock leaving `#mtd-model` listing that make's full range, score, byte-exact share text, stats-modal numbers, and that a reload restores the finished game instead of replaying it. |
 | `loss.spec.ts` | A loss after 5 guesses: make locks green and stays green, model/year never do, score/share/stats for a loss. |
 | `giveup.spec.ts` | Give-up before any guess: counts as a loss, appends no share-grid row (the zero-row collapse, §4.4), and the give-up control disappears once the game has ended. |
 | `practice.spec.ts` | The "no puzzle today" screen on a date past the last fixture, the archive listing only `date < today`, and a full practice win that never writes `motodle:stats` (byte-identical before/after). |
 | `rollover.spec.ts` | The persistent rollover banner at local midnight (`page.clock.install` + `pauseAt` + `runFor`, §4.5) without disturbing an in-progress board, and that the two days' state never mixes once Reload is clicked. |
-| `blocked-submit.spec.ts` | The submit button is `aria-disabled`, not natively `disabled` — the inline "Pick a bike from the list" / year-range message stays reachable via a forced click or Enter in a field, and neither path submits a guess. |
+| `blocked-submit.spec.ts` | The submit button is `aria-disabled`, not natively `disabled` — the inline "Choose a make" / "Choose a model" / year-range message stays reachable via a forced click or Enter in a select or the year field, and no path submits a guess. |
 | `colorblind.spec.ts` | The `[data-colorblind="true"]` CSS cascade wins over both an explicit dark theme and OS-level `prefers-color-scheme: dark` (jsdom cannot resolve this cascade at all, so it is asserted only here). |
 | `mobile-layout.spec.ts` | At 360×640, with no focus call and no scroll, the submit button sits above the fold; the viewport meta preserves pinch-zoom (no `user-scalable=no`/`maximum-scale`). |
 
@@ -151,7 +151,7 @@ fixture puzzle.
 | 6 | `npm run build` | `vite build` succeeds and `check-budget.ts` prints every budget green with real numbers. |
 | 7 | `npm run preview` | Serves on `http://127.0.0.1:4173`; `curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:4173/` → `200`. |
 | 8 | `npm run test:e2e` | All Playwright specs pass, on any date. |
-| 9 | `unshare -rn sh -c 'ip link set lo up && npm run dev -- --host 127.0.0.1'` | Exit 0; app loads offline; typeahead works; `todayOverride`/`?today=` renders the chosen fixture puzzle. A bare `unshare -rn npm run dev` (no `ip link set lo up`) exits 1 — `EADDRNOTAVAIL: ::1:5173` — because a fresh netns starts with `lo` down. The browser driving this check must run **inside the same namespace** (append `&& node <driver-script>` to the same `sh -c`) — a browser outside the namespace cannot reach a server inside it. |
+| 9 | `unshare -rn sh -c 'ip link set lo up && npm run dev -- --host 127.0.0.1'` | Exit 0; app loads offline; the make/model dropdowns populate from the local `catalog.json`; `todayOverride`/`?today=` renders the chosen fixture puzzle. A bare `unshare -rn npm run dev` (no `ip link set lo up`) exits 1 — `EADDRNOTAVAIL: ::1:5173` — because a fresh netns starts with `lo` down. The browser driving this check must run **inside the same namespace** (append `&& node <driver-script>` to the same `sh -c`) — a browser outside the namespace cannot reach a server inside it. |
 | 10 | Operator plays a full round by hand in a real browser | Final gate — the one thing e2e cannot check: 360×640 with the on-screen keyboard actually open, on a real phone or in device emulation (§5.8). |
 
 Note on step 5: `npm run generate`'s byte-for-byte determinism holds only for a fixed sharp/libvips

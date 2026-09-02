@@ -27,9 +27,16 @@ export function getModel(index: CatalogIndex, id: string): CatalogModel {
   return model;
 }
 
-/** Locked-make filtering (§4.3, §5.3): every model belonging to `makeId`, nothing else. */
+const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, 'en');
+
+/** Every make, alphabetical by display name (§5.3.2). */
+export function listMakes(index: CatalogIndex): CatalogMake[] {
+  return [...index.makes.values()].sort(byName);
+}
+
+/** Every model of `makeId` — ALL years, families and variants — alphabetical (§5.3.2, §4.3). */
 export function modelsForMake(index: CatalogIndex, makeId: string): CatalogModel[] {
-  return [...index.models.values()].filter((m) => m.makeId === makeId);
+  return [...index.models.values()].filter((m) => m.makeId === makeId).sort(byName);
 }
 
 /** Minimal shape `loadCatalog` needs from `fetch` — avoids pinning callers to the full global

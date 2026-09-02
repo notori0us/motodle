@@ -25,8 +25,8 @@ body {
 }
 
 #app {
-  /* svh is stable and never jumps with the URL bar (§5.8); dvh is reserved for the combobox
-     popup's max-height only. */
+  /* svh is stable and never jumps with the URL bar (§5.8). Nothing in the app uses dvh (§5.3
+     superseded the combobox popup that used to). */
   min-height: 100vh;
   min-height: 100svh;
 }

@@ -57,29 +57,26 @@ test('practice mode: a full win against an archived puzzle never touches motodle
   await expect(page.getByRole('link', { name: 'Back to today' })).toBeVisible();
 
   // Same win sequence as the main playthrough spec (puzzle #1's answer is unaffected by practice
-  // mode): guess 1 red/red/red, guess 2 green/red/yellow, guess 3 all-green win.
+  // mode): guess 1 red/red/red, guess 2 green/red/yellow, guess 3 all-green win. Guesses are
+  // entered with selectOption by catalog id (§5.3), never by typing.
   const submit = page.locator('button[type="submit"]');
-  // By id, not by role+accessible name: once the make locks, the input's aria-label changes to
-  // "<Make> model" (§5.3), which would silently stop matching a name-based locator.
-  const combo = page.locator('#mtd-guess');
+  // By id, not by role+accessible name: once the make locks, the select's aria-label changes to
+  // "Make — locked to {name}" (§5.3.3), which would silently stop matching a name-based locator.
+  const makeSelect = page.locator('#mtd-make');
+  const modelSelect = page.locator('#mtd-model');
   const year = page.getByRole('spinbutton');
 
-  await combo.fill('Triumph Bonneville T120');
-  await combo.press('Enter');
+  await makeSelect.selectOption('triumph');
+  await modelSelect.selectOption('triumph-bonneville-t120');
   await year.fill('1990');
   await submit.click();
 
-  await combo.fill('Suzuki GT750');
-  await combo.press('Enter');
+  await makeSelect.selectOption('suzuki');
+  await modelSelect.selectOption('suzuki-gt750');
   await year.fill('1999');
   await submit.click();
 
-  // "suz gsxr750" is the unique match for GSX-R750 in the real seed catalog (§5.3's locked-make
-  // filtering keeps the make token searchable even though the field shows "Suzuki" as a chip) --
-  // see playthrough.spec.ts for why a shorter query like "suz gsx" is not unique here.
-  await combo.fill('suz gsxr750');
-  await expect(page.locator('#mtd-guess-listbox').getByRole('option')).toHaveCount(1);
-  await page.locator('#mtd-guess-listbox').getByRole('option').first().click();
+  await modelSelect.selectOption('suzuki-gsxr750');
   await year.fill('2002');
   await submit.click();
 

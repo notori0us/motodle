@@ -21,7 +21,6 @@ import { todayOverride } from '../config';
 import { buildCatalogIndex, loadCatalog, type CatalogLoadResult } from '../lib/catalog';
 import { dayIndex, puzzleNumber, todayKey } from '../lib/date';
 import { giveUp as libGiveUp, submitGuess as libSubmitGuess, type SubmitGuessInput } from '../lib/game';
-import { buildMatchIndex, type MatchEntry } from '../lib/match';
 import { loadManifest, loadPuzzle, resolveAssetUrl, type PuzzleLoadResult } from '../lib/puzzle';
 import {
   KEY_PREFS,
@@ -78,7 +77,6 @@ export class GameStore {
   puzzleReason = $state<string | null>(null);
 
   catalog = $state<CatalogIndex | null>(null);
-  matchEntries = $state<MatchEntry[]>([]);
 
   puzzle = $state<Puzzle | null>(null);
   manifest = $state<Manifest | null>(null);
@@ -170,7 +168,6 @@ export class GameStore {
   private applyCatalogResult(result: CatalogLoadResult): void {
     if (result.status === 'ok') {
       this.catalog = buildCatalogIndex(result.catalog);
-      this.matchEntries = buildMatchIndex(this.catalog);
       this.catalogStatus = 'ok';
       this.catalogReason = null;
     } else {

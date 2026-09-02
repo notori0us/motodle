@@ -22,7 +22,7 @@ const EXPECTED_SHARE_TEXT = [
 ].join('\n');
 
 test.describe('win playthrough', () => {
-  test('full round: tile colours, locking, combobox filtering, score, share text, stats, reload', async ({
+  test('full round: tile colours, locking, make/model cascade, score, share text, stats, reload', async ({
     page,
     context,
   }) => {
@@ -41,14 +41,26 @@ test.describe('win playthrough', () => {
     await expect(page.getByRole('button', { name: 'Crop level 1 of 5' })).toHaveAttribute('aria-current', 'true');
     await expect(page.getByRole('button', { name: 'Crop level 2 of 5' })).toBeDisabled();
 
-    // By id, not by role+accessible name: once the make locks, the input's aria-label changes
-    // to "<Make> model" (§5.3), which would silently stop matching a name-based locator.
-    const combo = page.locator('#mtd-guess');
+    // Two cascading native selects, addressed by the frozen DOM contract ids (§5.3.1) -- never by
+    // role+accessible name, since a locked select's aria-label changes to "<Make/Model> — locked
+    // to {name}" (§5.3.3), which would silently stop matching a name-based locator. Guesses are
+    // entered with selectOption by catalog id, never by typing (§5.3, §7.4 preamble).
+    const makeSelect = page.locator('#mtd-make');
+    const modelSelect = page.locator('#mtd-model');
     const year = page.getByRole('spinbutton');
 
     // ---- 3. Guess 1: red/red/red; image advances to level 2; scrub back/forward. --------------
-    await combo.fill('Triumph Bonneville T120');
-    await combo.press('Enter');
+    // Before any make is chosen, #mtd-model is disabled with the "Choose a make first" placeholder
+    // (§5.3.2).
+    await expect(modelSelect).toBeDisabled();
+    await makeSelect.selectOption('triumph');
+    await expect(modelSelect).toBeEnabled();
+    // Changing the make resets the model selection to the placeholder (§5.3.2 cascade reset) --
+    // exercised with an unrelated make before returning to the real guess.
+    await makeSelect.selectOption('honda');
+    await expect(modelSelect).toHaveValue('');
+    await makeSelect.selectOption('triumph');
+    await modelSelect.selectOption('triumph-bonneville-t120');
     await year.fill('1990');
     await submit.click();
 
@@ -67,8 +79,8 @@ test.describe('win playthrough', () => {
 
     // ---- 4. Guess 2: correct make, wrong (off-sale) model, year 5 off -> green/red/yellow. -----
     await expect(submit).toHaveText('Guess 2 of 5');
-    await combo.fill('Suzuki GT750');
-    await combo.press('Enter');
+    await makeSelect.selectOption('suzuki');
+    await modelSelect.selectOption('suzuki-gt750');
     await year.fill('1999');
     await submit.click();
 
@@ -77,28 +89,26 @@ test.describe('win playthrough', () => {
     await expect(row2.locator('[data-color]').nth(1)).toHaveAttribute('data-color', 'red');
     await expect(row2.locator('[data-color]').nth(2)).toHaveAttribute('data-color', 'yellow');
 
-    // Make locked: chip appears, combobox is filtered to Suzuki only.
-    await expect(page.locator('.make-chip')).toHaveText('Suzuki');
-    await expect(combo).toHaveAttribute('aria-label', 'Suzuki model');
+    // Make locked: chip appears, #mtd-make is disabled holding the locked value, #mtd-model stays
+    // enabled and still lists the WHOLE Suzuki range -- every model of that make, unfiltered by
+    // year (§5.3.2/§5.3.3): suzuki-gsxr750 present, triumph-bonneville-t120 (a different make)
+    // absent, and more than one Suzuki model total, proving it is the make's full list and not
+    // narrowed down to "would-score" candidates.
+    await expect(page.locator('.lock-chip')).toHaveText('Locked');
+    await expect(makeSelect).toBeDisabled();
+    await expect(makeSelect).toHaveValue('suzuki');
+    await expect(makeSelect).toHaveAttribute('aria-label', 'Make — locked to Suzuki');
+    await expect(modelSelect).toBeEnabled();
 
-    const listbox = page.locator('#mtd-guess-listbox');
-    await combo.fill('triumph');
-    await expect(listbox.getByRole('option')).toHaveCount(0); // foreign make: no options
+    const modelValues = await modelSelect
+      .locator('option')
+      .evaluateAll((opts) => opts.map((o) => (o as HTMLOptionElement).value));
+    expect(modelValues).toContain('suzuki-gsxr750');
+    expect(modelValues).not.toContain('triumph-bonneville-t120'); // no foreign make leaks in
+    expect(modelValues.filter((v) => v !== '').length).toBeGreaterThan(1); // the whole make, not one
 
-    // The catalog's real seed has several Suzuki GSX* models, so "suz gsx" -- the plan's own
-    // example query -- surfaces several candidates, not one; the point it proves (§5.3) is that
-    // the "suz" MAKE token still matches even though the field is filtered to Suzuki only, and
-    // GSX-R750 is among the results, shown model-only ("GSX-R750", not "Suzuki GSX-R750").
-    await combo.fill('suz gsx');
-    await expect(listbox.getByRole('option')).not.toHaveCount(0);
-    await expect(listbox.getByRole('option', { name: 'GSX-R750', exact: true })).toBeVisible();
-
-    // ---- 5. Guess 3: refine to a unique match, chosen with ArrowDown+Enter, year 2 off -> win. -
-    await combo.fill('suz gsxr750');
-    await expect(listbox.getByRole('option')).toHaveCount(1);
-    await combo.press('ArrowDown');
-    await combo.press('Enter');
-    await expect(combo).toHaveValue('GSX-R750');
+    // ---- 5. Guess 3: correct model, year 2 off -> win. ------------------------------------------
+    await modelSelect.selectOption('suzuki-gsxr750');
     await year.fill('2002');
     await expect(submit).toHaveText('Guess 3 of 5');
     await submit.click();
@@ -112,6 +122,14 @@ test.describe('win playthrough', () => {
     await expect(page.getByRole('heading', { name: 'You got it!' })).toBeVisible();
     await expect(page.getByText('3 × 3')).toBeVisible();
     await expect(page.locator('.result-score strong')).toHaveText('9');
+
+    // Game over: both selects are disabled, and #mtd-model shows the player's own chosen model —
+    // same evidence (chip count + aria-label) as the make-lock assertion above, §5.3.3.
+    await expect(makeSelect).toBeDisabled();
+    await expect(modelSelect).toBeDisabled();
+    await expect(modelSelect).toHaveValue('suzuki-gsxr750');
+    await expect(page.locator('.lock-chip')).toHaveCount(2);
+    await expect(modelSelect).toHaveAttribute('aria-label', 'Model — locked to GSX-R750');
 
     // ---- 7. Share (from the still-open ResultModal) -> clipboard equals the exact §4.4 string. -
     await page.getByRole('button', { name: 'Share' }).click();

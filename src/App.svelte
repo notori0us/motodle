@@ -134,7 +134,6 @@
           <GuessForm
             today={game.today}
             catalog={game.catalog}
-            entries={game.matchEntries}
             onsubmit={(input) => game.submitGuess(input)}
             ongiveup={() => game.giveUp()}
           />

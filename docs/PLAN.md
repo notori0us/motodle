@@ -323,7 +323,7 @@ MODEL tile (§4.2 RULE B).
 | `source` | `"seed" \| "wikimedia-commons" \| "wikidata" \| "commons+wikidata"` | ✓ | Provenance. |
 | `makes[].id` | id | ✓ | `normalizeId(name)`. Unique. |
 | `makes[].name` | string | ✓ | Canonical display, e.g. `"Harley-Davidson"`. |
-| `makes[].country` | string | ✓ | **Required. LOAD-BEARING (RULE A).** ISO 3166-1 **alpha-2, uppercase**, the country the marque is *from* (not where a given bike was assembled): `JP IT GB US DE AT IN CN TW ES SE CZ` and friends. Hand-authored in the seed (§6.10); `npm run catalog` preserves it. `schema/constants.ts` carries `COUNTRY_NAMES` (code → display name, e.g. `JP → "Japan"`) for the help text — the code itself is never shown to a player. |
+| `makes[].country` | string | ✓ | **Required. LOAD-BEARING (RULE A).** ISO 3166-1 **alpha-2, uppercase**, the country the make is *from* (not where a given bike was assembled): `JP IT GB US DE AT IN CN TW ES SE CZ` and friends. Hand-authored in the seed (§6.10); `npm run catalog` preserves it. `schema/constants.ts` carries `COUNTRY_NAMES` (code → display name, e.g. `JP → "Japan"`) for the help text — the code itself is never shown to a player. |
 | `makes[].aliases` | string[] | ✓ | Extra search-only strings. May be `[]`. Never rendered. |
 | `models[].id` | id | ✓ | `normalizeId(make + " " + name)`. Unique. Doubles as the **dedup key**. |
 | `models[].makeId` | id | ✓ | FK into `makes`. |
@@ -387,7 +387,7 @@ export function normalizeId(s: string): string {
 not short, so the hyphen stays. `GSX-R 750` → base `gsx-r-750` → `gsx`(3, short) + `r`(short) join,
 then `r`(short) + `750`(digit, short) join → `gsxr750`.)
 
-Ids are **opaque**: nothing may parse a make or a year back out of one. Some marques normalize
+Ids are **opaque**: nothing may parse a make or a year back out of one. Some makes normalize
 unprettily (`BMW R75/5` → `bmwr755`); that is fine and is not a bug to "fix".
 
 Display label is always composed as `` `${make.name} ${model.name}` `` — never stored.
@@ -755,8 +755,8 @@ unit test pins that.
 
 **Invariants the evaluator asserts:**
 - A **green MODEL implies a green MAKE** — a model belongs to exactly one make (unchanged).
-- A **yellow MODEL implies nothing** about the make tile: the guessed model's marque may be the
-  answer's marque (make green), a compatriot (yellow) or neither (red). All three combinations are
+- A **yellow MODEL implies nothing** about the make tile: the guessed model's make may be the
+  answer's make (make green), a compatriot (yellow) or neither (red). All three combinations are
   reachable and all three are tested.
 - **Yellow never locks and never scores** on any tile — only green does (§4.3).
 
@@ -771,7 +771,7 @@ unit test pins that.
 | Triumph | GB | 🟥 red | different country |
 | Harley-Davidson | US | 🟥 red | different country |
 
-The country is a property of the **marque**, not of a factory: Triumph is `GB` even for a
+The country is a property of the **make**, not of a factory: Triumph is `GB` even for a
 Thailand-built bike, KTM is `AT`, Royal Enfield is `IN`, CFMoto is `CN`, Kymco is `TW`, Derbi is `ES`,
 Husqvarna is `SE` (historically) and Jawa/ČZ are `CZ`. `makes[].country` is required for every make
 (§3.2) so this branch can never read `undefined`.
@@ -1137,102 +1137,215 @@ fits, error.
 
 ### 5.2 Component list
 
-`App.svelte` · `ImageStage.svelte` · `GuessCombobox.svelte` · `YearInput.svelte` · `GuessForm.svelte` ·
+`App.svelte` · `ImageStage.svelte` · `GuessForm.svelte` · `YearInput.svelte` ·
 `Scoreboard.svelte` · `Modal.svelte` · `HelpModal.svelte` · `StatsModal.svelte` · `ResultModal.svelte` ·
 `ArchiveList.svelte` · `Toast.svelte`. No UI kit, no component library, no icon package (inline SVG).
 
-### 5.3 The combobox — `GuessCombobox.svelte`
+### 5.3 Make/Model dropdowns — `GuessForm.svelte`
 
-**One** field for "make model". Typing `trium bonn` matches `Triumph Bonneville T120`.
+**Two cascading native `<select>`s — a MAKE select, then a MODEL select — followed by the year input
+and the submit / give-up row.** There is no combobox, no typeahead and no fuzzy matching anywhere in
+the app. Native selects were chosen deliberately: on a phone they open the OS picker (a full-height,
+thumb-sized, familiar control instead of a hand-rolled popup over an on-screen keyboard); on the
+desktop they are keyboard type-ahead capable for free; and they are accessible by default, which is
+where every one of Cardle's field defects (C6, §1.2) actually lived.
 
-**Matching (`src/lib/match.ts`)** — a tiered scan over the pre-normalized catalog. A higher tier always
-beats a lower one regardless of score.
+**Supersedes, for the avoidance of doubt (Revision 2, §11.8).** These older passages are **dead text**;
+where any of them disagrees with this section, **this section wins**: §1.2's "One ARIA combobox" and
+"tiered fuzzy matcher" rows; the `GuessCombobox.svelte` and "typeahead matcher" entries in the §2 repo
+layout; §4.3's lock table where it says *Combobox* (the **rules** there are unchanged and still binding
+— only the control is now a `<select>`, §5.3.3); §5.1's "there is no typeahead" clause (the form is
+still disabled when the catalog fails, for the same reason: no options and no `country`/`years`);
+§5.8's "`dvh` is used only for the combobox popup" clause (nothing uses `dvh` now); the matcher cases
+in §7.1's `match.test.ts` row; and W4's combobox/ARIA-listbox bullet in §8. §7.2 #10 is **not**
+superseded — see §5.3.7.
 
-| Tier | Rule | Example (query → match) |
-|:--:|---|---|
-| 5 | `norm === q` | `honda cb750` → Honda CB750 |
-| 4 | `norm.startsWith(q)` | `trium` → Triumph … |
-| 3 | some word starts with `q` | `gs` → Suzuki **GS**X-R750 |
-| 2 | `norm.includes(q)` | `750` → Suzuki GSX-R**750** |
-| 1 | every query **token** prefix-matches some word, any order | `trium bonn` → **Trium**ph **Bonn**eville T120 |
-| 0 | in-order character subsequence with a gap penalty | `dcti916` → Ducati 916 |
-| — | none of the above ⇒ reject | |
+#### 5.3.1 DOM contract — frozen, so the UI and e2e workstreams can work independently
 
-Tier-0 scoring (fzy/Sublime heuristic): `+10` for an adjacent character, `+max(1, 8-gap)` otherwise,
-`+8` for a word-boundary hit, `−0.05 × label length`. Sort by `(tier desc, score desc, length asc,
-label asc)`; slice to **10** options. Normalization is precomputed once at catalog load
-(`{ label, norm, words }`), so a keystroke is one linear pass over a few thousand short strings —
-well under 1 ms. Incremental narrowing: when the new query starts with the previous one, filter the
-previous result set. **No debounce** (no network involved).
-
-**ARIA (APG combobox, list autocomplete):**
-
-```html
-<label for="mtd-guess">Make and model</label>
-<input id="mtd-guess" role="combobox" aria-expanded={open} aria-controls={listId}
-       aria-autocomplete="list" aria-activedescendant={open && active>=0 ? `${listId}-${active}` : undefined}
-       autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
-       inputmode="text" enterkeyhint="search">
-<ul id={listId} role="listbox" aria-label="Motorbikes" hidden={!open}>
-  <li id={`${listId}-${i}`} role="option" aria-selected={i===active}>…</li>
-</ul>
+```
+<select id="mtd-make" name="make">   label text "Make";  first option value="" text "Choose a make…"; other options value = catalog make id, text = make display name.
+<select id="mtd-model" name="model"> label text "Model"; first option value="" text "Choose a model…" (or "Choose a make first" while no make); other options value = catalog model id, text = model display name (make NOT repeated).
+Year input keeps id "mtd-year". Submit button and give-up button keep their current accessible names.
+Locked selects carry the disabled attribute and the existing locked chip/aria-label pattern.
 ```
 
-- **The `<ul>` is always in the DOM**, hidden with the `hidden` attribute — never `{#if open}`.
-  `aria-controls` must resolve to a real element in both states, and an `{#if}` makes it dangle the
-  moment the popup closes. A component test asserts
-  `document.getElementById(input.getAttribute('aria-controls')) !== null` **open and closed**.
-- `aria-expanded` lives on the **input** and is present even when false.
-- **DOM focus never leaves the input.** Highlight is virtual via `aria-activedescendant` — moving real
-  focus into the list closes the mobile keyboard.
-- `aria-selected` is set on the **one** active option, not on all of them.
-- A polite live region announces `"{n} results"` on filter change. Not on the listbox itself.
-- `$props.id()` is available (Svelte 5.57 ≥ 5.20) for the listbox id.
+- Each select has a **visible `<label>`** wired with `for` / `id` — never a placeholder-as-label.
+- The year input keeps `id="mtd-year"` and `§5.4` is unchanged.
+- The submit button and the give-up button keep their current accessible names
+  (`Guess {n} of 5`, `Give up`, then `Confirm` / `Cancel` in the confirmation step).
+- Locked selects carry the `disabled` attribute plus the existing locked chip / `aria-label` pattern
+  (§5.3.3).
+- Nothing else in the form's DOM changes.
 
-**Keyboard:**
+#### 5.3.2 The cascade
 
-| Key | Closed | Open |
+- The **MAKE select lists every make in the catalog**, ordered alphabetically by display name using
+  `a.name.localeCompare(b.name, 'en')` — the locale is pinned so a machine's locale can never reorder
+  the list under the two-timezone test run (§10.2).
+- The **MODEL select lists only the chosen make's models — all of them, regardless of year**, families
+  and their depth-2 variants alike (both are catalog entries by decision D4, §1.3), ordered
+  alphabetically by display name with the same comparator. No year filtering, ever: filtering by year
+  would leak `answer.year`.
+- Option text is the model name **only** (`models[].name` is already stored without the make, §3.2).
+- **Until a make is chosen the MODEL select is `disabled`** and shows the single placeholder option
+  `"Choose a make first"`.
+- **Changing the make resets the model selection** to the placeholder. This happens in the make
+  select's own `onchange` handler (`selectedMakeId = value; selectedModelId = '';`), **not** in an
+  `$effect` keyed on the make — an effect would also fire on the lock-prefill pass below and fight it.
+- Both lists come from the catalog index the store already holds; the guess form has **no** index of
+  its own to build or invalidate.
+
+`src/lib/catalog.ts` gains one helper and tightens one:
+
+```ts
+const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, 'en');
+
+/** Every make, alphabetical by display name (§5.3.2). */
+export function listMakes(index: CatalogIndex): CatalogMake[] {
+  return [...index.makes.values()].sort(byName);
+}
+
+/** Every model of `makeId` — ALL years, families and variants — alphabetical (§5.3.2). */
+export function modelsForMake(index: CatalogIndex, makeId: string): CatalogModel[] {
+  return [...index.models.values()].filter((m) => m.makeId === makeId).sort(byName);
+}
+```
+
+Both orderings are asserted in `catalog.test.ts`; neither component re-sorts.
+
+#### 5.3.3 Locking (unchanged rules, §4.3 — only the affordance changes)
+
+| Lock | MAKE select | MODEL select | Year |
+|---|---|---|---|
+| none | enabled, placeholder first | disabled until a make is chosen | editable |
+| MAKE green, MODEL not green | **`disabled`**, value = the locked make id, its option text still visible; the existing `.make-chip` renders `Locked` beside the field; `aria-label="Make — locked to {make.name}"` | enabled, listing **that make's models** (unchanged from the unlocked cascade) | editable |
+| MODEL green (⇒ MAKE green) | as above | **`disabled`**, value = the locked model id; chip `Locked`; `aria-label="Model — locked to {model.name}"` | **only** editable field |
+| YEAR green | — | — | disabled + pre-filled with the player's own green guess (§5.4) |
+
+- A locked select is `disabled` **and still shows its full option list** — the value is what matters,
+  and a one-option select would read oddly to a screen reader that announces the option count.
+- **No leak.** `locks.modelId` is the id **the player themself chose**, so rendering
+  `getModel(catalog, locks.modelId).name` shows their own guess, never `answer.model` — this is the
+  same guarantee §4.3 states for the combobox era (it mattered there because an `acceptModelIds`
+  match, e.g. player picks *Ducati Monster 900*, answer is *Ducati Monster*, must not be canonicalized
+  on screen). The dropdowns get it structurally: nothing ever renders `answer.*`.
+- Yellow locks nothing (§4.2/§4.3). No selection is ever cleared by a guess.
+- After a submitted guess the selects **keep the player's choices** — never silently cleared, the
+  Cardle defect §5.3 has always named. `YearInput` behaves the same.
+
+#### 5.3.4 Validation
+
+The submit button is **never silently dead**. It renders `aria-disabled="true"` (and stays clickable —
+`disabled` is set only when the whole form is disabled by game-over or a catalog failure, §5.1) and
+submitting an incomplete form sets the inline message pattern already used by the year field:
+
+| Missing | Inline message, rendered in a `<p class="field-error">` whose id is `mtd-make-error` / `mtd-model-error` | On the select |
 |---|---|---|
-| `↓` | open, move to first | next option (clamp, no wrap) |
-| `Alt+↓` | open, don't move | — |
-| `↑` | open, move to last | previous option (clamp) |
-| printable | open + filter | filter, reset active to 0 |
-| `Enter` | falls through to submit | **accept active option, close, `preventDefault()`** — never submits the round |
-| `Esc` | — | 1st: close, keep text; 2nd: clear input |
-| `Tab` | — | accept active, close, move focus on |
-| `Home`/`End` | move the **text caret** | move the **text caret** — must NOT jump the list (editable combobox rule) |
-| `Alt+↑` | — | close, keep text |
+| no make chosen | *"Choose a make"* | `aria-invalid="true"`, `aria-describedby="mtd-make-error"` |
+| make chosen, no model | *"Choose a model"* | `aria-invalid="true"`, `aria-describedby="mtd-model-error"` |
+| year empty / out of range | *"Enter a year between 1885 and {maxYear}"* (unchanged, §5.4) | on `#mtd-year` |
 
-On every active change: `el.scrollIntoView({ block: 'nearest' })`.
+**Every** offending control is marked on the same submit attempt — `attemptedInvalid` is one flag and
+each field derives its own invalid state from it — so a player who fixes one field is not ambushed by
+the next. The flag clears on the next valid submit. The `<form>` keeps `novalidate` for the reason
+already recorded in the component: native HTML5 constraint validation would swallow the submit before
+our own handler runs.
 
-**Touch/pointer:**
-- Option commit on **`onpointerdown` with `e.preventDefault()`** — a `mousedown` blurs the input before
-  `click` fires and the selection is lost. This is Cardle's exact bug class.
-- Outside dismissal listens on `pointerdown` and checks `event.composedPath()` — iOS momentum
-  scrolling steals a `click`.
-- Option rows ≥ 44 px, `touch-action: manipulation`, no `:hover`-only affordance.
-- List sized in `svh`/`dvh` and **flipped above the input** when the input sits in the lower 45 % of
-  the visual viewport (`window.visualViewport`), so the on-screen keyboard never covers it.
-- Input `font-size: 16px` minimum — the only correct fix for iOS focus auto-zoom.
+#### 5.3.5 Keyboard, touch, sizing
 
-**Locked-make filtering — stated unambiguously, because W3 and W4 would otherwise choose differently:**
-when `locks.makeId` is set, filtering **narrows the candidate set** to that make's models, but **each
-entry keeps its full `norm` (`'{make} {model}'`), so make tokens stay searchable.** Typing `suz gsx`
-with Suzuki already locked still matches `Suzuki GSX-R750`; typing `honda` returns `[]` (there are no
-Honda entries in the slice). The option row **renders the model name only**; the make is shown as a
-non-removable chip beside the input, whose `aria-label` becomes `"{make} model"`. `match.test.ts`
-covers both of those cases explicitly. When `locks.modelId` is set the input is `disabled` with the
-player's own matched entry as its value (§4.3).
+- **No custom key handling, with one narrow, documented exception.** The browser owns arrow keys,
+  `Home`/`End`, letter type-ahead and the popup; there is nothing to trap, nothing to `preventDefault()`
+  for those, no `aria-activedescendant`, no virtual focus. HTML implicit submission is *not* triggered
+  from a `<select>` in Chromium, so `Enter` with a select focused is wired explicitly — an `onkeydown`
+  on `#mtd-make` and `#mtd-model` that calls `preventDefault()` and `form.requestSubmit()` — to reach
+  the same validation path as the button: an incomplete form shows the §5.3.4 message, never nothing.
+  Both the component and the component's own comment call out that this is the one exception to the
+  "no custom key handling" rule above.
+- Both selects: `font-size: 16px` minimum (the only correct fix for iOS focus auto-zoom, §1.2),
+  `min-height: 44px`, `touch-action: manipulation`, full-width within the content column.
+- On a phone the OS picker is used verbatim — no `dvh`/`svh` popup sizing, no visual-viewport flip
+  logic, no outside-dismissal listener. Those three §5.3 hazards are gone with the combobox.
+- The form must still be reachable without scrolling at 360×640 (§5.8): the two selects stack, and the
+  existing `@media (max-height: 900px)` rule keeps the year field and the action row on one line.
+  E2E item 12 (§7.4) is the machine check.
+- `prefers-reduced-motion` and the theming rules are untouched.
 
-**After a submitted guess the input keeps the chosen entry's label** and selects it on focus, so a
-player can edit rather than retype. It is **never silently cleared** — Cardle's "wipe the errored field
-on focus" is the defect being fixed, and a replacement had to be named. `YearInput` behaves the same:
-the previous year stays, selected on focus.
+#### 5.3.6 Svelte state shape — exactly what lives in `GuessForm.svelte`
 
-**Validation:** the submit button is enabled only when a **catalog entry has actually been chosen**
-(an `modelId`, not just matching text) and the year is in range. If the player types text without
-choosing, submit shows an inline message — *"Pick a bike from the list"* — with `aria-invalid` and
-`aria-describedby`. Cardle's silent-disabled-button trap is explicitly not reproduced.
+```ts
+// props: { today, catalog, disabled, onsubmit, ongiveup }   — `entries` is GONE
+let selectedMakeId  = $state('');            // '' = placeholder
+let selectedModelId = $state('');            // '' = placeholder
+let yearValue       = $state<number | null>(null);   // unchanged
+let attemptedInvalid  = $state(false);       // unchanged
+let confirmingGiveUp  = $state(false);       // unchanged
+
+const gameOver     = $derived(today.status !== 'in_progress');
+const formDisabled = $derived(disabled || gameOver);
+
+const makeLocked   = $derived(today.locks.makeId !== null);
+const modelLocked  = $derived(today.locks.modelId !== null);
+
+const effectiveMakeId  = $derived(today.locks.makeId  ?? selectedMakeId);
+const effectiveModelId = $derived(today.locks.modelId ?? selectedModelId);
+
+const makeOptions  = $derived(listMakes(catalog));
+const modelOptions = $derived(effectiveMakeId ? modelsForMake(catalog, effectiveMakeId) : []);
+
+// Resumed / locked game pre-fill. `$state(prop)` captures only the INITIAL value (§10.7 gotcha #8),
+// so the prefill is an $effect — it runs on mount too, which is what makes a resumed practice or
+// reloaded in-progress game come back with its locked make/model already selected.
+$effect(() => { if (today.locks.makeId  !== null) selectedMakeId  = today.locks.makeId; });
+$effect(() => { if (today.locks.modelId !== null) selectedModelId = today.locks.modelId; });
+// (YearInput keeps its own equivalent effect for locks.year, §5.4.)
+
+const guessInput = $derived.by((): SubmitGuessInput | null => {
+  if (yearValue === null || !Number.isInteger(yearValue) || yearValue < 1885 || yearValue > MAX_YEAR) return null;
+  if (!effectiveMakeId || !effectiveModelId) return null;
+  const model = catalog.models.get(effectiveModelId);
+  if (!model || model.makeId !== effectiveMakeId) return null;   // stale pair, e.g. mid-make-change
+  return {
+    makeId: effectiveMakeId,
+    modelId: effectiveModelId,
+    make: getMake(catalog, effectiveMakeId).name,
+    model: model.name,
+    year: yearValue,
+  };
+});
+
+const makeInvalid  = $derived(attemptedInvalid && !effectiveMakeId);
+const modelInvalid = $derived(attemptedInvalid && !!effectiveMakeId && !effectiveModelId);
+const yearInvalid  = $derived(attemptedInvalid && today.locks.year === null
+                              && (yearValue === null || yearValue < 1885 || yearValue > MAX_YEAR));
+const submitDisabled = $derived(formDisabled || guessInput === null);
+```
+
+`handleSubmit`, `confirmGiveUp` and the give-up confirmation markup are unchanged. `SubmitGuessInput`
+(§3.7, `src/lib/game.ts`) is unchanged — the display strings now come from the catalog rather than
+from a match label, which is strictly less code and no leak (§5.3.3).
+
+#### 5.3.7 Files deleted, and the one thing that must NOT be deleted
+
+**Delete:**
+
+| Path | Why |
+|---|---|
+| `src/components/GuessCombobox.svelte` | replaced by the two selects |
+| `src/components/GuessCombobox.test.ts` | its component is gone (§7.3) |
+| the matcher half of `src/lib/match.ts` | `fold`, `tokenize`, `buildMatchIndex`, `rankMatches`, `matchCatalog`, the tier/score heuristic, `MatchEntry`, `MatchOptions` — nothing imports them once the combobox is gone |
+| the matcher `describe` blocks in `src/lib/match.test.ts` | they test deleted code |
+| `GameStore.matchEntries` + the `buildMatchIndex` import in `src/state/game.svelte.ts`, and the `entries` prop threaded through `App.svelte` → `GuessForm` | the form reads the catalog index directly |
+
+**KEEP — `normalizeId` stays in `src/lib/match.ts`, at exactly that path.** The §7.2 #10
+cross-implementation contract test loads `src/lib/match.ts` by path and compares its `normalizeId`
+against `tools/lib/normalize.ts` on every frozen vector and every catalog name; moving or removing it
+breaks a frozen contract test. `src/lib/match.test.ts` therefore keeps the §3.2 frozen vector table
+and loses everything else. The file's header comment shrinks to "id normalization shared with
+`tools/lib/normalize.ts` (§3.2)".
+
+`schema/types.ts` keeps `MatchResult` and `MatchTier` declared — the §3.7 name list is frozen and is
+not being re-opened for this revision — but nothing imports them any more. Do not delete them and do
+not add new names.
 
 ### 5.4 `YearInput.svelte`
 
@@ -1270,7 +1383,7 @@ opener, background scroll locked via `overscroll-behavior: contain`.
   Motodle every day at midnight, your time". Auto-opens on first visit. It must explain **all three
   yellow bands in a player's words**, using `COUNTRY_NAMES` (§4.7) so a country code is never shown:
 
-  > **Make** — 🟩 you named the right marque. 🟨 wrong marque, but **from the same country** (you
+  > **Make** — 🟩 you named the right make. 🟨 wrong make, but **from the same country** (you
   > guessed Honda, the answer is a different **Japanese** make). 🟥 wrong country.
   >
   > **Model** — 🟩 that's the bike. 🟨 wrong bike, but **one that was on sale the year the answer was
@@ -1689,8 +1802,8 @@ Include every recon-verified model and all three fixture answers. `source: "seed
 proved Wikidata carries almost no production dates and Commons carries none, so there is nothing to
 scrape. The standard is explicit:
 
-- `makes[].country` — ISO 3166-1 alpha-2, uppercase, the marque's country of origin. **Required on
-  every make; there is no "unknown".** If a marque's origin is genuinely contested, pick the one a
+- `makes[].country` — ISO 3166-1 alpha-2, uppercase, the make's country of origin. **Required on
+  every make; there is no "unknown".** If a make's origin is genuinely contested, pick the one a
   player would name and move on.
 - `models[].years` — **approximate to ±1 year is acceptable for a hint. When unsure, write `null`.**
   A wrong range produces a misleading yellow tile; `null` produces an honest red one, so `null` is
@@ -1790,13 +1903,17 @@ proved that without it `mount()` throws `lifecycle_function_unavailable`.
 
 | Component | Tests |
 |---|---|
-| `GuessCombobox` | **`document.getElementById(input.getAttribute('aria-controls'))` is non-null both open and closed** (the listbox is `hidden`, never unmounted); the input keeps its chosen label after a submitted guess and is never silently cleared; `aria-expanded` tracks the popup and is present when false; `aria-activedescendant` points at the active option id and is *absent* when none; `aria-selected` on exactly one option; ArrowDown/Up clamp; Enter accepts and **does not submit the form**; Esc once closes, twice clears; Home/End do not move the list; `pointerdown` on an option commits (the `mousedown`-blur trap); locked-make filtering; typing without choosing blocks submit with an inline message |
+| `GuessForm` | `#mtd-make` carries the `"Choose a make…"` placeholder first and then **every** catalog make, alphabetical by display name, `option.value` = make id; `#mtd-model` is `disabled` with `"Choose a make first"` until a make is chosen; choosing a make fills `#mtd-model` with **exactly that make's models — all of them, families and depth-2 variants, no year filtering**, alphabetical, option text = model name with the make **not** repeated, and no other make's model present; **changing the make resets `#mtd-model` to the placeholder**; a complete make+model+year submit calls `onsubmit` **once** with `{makeId, modelId, make, model, year}`; **submit with nothing chosen is never silently dead** — the button is `aria-disabled="true"`, `#mtd-make` gets `aria-invalid="true"` + `aria-describedby` and the inline *"Choose a make"* renders; with a make but no model the same happens on `#mtd-model` with *"Choose a model"*; out-of-range/empty year shows the year message (all offending fields marked on the same attempt); **locked MAKE** ⇒ `#mtd-make` is `disabled` showing the locked make with the locked chip and `aria-label`, while `#mtd-model` still lists that make's models and stays enabled; **locked MODEL** ⇒ `#mtd-model` is `disabled` too, showing **the player's own chosen model** (never `answer.model`), and only `#mtd-year` is editable; a **resumed** game whose locks are already set pre-fills both selects on mount (the §5.3.6 `$effect`, not `$state(prop)`); selections survive a submitted guess and are never silently cleared; give-up shows the confirmation step and only then calls `ongiveup` |
 | `YearInput` | steppers clamp at 1885 and `currentYear+1`; non-numeric blocked; disabled + pre-filled when year is locked |
 | `Scoreboard` | 5×3 tiles; colours match results, **including yellow in the make and model columns** (RULES A and B); colourblind glyphs present |
 | `ImageStage` | level N shown during guess N; scrub back allowed, forward disabled; **all 5 levels unlock once `status !== 'in_progress'`**; `viewLevel` persists; full reveal is **not requested** before game end |
 | `ResultModal` | attribution renders (author, licence link, Commons link) **even when `attributionRequired` is false**; **`credit.modified` renders beside the licence link**; `creditNote` renders verbatim; a non-4:3 `full` image is **letterboxed, not distorted** |
 | `StatsModal` | 8 distribution buckets always present; today's bucket highlighted; countdown format |
 | `HelpModal` | auto-opens when `seenHelp` is unset; sets the flag; does not re-open |
+
+`GuessCombobox.test.ts` is **deleted** with its component (§5.3.7). Its assertions have no analogue: a native
+`<select>` needs no `aria-expanded`, no `aria-activedescendant`, no always-mounted listbox and no `pointerdown`
+commit — the browser owns all of it (§5.3.5).
 
 Async flush: prefer `await tick()` from `'svelte'`; the probe used `await new Promise(r => setTimeout(r, 0))`
 and that works — the recon flagged `tick()` as idiomatic-but-untested, so the first component test to
@@ -1828,20 +1945,29 @@ clock**, and none of them may read the real date:
 The dates above are **local** wall times with no timezone suffix, matching `todayKey()`'s local-date
 semantics (§4.1). A `Z` suffix would put half the planet on the previous day.
 
-`e2e/playthrough.spec.ts` drives the real build via `vite preview`:
+`e2e/playthrough.spec.ts` drives the real build via `vite preview`. **A guess is entered by selecting
+options, never by typing** (§5.3): `await page.selectOption('#mtd-make', '<makeId>')`, then
+`await page.selectOption('#mtd-model', '<modelId>')`, then fill `#mtd-year` and press the submit
+button. Option **values are catalog ids**, so specs address them by id and never by visible text.
 
 1. First visit (clock pinned to **2026-09-02T12:00:00**) → HelpModal auto-opens → close.
 2. Puzzle #1 loads; level 1 shown; scrub-forward disabled.
 3. Guess 1 — a make from **a different country** and a model whose production range **excludes 2004**
-   (e.g. Triumph Bonneville T120, `GB`, `[1959,1974]`), year 11+ off → `🟥🟥🟥`; image advances to
-   level 2; scrub back to level 1 works, forward to 3 does not.
-4. Guess 2 correct make, **wrong model whose range excludes 2004** (e.g. Suzuki GT750, `[1971,1977]` —
-   picking a still-current Suzuki would make the model tile yellow, not red), year 5 off → `🟩🟥🟨`;
-   **make chip appears and the combobox is filtered** — type a foreign make and assert it yields no
-   options, then type `suz gsx` and assert the make token still matches inside the locked slice
-   (§5.3).
-5. Guess 3 correct model (typed as `suz gsx`, chosen with `ArrowDown` + `Enter`), year 2 off →
-   all green → **win**, ResultModal opens.
+   (`selectOption('#mtd-make', 'triumph')` then `selectOption('#mtd-model', 'triumph-bonneville-t120')`
+   — `GB`, `[1959,1974]`), year 11+ off → `🟥🟥🟥`; image advances to level 2; scrub back to level 1
+   works, forward to 3 does not. Before selecting the make, assert `#mtd-model` is **disabled**; after
+   it, assert it is enabled, then switch `#mtd-make` to another make and assert `#mtd-model` has
+   reset to `''` (the §5.3.2 cascade reset) before switching back to `triumph` and choosing the model.
+4. Guess 2 correct make, **wrong model whose range excludes 2004** (`suzuki` +
+   `suzuki-gt750`, `[1971,1977]` — picking a still-current Suzuki would make the model tile yellow,
+   not red), year 5 off → `🟩🟥🟨`; **the MAKE select locks** — assert `#mtd-make` is `disabled` with
+   value `suzuki` and the locked chip is visible, that `#mtd-model` is **still enabled**, that its
+   option values include `suzuki-gsxr750` and include **no** non-Suzuki model (e.g.
+   `triumph-bonneville-t120` is absent), and that it lists **more than one** Suzuki model — i.e. the
+   whole make, unfiltered by year (§5.3.2).
+5. Guess 3 correct model (`selectOption('#mtd-model', 'suzuki-gsxr750')`), year 2 off → all green →
+   **win**, ResultModal opens. Assert both selects are now `disabled` (game over) and that `#mtd-model`
+   shows the player's own choice.
 6. Assert score reads **9** (3 points × multiplier 3).
 7. Share → assert the clipboard text equals the expected §4.4-shaped string exactly. The spec must
    call `context.grantPermissions(['clipboard-read', 'clipboard-write'])` first; `127.0.0.1` is a
@@ -1855,8 +1981,11 @@ semantics (§4.1). A `Z` suffix would put half the planet on the previous day.
 11. A third spec: clock pinned to **2026-09-05T12:00:00** → the "no puzzle today" screen renders for
     09-05 → navigate `?d=2026-09-02` practice → play to a win → assert `motodle:stats` is
     **byte-identical** before and after.
-12. Viewport 360×640, **no keyboard**: the submit button is in the viewport with the combobox focused.
-    (The keyboard-open case is §7.5 step 10 — headless Chromium cannot simulate it, §5.8.)
+12. Viewport 360×640, **no keyboard, nothing focused** (`window.scrollY === 0`): both selects,
+    `#mtd-year` and the submit button are inside the viewport (no scrolling). Unfocused is the
+    stronger check — focusing a control can itself scroll the page, which would pass the assertion
+    for the wrong reason (§5.8) — so the e2e spec asserts that, not a "focus `#mtd-model` then check"
+    variant. (The keyboard-open case is §7.5 step 10 — headless Chromium cannot simulate it, §5.8.)
 
 Config: `workers: 1`, `webServer.command = npx vite preview --port 4173 --strictPort --host 127.0.0.1`.
 **`--host 127.0.0.1` is mandatory** — Vite otherwise binds IPv6-only (`[::1]`) on this host and
@@ -2403,3 +2532,29 @@ Where they landed:
 | Seed catalog authoring | §6.10 (40–60 makes, 300–500 models, every decade since 1950; `country`/`years` hand-authored, ±1 year acceptable, `null` when unsure; `docs/CATALOG-REVIEW.md`) |
 | Tests | §7.1 (`game.test.ts`, `catalog.test.ts`), §7.2 #11–#12 (country valid; year range sane), §7.3 (`Scoreboard` yellow columns), §7.4 (e2e guesses chosen so the intended tiles still come out red) |
 | Workstream DoDs | §8 W1 (catalog fields), W3 (`evaluateGuess` is the sole implementation), W4 (no component computes a tile colour) |
+
+### 11.8 Revision 2 — user feedback 2026-09-02
+
+Operator feedback taken verbatim after playing the first build: **"Marque => Make. I'm american"**, and
+replace the single make-model typeahead with **two dropdowns — pick the make, then pick from that
+make's models, all years**. Both decisions are **fixed**; they are not design options to re-litigate.
+
+| # | Change | Why | Sections |
+|---|---|---|---|
+| R2-1 | **"marque" → "make" everywhere in this plan's prose**, user-facing wording first (help text, catalog field prose, RULE A worked example, seed-catalog authoring notes) | The operator is American; "marque" is not the word an American player uses. The same rename is required in the UI strings, the help modal, every `aria-label`, and the README | §3.2, §4.2, §5.6, §6.10 |
+| R2-2 | The **one exception**: the `/\s+motorcycle marque$/i` suffix strip in `tools/catalog.ts` **stays**. It matches a Wikimedia Commons category name, not a player-facing string — renaming it would break category parsing | §6 (tools, unchanged) |
+| R2-3 | §5.3 rewritten from "The combobox — `GuessCombobox.svelte`" to **"Make/Model dropdowns — `GuessForm.svelte`"**: two cascading native `<select>`s, frozen DOM contract (`#mtd-make` / `#mtd-model`, placeholder options, option values = catalog ids), the cascade and its reset rule, the locking affordance, the validation messages, keyboard/touch/sizing notes, and the exact `$state`/`$derived` shape | Native selects give the phone OS picker, free keyboard type-ahead, and accessibility by default; they delete an entire class of hand-rolled-popup defects (the `mousedown`-blur trap, the visual-viewport flip, outside-dismissal, virtual focus) rather than specifying fixes for them | §5.3 (all of it) |
+| R2-4 | The **MODEL list is every model of the chosen make — all years, families and depth-2 variants alike, alphabetical**. No year filtering, ever | Operator instruction; also a leak guard — filtering the list by year would expose `answer.year` | §5.3.2 |
+| R2-5 | **Locking rules unchanged** (§4.3 still binding): green MAKE disables `#mtd-make` while `#mtd-model` keeps listing that make's models; green MODEL disables `#mtd-model` too; only the year stays editable. Only the *affordance* moved — `disabled` + the existing locked chip / `aria-label` instead of a filtered input | The §4.3 contract, the scoring rules and the "never show `answer.model`" guarantee were all fine; only the widget changed | §5.3.3 |
+| R2-6 | **Validation keeps the existing inline pattern**: `aria-disabled` submit, `aria-invalid` + `aria-describedby` on the offending select, messages *"Choose a make"* / *"Choose a model"*, year message unchanged. Never a silently dead button | Cardle's silent-disabled-button trap stays fixed | §5.3.4 |
+| R2-7 | **Deletions**: `GuessCombobox.svelte`, `GuessCombobox.test.ts`, the matcher half of `src/lib/match.ts` (`buildMatchIndex`/`rankMatches`/`matchCatalog`/`fold`/`tokenize`/`MatchEntry`/`MatchOptions`), the matcher `describe`s in `match.test.ts`, `GameStore.matchEntries` and the `entries` prop | Dead code once nothing types a query | §5.3.7 |
+| R2-8 | **`normalizeId` stays in `src/lib/match.ts`, at that exact path** — §7.2 #10 loads the file by path and diffs it against `tools/lib/normalize.ts`. `match.test.ts` keeps the §3.2 frozen vector table. `MatchResult`/`MatchTier` stay declared in `schema/types.ts` because the §3.7 name list is frozen; nothing imports them | A frozen cross-implementation contract test must not be collateral damage of a UI change | §5.3.7, §7.2 #10 |
+| R2-9 | `src/lib/catalog.ts` gains `listMakes(index)` and `modelsForMake` now sorts; both use `localeCompare(…, 'en')` so ordering is locale-proof under the two-timezone run | The dropdowns need a stable, asserted order | §5.3.2 |
+| R2-10 | §5.2 component list drops `GuessCombobox.svelte` | follows R2-7 | §5.2 |
+| R2-11 | §7.3 swaps the `GuessCombobox` row for a **`GuessForm`** row covering option population and order, the cascade reset, the disabled-until-a-make state, both locked states, resumed-game pre-fill, all three validation messages, and one `onsubmit` call per submit | The component under test changed; every behaviour worth testing moved up into `GuessForm` | §7.3 |
+| R2-12 | §7.4 now enters guesses with `page.selectOption(...)` by **catalog id**; step 4 asserts the locked-make state and that `#mtd-model` lists that make's whole model list (`suzuki-gsxr750` present, `triumph-bonneville-t120` absent, >1 option); step 12 stays unfocused, `window.scrollY === 0` (stronger than focusing `#mtd-model`, §5.8 — a focus call can itself scroll the page). **Every other assertion is unchanged** — tiles, scrub, score 9, share text, stats, practice-isolation, loss/give-up grids | The playthrough's subject matter did not change, only the input mechanics | §7.4 |
+| R2-13 | Older combobox wording elsewhere (§1.2's two rows, §2's file list, §4.3's "Combobox" cells, §5.1's "no typeahead", §5.8's `dvh` clause, §7.1's matcher cases, §8 W4's ARIA-listbox bullet) is **superseded, not edited** — §5.3 opens with the list and wins any disagreement | Revision 2 was scoped to the sections that define the control; leaving a supersession list is safer than a scattered rewrite. Folding it in is a follow-up | §5.3 preamble |
+
+Everything not listed here is unchanged: `evaluateGuess` and both yellow rules, scoring and the 8-bucket
+distribution, share text, stats and streak arithmetic, storage schema, the image stage, the modals, the
+payload budgets, and the mobile rules (form reachable at 360×640 without scrolling, pinch zoom on).

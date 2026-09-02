@@ -14,10 +14,11 @@ test('rollover banner appears at local midnight; mid-guess state survives; the n
   await closeHelpModal(page);
 
   const submit = page.locator('button[type="submit"]');
-  const combo = page.getByRole('combobox', { name: 'Make and model' });
+  const makeSelect = page.locator('#mtd-make');
+  const modelSelect = page.locator('#mtd-model');
   const year = page.getByRole('spinbutton');
-  await combo.fill('Triumph Bonneville T120');
-  await combo.press('Enter');
+  await makeSelect.selectOption('triumph');
+  await modelSelect.selectOption('triumph-bonneville-t120');
   await year.fill('1990');
   await submit.click();
   await expect(submit).toHaveText('Guess 2 of 5');

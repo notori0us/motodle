@@ -50,7 +50,8 @@ describe('App', () => {
 
     const submit = await screen.findByRole('button', { name: /Guess 1 of 5/ });
     expect(submit).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Make and model' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Make' })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Model' })).toBeInTheDocument();
     // First visit: prefs.seenHelp is unset, so the HelpModal auto-opens (§5.1).
     expect(screen.getByRole('heading', { name: 'How to play' })).toBeInTheDocument();
   });
@@ -96,9 +97,8 @@ describe('App', () => {
     await screen.findByRole('button', { name: /Guess 1 of 5/ });
     expect(screen.getByText(/Practice/)).toBeInTheDocument();
 
-    const combo = screen.getByRole('combobox');
-    await fireEvent.input(combo, { target: { value: 'gsxr' } });
-    await fireEvent.keyDown(combo, { key: 'Enter' });
+    await fireEvent.change(screen.getByRole('combobox', { name: 'Make' }), { target: { value: 'suzuki' } });
+    await fireEvent.change(screen.getByRole('combobox', { name: 'Model' }), { target: { value: 'suzuki-gsxr750' } });
     const year = screen.getByRole('spinbutton');
     await fireEvent.input(year, { target: { value: '2004' } });
     await fireEvent.click(screen.getByRole('button', { name: /Guess 1 of 5/ }));

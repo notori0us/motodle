@@ -28,11 +28,12 @@ test('loss after 5 guesses: make stays locked green, model/year never do, score 
   await closeHelpModal(page);
 
   const submit = page.locator('button[type="submit"]');
-  const combo = page.getByRole('combobox', { name: 'Make and model' });
+  const makeSelect = page.locator('#mtd-make');
+  const modelSelect = page.locator('#mtd-model');
   const year = page.getByRole('spinbutton');
 
-  await combo.fill('Suzuki GT750');
-  await combo.press('Enter');
+  await makeSelect.selectOption('suzuki');
+  await modelSelect.selectOption('suzuki-gt750');
   await year.fill('1990');
 
   for (let guessNumber = 1; guessNumber <= 5; guessNumber++) {
