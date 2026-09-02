@@ -2,9 +2,9 @@
  * Streak + distribution updates (§4.3). Pure. No DOM, no storage — the caller persists the
  * returned `StatsState` through `src/lib/storage.ts`.
  *
- * Practice NEVER reaches this function (§4.6) — enforced by construction one layer up (W4 builds
- * the practice store with a `NullStatsSink`, not an `if` at each call site), not by anything in
- * here.
+ * Practice NEVER reaches this function (§4.6). That is enforced one layer up, at the single
+ * call site — `GameStore.onGameEnded()` in `src/state/game.svelte.ts` — which is the only code
+ * that calls `recordCompletion`; nothing in here knows about practice mode.
  */
 import type { Puzzle, StatsState } from '../../schema/types';
 import { dayIndex } from './date';

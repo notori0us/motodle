@@ -76,7 +76,7 @@
 | Ducati | IT | Desmosedici RR | 2007–2010 | seed |
 | Ducati | IT | Diavel | 2011–present | seed |
 | Ducati | IT | Hypermotard 796 | 2010–2012 | seed |
-| Ducati | IT | Monster | 1993–2008 | seed |
+| Ducati | IT | Monster | 1993–present | seed |
 | Ducati | IT | Monster 1200 | 2014–2021 | seed |
 | Ducati | IT | Monster 900 | 1993–2002 | seed |
 | Ducati | IT | Multistrada 1000DS | 2003–2009 | seed |
@@ -102,18 +102,18 @@
 | Harley-Davidson | US | Road King | 1994–present | seed |
 | Harley-Davidson | US | Shovelhead | 1966–1984 | seed |
 | Harley-Davidson | US | Softail | 1984–present | seed |
-| Harley-Davidson | US | Sportster |  | seed |
+| Harley-Davidson | US | Sportster | 1957–present | seed |
 | Harley-Davidson | US | Sportster S | 2021–present | seed |
 | Harley-Davidson | US | Street 750 | 2014–2020 | seed |
 | Harley-Davidson | US | V-Rod | 2001–2017 | seed |
-| Harley-Davidson | US | Wide Glide | 1980–present | seed |
+| Harley-Davidson | US | Wide Glide | 1980–2017 | seed |
 | Hero | IN | Splendor | 1994–present | seed |
 | Hero | IN | Xpulse 200 | 2019–present | seed |
 | Honda | JP | Africa Twin | 1989–present | seed |
 | Honda | JP | CB1000R | 2008–present | seed |
 | Honda | JP | CB1100R | 1980–1983 | seed |
 | Honda | JP | CB1300 | 1997–2013 | seed |
-| Honda | JP | CB250 Nighthawk | 1991–2003 | seed |
+| Honda | JP | CB250 Nighthawk | 1991–2008 | seed |
 | Honda | JP | CB350 | 1968–1973 | seed |
 | Honda | JP | CB400F | 1975–1977 | seed |
 | Honda | JP | CB450 (Black Bomber) | 1965–1974 | seed |
@@ -142,10 +142,10 @@
 | Honda | JP | Shadow (VT750) | 1983–present | seed |
 | Honda | JP | Super Cub | 1958–present | seed |
 | Honda | JP | Transalp (XL600V) | 1987–2000 | seed |
-| Honda | JP | Varadero (XL1000V) | 2001–2011 | seed |
+| Honda | JP | Varadero (XL1000V) | 1999–2011 | seed |
 | Honda | JP | VF750 Interceptor | 1983–1986 | seed |
 | Honda | JP | VFR750R (RC30) | 1987–1990 | seed |
-| Honda | JP | VFR800 | 1998–present | seed |
+| Honda | JP | VFR800 | 1998–2021 | seed |
 | Husqvarna | SE | 401 Vitpilen | 2018–present | seed |
 | Husqvarna | SE | CR250 | 1970–1980 | seed |
 | Husqvarna | SE | Viking 250 | 1966–1972 | seed |
@@ -158,12 +158,12 @@
 | Jawa | CZ | 250 Perak | 1946–1959 | seed |
 | Jawa | CZ | 350 Model | 1949–1973 | seed |
 | Jawa | CZ | 350/634 | 1973–1984 | seed |
-| Kawasaki | JP | Concours (ZG1000/1400) | 1986–2006 | seed |
+| Kawasaki | JP | Concours (ZG1000/1400) | 1986–2022 | seed |
 | Kawasaki | JP | Eliminator 900 | 1985–1989 | seed |
 | Kawasaki | JP | GPZ900R Ninja | 1984–2003 | seed |
 | Kawasaki | JP | H1 Mach III | 1969–1975 | seed |
-| Kawasaki | JP | KLR650 | 1987–2018 | seed |
-| Kawasaki | JP | KLX250 | 1993–present | seed |
+| Kawasaki | JP | KLR650 | 1987–present | seed |
+| Kawasaki | JP | KLX250 | 1993–2020 | seed |
 | Kawasaki | JP | KZ900/1000 | 1976–1980 | seed |
 | Kawasaki | JP | Ninja 250R | 1986–2012 | seed |
 | Kawasaki | JP | Ninja 400 | 2018–present | seed |
@@ -188,7 +188,7 @@
 | KTM | AT | 390 Duke | 2013–present | seed |
 | KTM | AT | 450 SX-F | 2003–present | seed |
 | KTM | AT | 620 Duke | 1994–1998 | seed |
-| KTM | AT | 690 Duke | 2008–present | seed |
+| KTM | AT | 690 Duke | 2008–2019 | seed |
 | KTM | AT | 890 Duke | 2020–present | seed |
 | KTM | AT | RC 390 | 2014–present | seed |
 | Kymco | TW | Like 150 | 2010–present | seed |
@@ -207,7 +207,7 @@
 | Moto Guzzi | IT | Griso | 2005–2016 | seed |
 | Moto Guzzi | IT | Le Mans (850/1000) | 1976–1993 | seed |
 | Moto Guzzi | IT | V100 Mandello | 2022–present | seed |
-| Moto Guzzi | IT | V7 III | 2017–present | seed |
+| Moto Guzzi | IT | V7 III | 2017–2020 | seed |
 | Moto Guzzi | IT | V7 Sport | 1971–1974 | seed |
 | Moto Guzzi | IT | V85 TT | 2019–present | seed |
 | MV Agusta | IT | 750 Sport | 1971–1975 | seed |
@@ -217,7 +217,7 @@
 | MZ | DE | ETZ 250 | 1981–1990 | seed |
 | MZ | DE | Skorpion | 1994–2000 | seed |
 | Norton | GB | Commando 750 | 1968–1977 | seed |
-| Norton | GB | Commando 961 | 2010–2020 | seed |
+| Norton | GB | Commando 961 | 2010–present | seed |
 | Norton | GB | Dominator | 1949–1966 | seed |
 | Norton | GB | Manx | 1947–1962 | seed |
 | NSU | DE | Fox | 1949–1954 | seed |
@@ -263,7 +263,7 @@
 | Suzuki | JP | RG250 Gamma | 1983–1987 | seed |
 | Suzuki | JP | RG500 Gamma | 1985–1987 | seed |
 | Suzuki | JP | RM-Z450 | 2005–present | seed |
-| Suzuki | JP | RM250 | 1976–2012 | seed |
+| Suzuki | JP | RM250 | 1976–2008 | seed |
 | Suzuki | JP | SV650 | 1999–present | seed |
 | Suzuki | JP | T500 Titan | 1968–1975 | seed |
 | Suzuki | JP | TS250 | 1969–1979 | seed |
@@ -291,14 +291,14 @@
 | Triumph | GB | Trident 660 | 2021–present | seed |
 | Triumph | GB | Trident T150 | 1968–1975 | seed |
 | TVS | IN | Apache RTR 200 | 2016–present | seed |
-| TVS | IN | Ronin | 2023–present | seed |
+| TVS | IN | Ronin | 2022–present | seed |
 | Ural | RU | Gear Up | 2014–present | seed |
 | Ural | RU | M72 | 1941–1960 | seed |
 | Velocette | GB | Thruxton | 1965–1971 | seed |
 | Velocette | GB | Venom | 1955–1970 | seed |
 | Victory | US | Octane | 2016–2017 | seed |
 | Victory | US | V92C | 1998–2002 | seed |
-| Victory | US | Vegas | 2003–2010 | seed |
+| Victory | US | Vegas | 2003–2017 | seed |
 | Vincent | GB | Black Shadow | 1948–1955 | seed |
 | Vincent | GB | Rapide | 1946–1955 | seed |
 | Yamaha | JP | DT1 | 1968–1971 | seed |
@@ -310,7 +310,7 @@
 | Yamaha | JP | FZR1000 | 1987–1995 | seed |
 | Yamaha | JP | MT-07 | 2014–present | seed |
 | Yamaha | JP | MT-09 | 2013–present | seed |
-| Yamaha | JP | RD250 | 1973–1975 | seed |
+| Yamaha | JP | RD250 | 1973–1979 | seed |
 | Yamaha | JP | RD350 | 1973–1975 | seed |
 | Yamaha | JP | RD400 | 1976–1979 | seed |
 | Yamaha | JP | RZ350 | 1983–1986 | seed |
@@ -332,7 +332,7 @@
 | Yamaha | JP | YA-1 | 1955–1958 | seed |
 | Yamaha | JP | YDS-1 | 1959–1963 | seed |
 | Yamaha | JP | YZF-R1 | 1998–present | seed |
-| Yamaha | JP | YZF-R6 | 1999–present | seed |
+| Yamaha | JP | YZF-R6 | 1999–2020 | seed |
 | Yamaha | JP | YZF-R7 | 2021–present | seed |
 | Yamaha | JP | YZF750R | 1993–1998 | seed |
 | Zero | US | S | 2013–present | seed |

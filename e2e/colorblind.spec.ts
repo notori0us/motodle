@@ -5,8 +5,8 @@
 import { expect, test } from '@playwright/test';
 import { closeHelpModal, DAY1, localTime } from './helpers';
 
-const COLORBLIND_GREEN = '#d2691e';
-const BASE_GREEN = '#4c9a2a'; // tokens.css:25 -- the un-shifted RULE A/B green, proves a difference
+const COLORBLIND_GREEN = '#c2410c';
+const BASE_GREEN = '#3b7d22'; // tokens.css -- the un-shifted RULE A/B green, proves a difference
 
 test('colourblind palette wins over both explicit dark and prefers-color-scheme: dark', async ({ page }) => {
   await page.clock.install({ time: localTime(DAY1) });

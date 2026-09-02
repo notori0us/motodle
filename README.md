@@ -38,6 +38,10 @@ npm run crop           # offline: crop.ts's five WebP levels + full reveal for o
 npm run schedule        # offline: an approved review batch -> public/puzzles/** + manifest.json
 ```
 
+`docs/CATALOG-REVIEW.md` is a render of `public/catalog.json` and a unit test pins the two together
+byte for byte — after editing the catalog (the source of truth), re-render it with
+`npm run catalog -- --review-only` (offline) or `npm test` goes red.
+
 `npm run catalog` and `npm run fetch` are the two scripts that talk to Wikimedia, and both require
 `MOTODLE_UA_CONTACT` — a contact URL sent as part of the Wikimedia API `User-Agent`
 (`motodle/0.1 (<contact>) node-fetch`, assembled in `tools/lib/wikimedia.ts`). It defaults to

@@ -20,8 +20,22 @@
   };
 
   const rows = $derived(Array.from({ length: 5 }, (_, i) => guesses[i] ?? null));
+
+  // Screen-reader announcement of the latest row. The tiles themselves are static cells, so
+  // without this a keyboard/SR player submits a guess and hears nothing (§5.6 spirit: colour is
+  // never the only signal — here, sight is not the only channel either).
+  const latest = $derived(guesses.length > 0 ? guesses[guesses.length - 1] : null);
+  const announcement = $derived(
+    latest
+      ? `Guess ${guesses.length}: make ${latest.make} ${LABELS[latest.result.make]}, ` +
+        `model ${latest.model} ${LABELS[latest.result.model]}, year ${latest.year} ${LABELS[latest.result.year]}.`
+      : '',
+  );
 </script>
 
+<!-- A plain polite live region, deliberately NOT role="status": the toast and the rollover banner
+     already own that role, and a third one would make `getByRole('status')` ambiguous. -->
+<div class="visually-hidden" aria-live="polite" aria-atomic="true" data-testid="guess-announcement">{announcement}</div>
 <div class="scoreboard" role="table" aria-label="Guesses">
   <div class="scoreboard__head" role="row">
     <span role="columnheader">Make</span>
@@ -126,7 +140,7 @@
   /* Short viewports (e.g. 360x640, §5.8): the 5-row grid is the single biggest fixed cost on the
      page, so tighten its row gap and tile padding further where vertical space is actually scarce
      (review B3's numeric target — 2rem alone was not enough to clear the fold). */
-  @media (max-height: 900px) {
+  @media (max-height: 1000px) {
     .scoreboard {
       gap: var(--space-1);
     }

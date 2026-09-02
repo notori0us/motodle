@@ -22,20 +22,13 @@ import {
   FULL_BUDGET_BYTES,
   JS_GZ_BUDGET_BYTES,
 } from '../schema/constants';
-import type { Manifest, Puzzle } from '../schema/types';
+import type { BudgetReport, Manifest, Puzzle } from '../schema/types';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
 const DIST_DIR = path.resolve(process.argv[2] ?? path.join(ROOT, 'dist'));
 
-interface Row {
-  name: string;
-  bytes: number;
-  budget: number;
-  pass: boolean;
-}
-
-const rows: Row[] = [];
+const rows: BudgetReport[] = [];
 
 function record(name: string, bytes: number, budget: number): void {
   rows.push({ name, bytes, budget, pass: bytes <= budget });

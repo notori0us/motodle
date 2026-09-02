@@ -93,6 +93,7 @@ export function loadVersioned<T>(
   } catch {
     return fallback;
   }
+  if (parsed === null || typeof parsed !== 'object') return fallback; // `null`/`42` are corrupt, not records
 
   const mirrored = (parsed as { schemaVersion?: unknown } | null)?.schemaVersion;
   const storedVersion = typeof mirrored === 'number' ? mirrored : targetVersion;

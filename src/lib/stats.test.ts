@@ -129,13 +129,3 @@ describe('recordCompletion — distribution buckets', () => {
     expect(stats.wins).toBe(1);
   });
 });
-
-describe('an abandoned day counts nothing', () => {
-  it('recordCompletion is simply never invoked — played/streak stay exactly as they were', () => {
-    const stats = createInitialStats();
-    // No call to recordCompletion at all — the abandoned day leaves stats untouched by
-    // construction, not by any special-cased branch inside recordCompletion.
-    expect(stats.played).toBe(0);
-    expect(stats.currentStreak).toBe(0);
-  });
-});

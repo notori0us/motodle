@@ -3,7 +3,7 @@
 A daily motorbike guessing game (Cardle-style, Wordle-shaped). Fully static. One puzzle per day, the
 same for everyone.
 
-- **Repo:** `/home/chris/workspace/motodle` (git-initialized, otherwise empty)
+- **Repo:** this repository (`motodle/`; started as an empty git-initialized directory)
 - **`LAUNCH_DATE` = `2026-09-02`** (local date)
 - **Milestone:** "runs great locally" — see §7 acceptance checklist.
 - Status of this document: **the frozen contract** for a multi-agent implementation workflow. Agents
@@ -2577,6 +2577,37 @@ Adds **§12**, the specification for `.github/workflows/ci.yml`. Nothing in §1�
 No §7.5 row is *weakened* by CI. Row 5's offline guarantee, which locally comes from `unshare -rn`,
 comes in CI from the §7.2 #14 import-graph contract test — which is the durable guard anyway (§7.5's
 own note), and which row 4 has already run by the time row 5 executes.
+
+### 11.10 Revision 4 — fresh-eyes review 2026-09-02
+
+A senior-engineer pass over the whole repo: read everything, ran the §7.5 checklist, played full
+rounds at 360×640 and 1280×800 under a pinned clock, then fixed what was clearly right and inside
+the frozen rules. **Nothing in §1.3, §3, §4 or the §5.3.1 DOM contract changed.** Terse index:
+
+| # | Change | Why | Where |
+|---|---|---|---|
+| R4-1 | Two tabs finishing the same day no longer double-count `played`: `GameStore.onGameEnded()` re-reads `motodle:stats` from the backend before `recordCompletion()` | §4.3's idempotency guard compares `lastCompletedDate`, but each tab handed it its own boot-time snapshot, so the guard never saw the other tab's write | `src/state/game.svelte.ts`, `src/state/game.test.ts` (new) |
+| R4-2 | `viewLevel` snaps to `unlockedLevel` after every guess and give-up — i.e. to 5 once the game ends | §5.5 says "snaps to the new `unlockedLevel`"; the store snapped to `guesses.length + 1`, parking a won game on level 3 | same |
+| R4-3 | Image stage: the frame's **width** follows the height cap (`width: min(100%, cap × 4/3)`, centred) and the cap is `clamp(120px, 100svh − 500px, 36svh)` instead of a flat `22svh` under 900px | The 100%-wide, height-capped frame letterboxed the crop between grey bars (187 of 336 px was image at 360×640) and shrank a 1280×800 desktop's image to 480×176. Height at 360×640 is unchanged (140 px; the §5.8 no-scroll rule still holds, e2e-verified); 384×288 at 1280×800. §5.8's "sized by viewport width" sentence is superseded by this cap — the size/no-scroll trade-off is flagged for the operator in the review report | `src/components/ImageStage.svelte` |
+| R4-4 | Compact-layout breakpoint `max-height: 900px` → `1000px` | Tall phones (412×915) fell into the stacked desktop layout and put the submit button 31 px below the fold | `src/styles/app.css`, `GuessForm.svelte`, `Scoreboard.svelte` |
+| R4-5 | Tile fills meet WCAG AA against their white text: green `#3b7d22` (5.1:1, was 3.5), yellow `#946c0a` (4.8:1, was 3.3), colourblind orange `#c2410c` (5.2:1, was 3.6) | 0.85 rem labels at ~3.3:1 fail AA; §5.7's "colour is never the only signal" needs the text to be readable too | `src/styles/tokens.css`, `e2e/colorblind.spec.ts` constants |
+| R4-6 | Scoreboard gains a visually-hidden polite live region announcing the latest row ("Guess 2: make Honda close, model CB750 incorrect, year 2000 close.") — `aria-live`, not `role="status"`, so the toast/banner locators stay unambiguous | A screen-reader player submitted a guess and heard nothing | `Scoreboard.svelte` + test |
+| R4-7 | Year steppers respond to Enter/Space (one step per press, no key auto-repeat) | They were pointer-only: focusable but inert from the keyboard | `YearInput.svelte` + test |
+| R4-8 | StatsModal's Share button renders only once the game has ended (`canShare` prop) | Mid-game it shared a partial grid as "0/15", indistinguishable from a loss; §5.6's "and a Share button" is now read as "once there is a result to share" | `StatsModal.svelte`, `App.svelte` + test |
+| R4-9 | `<main>` landmark around the screen; `title` tooltips on the five icon buttons; the theme button's tooltip names the current theme; the practice bar no longer renders "Motodle #" with no number when `?d=` hits a missing puzzle | Landmark navigation; glyph-only buttons were undiscoverable to mouse users | `App.svelte`, `app.css` |
+| R4-10 | `index.html`: `description`, `referrer: strict-origin-when-cross-origin`, light/dark `theme-color`, inline-SVG favicon (no `/favicon.ico` 404 on the CDN) | Launch hygiene at zero extra requests; §10.5 unchanged otherwise | `index.html` |
+| R4-11 | `loadVersioned` treats a stored non-object (`null`, `42`) as corrupt → fallback | `JSON.parse('null')` came back as the record itself and would have crashed the first `.seenHelp` read | `src/lib/storage.ts` + test |
+| R4-12 | Seed catalog: 17 `years` corrections (Monster family still on sale; Sportster `null` → `[1957, null]`; Wide Glide ended 2017; VFR800, YZF-R6, KLX250, 690 Duke, RM250, V7 III ended; KLR650 and Commando 961 back on sale; Varadero from 1999; Nighthawk 250 to 2008; RD250 to 1979; Concours to 2022 to match its ZG1400 name; Vegas to 2017; Ronin from 2022). `docs/CATALOG-REVIEW.md` re-rendered, and a new test pins it to the catalog byte for byte | RULE B hints were wrong for these; the review sheet could drift silently from the catalog | `public/catalog.json`, `docs/CATALOG-REVIEW.md`, `tools/catalog.test.ts` |
+| R4-13 | `tools/schedule.ts` validates `--start` (`YYYY-MM-DD`, parseable) before anything runs; `tools/lib/wikimedia.ts` puts a 60 s `AbortSignal.timeout` on every request; `check-budget.ts` uses the frozen `BudgetReport` type instead of a private twin | A bad `--start` produced `NaN-NaN-NaN.json`; a stalled socket hung a walk forever | `tools/` |
+| R4-14 | Comments that lied: `stats.ts` and `practice.spec.ts` claimed a `NullStatsSink`. The practice guard is the single `if` in `GameStore.onGameEnded()` — §4.6's "one place, not an `if` at each call site" is met (there is exactly one call site) but not by the named mechanism | Honest docs | `src/lib/stats.ts`, `e2e/practice.spec.ts` |
+| R4-15 | The `it.skipIf(!bothExist)` scaffolding in the two no-drift contract tests is gone (a deleted `normalize.ts`/`date.ts` now fails instead of silently skipping); the tautological "abandoned day" test in `stats.test.ts` is removed | Tests that cannot fail are not tests | `schema/*.test.ts`, `src/lib/stats.test.ts` |
+| R4-16 | `package.json`: `private: true`, a real `description`, the dead `"main": "index.js"` removed; §1's absolute workstation path replaced | Scaffold residue; a personal path in a doc | `package.json`, this file |
+
+**Known drift left standing (documented, not fixed):** §5.1's no-puzzle countdown is not rendered
+(and would mislead once content runs out — tomorrow has no puzzle either); §12.1's
+`cancel-in-progress: true` is `github.ref != 'refs/heads/main'` in the real workflow (the workflow
+is right — never cancel `main`); §12.2a's `6.*` check is an exact-lockfile match in the workflow
+(stricter, also fine); §1.2/§2/§7.1 still carry the pre-R2 combobox wording that §5.3 supersedes.
 
 ---
 

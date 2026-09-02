@@ -1,6 +1,7 @@
 // "No puzzle today" (§7.4a: any date past the last fixture 404s) and practice/archive isolation
 // (§4.6): playing an archived puzzle to a WIN must never write `motodle:stats` (§3.5, §4.6 --
-// enforced by construction with a NullStatsSink, not an `if` at each call site).
+// `recordCompletion` has exactly one caller, `GameStore.onGameEnded()`, and that is where the
+// practice guard lives).
 //
 // Clock pinned to NO_PUZZLE_DAY -- well past the last fixture (2026-09-04) -- so "today" has no
 // puzzle file, and every fixture date is a valid `date < today` practice entry in the archive.

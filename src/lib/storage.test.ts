@@ -95,6 +95,15 @@ describe('loadVersioned / saveVersioned — round-trip and key shape', () => {
     expect(loadVersioned(backend, KEY_STATS, fallback)).toEqual(fallback);
   });
 
+  it('valid JSON that is not an object (`null`, a number) returns the fallback rather than a non-record', () => {
+    const backend = new MemoryBackend();
+    const fallback = { schemaVersion: 1, played: 0 };
+    backend.set(KEY_STATS, 'null');
+    expect(loadVersioned(backend, KEY_STATS, fallback)).toEqual(fallback);
+    backend.set(KEY_STATS, '42');
+    expect(loadVersioned(backend, KEY_STATS, fallback)).toEqual(fallback);
+  });
+
   it('a throwing backend (private mode) degrades to the fallback, never throws', () => {
     const backend = new ThrowingBackend();
     const fallback = { schemaVersion: 1, played: 0 };

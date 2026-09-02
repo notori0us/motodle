@@ -66,4 +66,16 @@ describe('Scoreboard', () => {
     render(Scoreboard, { props: { guesses, colorblind: false } });
     expect(screen.queryByText('✓')).not.toBeInTheDocument();
   });
+
+  it('announces the LATEST guess in a polite live region (empty before any guess)', () => {
+    const { rerender } = render(Scoreboard, { props: { guesses: [] } });
+    const region = screen.getByTestId('guess-announcement');
+    expect(region).toHaveAttribute('aria-live', 'polite');
+    expect(region).toHaveTextContent('');
+
+    rerender({ guesses });
+    expect(screen.getByTestId('guess-announcement')).toHaveTextContent(
+      'Guess 2: make Suzuki correct, model GT750 incorrect, year 2003 close.',
+    );
+  });
 });

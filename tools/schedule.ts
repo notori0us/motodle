@@ -339,6 +339,11 @@ export async function scheduleApproved(opts: ScheduleOptions): Promise<ScheduleR
   const force = opts.force ?? false;
   const dryRun = opts.dryRun ?? false;
 
+  // A malformed --start would otherwise flow through addDays() into "NaN-NaN-NaN.json" files.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(opts.startDate) || Number.isNaN(Date.parse(opts.startDate))) {
+    throw new Error(`schedule.ts: --start must be a valid YYYY-MM-DD date, got "${opts.startDate}"`);
+  }
+
   const review = await loadReviewFile(opts.reviewPath);
   const catalog = await loadCatalog(catalogPath);
   const approvedOn = localToday();

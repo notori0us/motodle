@@ -59,6 +59,10 @@
     const next = game.prefs.theme === 'system' ? 'dark' : game.prefs.theme === 'dark' ? 'light' : 'system';
     game.setTheme(next);
   }
+
+  // The theme button cycles system -> dark -> light; the glyph never changes, so the tooltip is
+  // the only place a sighted player learns which of the three they are on.
+  const themeTitle = $derived(`Theme: ${game.prefs.theme} (click to change)`);
 </script>
 
 <div class="app-shell">
@@ -73,19 +77,24 @@
     <header class="app-header">
       <h1>Motodle</h1>
       <div class="app-header__actions">
-        <button type="button" class="icon-button" aria-label="How to play" onclick={() => game.openHelp()}>?</button>
-        <button type="button" class="icon-button" aria-label="Statistics" onclick={() => game.openStats()}>
+        <button type="button" class="icon-button" aria-label="How to play" title="How to play" onclick={() => game.openHelp()}>
+          ?
+        </button>
+        <button type="button" class="icon-button" aria-label="Statistics" title="Statistics" onclick={() => game.openStats()}>
           &#128202;
         </button>
-        <button type="button" class="icon-button" aria-label="Archive" onclick={() => game.openArchive()}>
+        <button type="button" class="icon-button" aria-label="Archive" title="Archive" onclick={() => game.openArchive()}>
           &#128197;
         </button>
-        <button type="button" class="icon-button" aria-label="Change theme" onclick={cycleTheme}>&#9680;</button>
+        <button type="button" class="icon-button" aria-label="Change theme" title={themeTitle} onclick={cycleTheme}>
+          &#9680;
+        </button>
         <button
           type="button"
           class="icon-button"
           aria-pressed={game.prefs.colorblind}
           aria-label="Toggle colourblind mode"
+          title="Toggle colourblind mode"
           onclick={() => game.toggleColorblind()}
         >
           &#9681;
@@ -95,51 +104,53 @@
 
     {#if game.isPractice}
       <div class="practice-bar">
-        <span>Practice · Motodle #{game.puzzle?.number ?? ''}</span>
+        <span>{game.puzzle ? `Practice · Motodle #${game.puzzle.number}` : 'Practice'}</span>
         <a class="button" href="?">Back to today</a>
       </div>
     {/if}
 
-    {#if game.screen === 'loading'}
-      <div class="skeleton" style="aspect-ratio: 4 / 3" aria-hidden="true"></div>
-    {:else if game.screen === 'no-puzzle'}
-      <section class="state-message">
-        <p>No Motodle today. Check back tomorrow, or play a past puzzle.</p>
-        <button type="button" class="button button--primary" onclick={() => game.openArchive()}>
-          Play the archive
-        </button>
-      </section>
-    {:else if game.screen === 'load-failed'}
-      <section class="state-message">
-        <p>Couldn't load today's Motodle.</p>
-        <button type="button" class="button button--primary" onclick={() => game.retryPuzzle()}>Retry</button>
-      </section>
-    {:else if game.screen === 'game' && game.puzzle}
-      {#key game.today.puzzleId}
-        <ImageStage
-          image={game.puzzle.image}
-          unlockedLevel={game.unlockedLevel}
-          viewLevel={game.today.viewLevel}
-          onchangeLevel={(l) => game.setViewLevel(l)}
-        />
-
-        <Scoreboard guesses={game.today.guesses} colorblind={game.prefs.colorblind} />
-
-        {#if game.catalogStatus === 'failed'}
-          <section class="state-message">
-            <p>Couldn't load the bike list.</p>
-            <button type="button" class="button button--primary" onclick={() => game.retryCatalog()}>Retry</button>
-          </section>
-        {:else if game.catalogStatus === 'ok' && game.catalog}
-          <GuessForm
-            today={game.today}
-            catalog={game.catalog}
-            onsubmit={(input) => game.submitGuess(input)}
-            ongiveup={() => game.giveUp()}
+    <main class="app-main">
+      {#if game.screen === 'loading'}
+        <div class="skeleton" style="aspect-ratio: 4 / 3" aria-hidden="true"></div>
+      {:else if game.screen === 'no-puzzle'}
+        <section class="state-message">
+          <p>No Motodle today. Check back tomorrow, or play a past puzzle.</p>
+          <button type="button" class="button button--primary" onclick={() => game.openArchive()}>
+            Play the archive
+          </button>
+        </section>
+      {:else if game.screen === 'load-failed'}
+        <section class="state-message">
+          <p>Couldn't load today's Motodle.</p>
+          <button type="button" class="button button--primary" onclick={() => game.retryPuzzle()}>Retry</button>
+        </section>
+      {:else if game.screen === 'game' && game.puzzle}
+        {#key game.today.puzzleId}
+          <ImageStage
+            image={game.puzzle.image}
+            unlockedLevel={game.unlockedLevel}
+            viewLevel={game.today.viewLevel}
+            onchangeLevel={(l) => game.setViewLevel(l)}
           />
-        {/if}
-      {/key}
-    {/if}
+
+          <Scoreboard guesses={game.today.guesses} colorblind={game.prefs.colorblind} />
+
+          {#if game.catalogStatus === 'failed'}
+            <section class="state-message">
+              <p>Couldn't load the bike list.</p>
+              <button type="button" class="button button--primary" onclick={() => game.retryCatalog()}>Retry</button>
+            </section>
+          {:else if game.catalogStatus === 'ok' && game.catalog}
+            <GuessForm
+              today={game.today}
+              catalog={game.catalog}
+              onsubmit={(input) => game.submitGuess(input)}
+              ongiveup={() => game.giveUp()}
+            />
+          {/if}
+        {/key}
+      {/if}
+    </main>
 
     <footer class="app-footer">
       <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
@@ -154,6 +165,7 @@
   open={game.statsOpen}
   stats={game.stats}
   highlightScore={!game.isPractice && game.today.status !== 'in_progress' ? game.today.score : null}
+  canShare={game.screen === 'game' && game.today.status !== 'in_progress'}
   onclose={() => game.closeStats()}
   onshare={handleShare}
 />

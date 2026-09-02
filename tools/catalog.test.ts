@@ -240,3 +240,18 @@ describe('buildCatalog — --review-only', () => {
     expect(second).toContain('Ducati');
   });
 });
+
+// -----------------------------------------------------------------------------------------
+// The committed docs/CATALOG-REVIEW.md is a render of public/catalog.json (§6.10: regenerated
+// wholesale, never hand-edited). A catalog edit without `npm run catalog -- --review-only` would
+// otherwise leave the operator's review sheet silently stale.
+// -----------------------------------------------------------------------------------------
+
+describe('docs/CATALOG-REVIEW.md is in sync with public/catalog.json', () => {
+  it('equals renderCatalogReview(public/catalog.json) byte for byte', async () => {
+    const root = path.join(__dirname, '..');
+    const catalog: Catalog = JSON.parse(await fs.readFile(path.join(root, 'public/catalog.json'), 'utf8'));
+    const committed = await fs.readFile(path.join(root, 'docs/CATALOG-REVIEW.md'), 'utf8');
+    expect(committed).toBe(renderCatalogReview(catalog));
+  });
+});

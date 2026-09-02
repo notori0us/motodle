@@ -7,7 +7,6 @@
  * pattern for a mutable rune outside a component.
  */
 import type {
-  Catalog,
   CatalogIndex,
   Manifest,
   PracticeState,
@@ -233,7 +232,9 @@ export class GameStore {
   submitGuess(input: SubmitGuessInput): void {
     if (!this.puzzle || !this.catalog) return;
     this.today = libSubmitGuess(this.today, input, this.puzzle.answer, this.catalog);
-    this.today = { ...this.today, viewLevel: Math.min(5, this.today.guesses.length + 1) };
+    // §5.5: advancing a guess snaps the view to the newly unlocked level — which is 5 once the
+    // game has ended, since every level unlocks at that point.
+    this.today = { ...this.today, viewLevel: this.unlockedLevel };
     this.persistToday();
     if (this.today.status !== 'in_progress') this.onGameEnded();
   }
@@ -241,6 +242,7 @@ export class GameStore {
   giveUp(): void {
     if (!this.puzzle) return;
     this.today = libGiveUp(this.today);
+    this.today = { ...this.today, viewLevel: this.unlockedLevel };
     this.persistToday();
     this.onGameEnded();
   }
@@ -248,6 +250,10 @@ export class GameStore {
   private onGameEnded(): void {
     if (!this.isPractice && this.puzzle) {
       const won = this.today.status === 'won';
+      // Re-read stats from storage first: another tab may have completed the same day since this
+      // tab booted, and `recordCompletion`'s idempotency guard (§4.3, `lastCompletedDate`) can only
+      // see that if it is handed the stored record, not this tab's boot-time snapshot.
+      this.stats = loadVersioned(this.backend, KEY_STATS, this.stats);
       this.stats = recordCompletion(this.stats, this.puzzle, { won, score: this.today.score ?? 0 });
       saveVersioned<StatsState>(this.backend, KEY_STATS, this.stats);
     }

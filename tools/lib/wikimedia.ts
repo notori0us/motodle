@@ -15,6 +15,7 @@ const MIN_REQUEST_INTERVAL_MS = 200; // "200ms inter-request delay" (§6.8)
 const MAX_ATTEMPTS = 5; // "1s -> 30s, 5 attempts" (§6.8)
 const BACKOFF_BASE_MS = 1000;
 const BACKOFF_MAX_MS = 30_000;
+const REQUEST_TIMEOUT_MS = 60_000; // a stalled socket must not hang a 1,000-call walk forever
 
 // -------------------------------------------------------------------------------------------
 // User-Agent (§6.8, D5) — assembled and validated BEFORE any request is ever made.
@@ -188,6 +189,7 @@ export class WikimediaClient {
       try {
         response = await fetch(url, {
           headers: { 'User-Agent': this.userAgent, 'Accept-Encoding': 'gzip' },
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         });
       } catch (err) {
         if (attempt === MAX_ATTEMPTS) throw err;

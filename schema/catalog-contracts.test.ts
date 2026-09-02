@@ -2,7 +2,7 @@
  * §7.2 items 2, 3, 10, 11, 12 — catalog shape, cross-file id resolution, normalizeId no-drift,
  * and the RULE A / RULE B data invariants.
  */
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -61,12 +61,10 @@ describe('§7.2 #3 — every answer.modelId / acceptModelIds[] resolves in the c
 });
 
 describe('§7.2 #10 — tools/lib/normalize.ts and src/lib/match.ts must not drift', () => {
-  // Both files belong to other workstreams (W2, W3) and do not exist while W1 runs alone —
-  // this activates once they land. It is intentionally excluded from nothing: once both files
-  // exist, this test enforces the real invariant instead of skipping.
+  // Both files are loaded by PATH (§5.3.7 pins `normalizeId` to `src/lib/match.ts`); a moved or
+  // deleted file fails the dynamic import loudly — there is deliberately no skip-if-missing.
   const normalizePath = path.join(ROOT, 'tools/lib/normalize.ts');
   const matchPath = path.join(ROOT, 'src/lib/match.ts');
-  const bothExist = existsSync(normalizePath) && existsSync(matchPath);
 
   const FROZEN_VECTORS: [string, string][] = [
     ['GSX-R 750', 'gsxr750'],
@@ -83,7 +81,7 @@ describe('§7.2 #10 — tools/lib/normalize.ts and src/lib/match.ts must not dri
     ['ČZ', 'cz'],
   ];
 
-  it.skipIf(!bothExist)(
+  it(
     'tools/lib/normalize.ts#normalizeId and src/lib/match.ts#normalizeId agree on every frozen vector and every catalog name',
     async () => {
       const normalizeMod: any = await import(pathToFileURL(normalizePath).href);
@@ -103,12 +101,6 @@ describe('§7.2 #10 — tools/lib/normalize.ts and src/lib/match.ts must not dri
       }
     },
   );
-
-  if (!bothExist) {
-    it('(informational) not yet activated — tools/lib/normalize.ts and/or src/lib/match.ts do not exist yet (W2/W3)', () => {
-      expect(bothExist).toBe(false);
-    });
-  }
 });
 
 // normalizeId(), reproduced verbatim from PLAN.md §3.2 (the frozen literal function body).

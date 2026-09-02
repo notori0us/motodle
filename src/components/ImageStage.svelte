@@ -95,29 +95,22 @@
   .image-stage__frame {
     position: relative;
     display: block;
-    width: 100%;
-    /* Fixed 4:3 box per §5.5 ("zero layout shift as levels swap") — the per-level w/h used to
-       drive this via an inline style, which drifted a fraction of a pixel on non-4:3 generated
-       crops (review improvement #1). Capped by max-height too (review B3) so the stage can't push
-       the guess form below the fold at short viewports (§5.8's 360x640 no-scroll rule); the
-       object-fit: contain below letterboxes anything that isn't exactly 4:3 or is height-clamped. */
+    /* Fixed 4:3 box per §5.5 ("zero layout shift as levels swap"). The height cap keeps the guess
+       form above the fold at short viewports (§5.8's 360x640 no-scroll rule, review B3): the
+       non-image chrome (header, scrub, 5-row board, form) measures ~475px, so the stage gets what
+       is left of the viewport, never less than 120px and never more than 36svh / the column width.
+       The WIDTH follows the cap (4:3 of it) rather than staying 100% — a 100%-wide, height-capped
+       frame letterboxed the crop between two grey bars and wasted ~45% of the frame at 360x640. */
+    --stage-max-h: clamp(120px, 100svh - 500px, 36svh);
+    width: min(100%, calc(var(--stage-max-h) * 4 / 3));
+    margin: 0 auto;
     aspect-ratio: 4 / 3;
-    max-height: 34svh;
     border: none;
     padding: 0;
     background: var(--color-surface);
     border-radius: var(--radius-md);
     overflow: hidden;
     touch-action: manipulation;
-  }
-
-  @media (max-height: 900px) {
-    /* 34svh alone still leaves the form below the fold once the header and scoreboard are
-       accounted for, so tighten the cap further where vertical space is actually scarce (review
-       B3's numeric target). */
-    .image-stage__frame {
-      max-height: 22svh;
-    }
   }
 
   .image-stage__img {

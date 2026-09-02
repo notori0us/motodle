@@ -22,9 +22,11 @@
   --color-danger: #b91c1c;
   --color-overlay: rgb(0 0 0 / 45%);
 
-  --tile-green-bg: #4c9a2a;
+  /* Tile fills are chosen for >= 4.5:1 against their white text (WCAG AA at the 0.85rem tile
+     size): green 5.1:1, yellow 4.8:1, red 6.6:1. */
+  --tile-green-bg: #3b7d22;
   --tile-green-fg: #ffffff;
-  --tile-yellow-bg: #b8860b;
+  --tile-yellow-bg: #946c0a;
   --tile-yellow-fg: #ffffff;
   --tile-red-bg: #b32222;
   --tile-red-fg: #ffffff;
@@ -66,8 +68,8 @@
     --color-danger: #ff8a8a;
     --color-overlay: rgb(0 0 0 / 65%);
 
-    --tile-green-bg: #4c9a2a;
-    --tile-yellow-bg: #b8860b;
+    --tile-green-bg: #3b7d22;
+    --tile-yellow-bg: #946c0a;
     --tile-red-bg: #a13a3a;
     --tile-empty-bg: var(--color-surface);
     --tile-empty-border: var(--color-border);
@@ -88,8 +90,8 @@
   --color-danger: #ff8a8a;
   --color-overlay: rgb(0 0 0 / 65%);
 
-  --tile-green-bg: #4c9a2a;
-  --tile-yellow-bg: #b8860b;
+  --tile-green-bg: #3b7d22;
+  --tile-yellow-bg: #946c0a;
   --tile-red-bg: #a13a3a;
   --tile-empty-bg: var(--color-surface);
   --tile-empty-border: var(--color-border);
@@ -97,12 +99,13 @@
   --shadow-modal: 0 10px 40px rgb(0 0 0 / 60%);
 }
 
-/* Colourblind palette (§5.7): green->orange, yellow->blue, red->near-black. Wins regardless of
+/* Colourblind palette (§5.7): green->orange, yellow->blue, red->near-black (orange 5.2:1, blue
+   6.7:1 against white text). Wins regardless of
    light/dark theme: the :root prefix brings this to (0,2,0), tying both theme blocks' specificity
    so source order (last in the file) decides and this block always wins. A bare [data-colorblind]
    selector is (0,1,0) and silently loses to both theme blocks — that was the bug (review B1). */
 :root[data-colorblind='true'] {
-  --tile-green-bg: #d2691e;
+  --tile-green-bg: #c2410c;
   --tile-green-fg: #ffffff;
   --tile-yellow-bg: #1d4ed8;
   --tile-yellow-fg: #ffffff;

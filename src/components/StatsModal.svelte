@@ -11,10 +11,13 @@
      *  nothing has been completed yet (or the finished game was practice, which never touches
      *  stats). */
     highlightScore: number | null;
+    /** Sharing mid-game would broadcast a partial grid as a 0/15 result — the button exists only
+     *  once today's (or the practice) game has ended, exactly like Wordle. */
+    canShare: boolean;
     onclose: () => void;
     onshare: () => void;
   }
-  let { open, stats, highlightScore, onclose, onshare }: Props = $props();
+  let { open, stats, highlightScore, canShare, onclose, onshare }: Props = $props();
 
   // Display order is descending (§5.6: "15 12 9 6 3 2 1 0").
   const ORDER = [15, 12, 9, 6, 3, 2, 1, 0] as const;
@@ -76,7 +79,9 @@
     <strong>{formatHMS(remainingMs)}</strong>
   </div>
 
-  <button type="button" class="button button--primary" onclick={onshare}>Share</button>
+  {#if canShare}
+    <button type="button" class="button button--primary" onclick={onshare}>Share</button>
+  {/if}
 </Modal>
 
 <style>

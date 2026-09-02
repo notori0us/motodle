@@ -80,6 +80,13 @@ a {
   flex: 1 1 auto;
 }
 
+/* The <main> landmark wraps the screen (image, board, form); same rhythm as its parent column. */
+.app-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .app-header {
   display: flex;
   align-items: center;
@@ -177,11 +184,13 @@ a {
   text-align: center;
 }
 
-@media (max-height: 900px) {
+@media (max-height: 1000px) {
   /* Short viewports (e.g. 360x640, §5.8): tighten the vertical rhythm between sections, on top of
-     the section-local tightening in ImageStage/Scoreboard/GuessForm, to keep the guess form
-     reachable without scrolling (review B3). */
-  .app-column {
+     the section-local tightening in Scoreboard/GuessForm, to keep the guess form reachable
+     without scrolling (review B3). 1000px, not 900px, so tall phones (412x915, 430x932) get the
+     compact layout too — in the stacked layout their submit button sat below the fold. */
+  .app-column,
+  .app-main {
     gap: var(--space-2);
   }
 }

@@ -242,6 +242,15 @@ describe('extensionForMime', () => {
 // scheduleApproved — end to end over synthetic, fully-offline fixtures
 // -----------------------------------------------------------------------------------------
 
+describe('scheduleApproved — --start validation', () => {
+  it('refuses a malformed --start before touching anything (would otherwise write NaN-NaN-NaN.json)', async () => {
+    await writeReview(reviewFile([candidate()]));
+    await expect(scheduleApproved(baseOpts({ startDate: '2026-9-5' }))).rejects.toThrow(/--start must be a valid YYYY-MM-DD/);
+    await expect(scheduleApproved(baseOpts({ startDate: '2026-13-45' }))).rejects.toThrow(/--start must be a valid YYYY-MM-DD/);
+    expect(await fs.readdir(puzzlesDir)).toEqual([]);
+  });
+});
+
 describe('scheduleApproved — happy path', () => {
   it('produces a contract-valid puzzle and manifest', async () => {
     await seedOriginal(candidate().originalUrl, FIXTURE_IMAGE);

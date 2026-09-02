@@ -1,8 +1,8 @@
 {
   "name": "motodle",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "Daily motorbike guessing game — a fully static Vite + Svelte 5 site.",
   "type": "module",
   "scripts": {
     "dev": "vite",

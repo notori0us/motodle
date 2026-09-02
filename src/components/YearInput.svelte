@@ -74,6 +74,16 @@
     repeatDelay = null;
     repeatTimer = null;
   }
+
+  /** The steppers are pointer-driven (press-and-hold auto-repeat), and a keyboard activation
+   *  fires no pointer events — so Enter/Space step once explicitly, else the buttons are
+   *  focusable but inert for keyboard-only players. */
+  function handleStepKeydown(e: KeyboardEvent, delta: number) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    if (e.repeat) return;
+    commitStep(delta);
+  }
 </script>
 
 <div class="year-input">
@@ -86,6 +96,7 @@
     onpointerup={stopRepeat}
     onpointerleave={stopRepeat}
     onpointercancel={stopRepeat}
+    onkeydown={(e) => handleStepKeydown(e, -1)}
   >
     −
   </button>
@@ -113,6 +124,7 @@
     onpointerup={stopRepeat}
     onpointerleave={stopRepeat}
     onpointercancel={stopRepeat}
+    onkeydown={(e) => handleStepKeydown(e, 1)}
   >
     +
   </button>

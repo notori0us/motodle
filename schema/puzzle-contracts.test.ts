@@ -8,7 +8,7 @@
  * date arithmetic), so inlining it here carries no drift risk.
  */
 import { gzipSync } from 'node:zlib';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -99,9 +99,8 @@ describe('§3.1 — answer.year stays within 1885..currentYear+1 (tight bound; t
 describe('no-drift — tools/lib/date.ts and src/lib/date.ts must agree on puzzleNumber()/dayIndex()', () => {
   const toolsDatePath = path.join(ROOT, 'tools/lib/date.ts');
   const srcDatePath = path.join(ROOT, 'src/lib/date.ts');
-  const bothExist = existsSync(toolsDatePath) && existsSync(srcDatePath);
 
-  it.skipIf(!bothExist)(
+  it(
     'agree across a multi-year sweep of consecutive date keys, including leap days and year boundaries',
     async () => {
       const toolsMod: any = await import(pathToFileURL(toolsDatePath).href);
@@ -123,12 +122,6 @@ describe('no-drift — tools/lib/date.ts and src/lib/date.ts must agree on puzzl
       }
     },
   );
-
-  if (!bothExist) {
-    it('(informational) not yet activated — tools/lib/date.ts and/or src/lib/date.ts do not exist yet', () => {
-      expect(bothExist).toBe(false);
-    });
-  }
 });
 
 describe('§7.2 #5 — manifest.json', () => {

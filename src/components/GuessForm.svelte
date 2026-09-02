@@ -301,7 +301,7 @@
      visible label), and the year field and the submit/give-up row go on one line too —
      recovering enough height to keep the whole form (now two selects plus year/actions)
      reachable without scrolling (review B3). */
-  @media (max-height: 900px) {
+  @media (max-height: 1000px) {
     .guess-form {
       gap: var(--space-2);
     }

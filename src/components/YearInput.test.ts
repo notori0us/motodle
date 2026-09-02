@@ -25,6 +25,20 @@ describe('YearInput', () => {
     expect(onchange).toHaveBeenLastCalledWith(MAX_YEAR); // clamped, does not exceed
   });
 
+  it('steppers work from the keyboard (Enter/Space), one step per press, no auto-repeat on held keys', async () => {
+    const onchange = vi.fn();
+    render(YearInput, { props: { id: 'y', value: 2000, onchange } });
+    const later = screen.getByRole('button', { name: 'Later year' });
+    await fireEvent.keyDown(later, { key: 'Enter' });
+    expect(onchange).toHaveBeenLastCalledWith(2001);
+    await fireEvent.keyDown(screen.getByRole('button', { name: 'Earlier year' }), { key: ' ' });
+    expect(onchange).toHaveBeenLastCalledWith(1999); // computed from the `value` prop (still 2000), not the last step
+    await fireEvent.keyDown(later, { key: 'Enter', repeat: true });
+    expect(onchange).toHaveBeenCalledTimes(2); // a held key does not auto-repeat
+    await fireEvent.keyDown(later, { key: 'a' });
+    expect(onchange).toHaveBeenCalledTimes(2);
+  });
+
   it('blocks non-numeric input (never validated by string length)', async () => {
     const onchange = vi.fn();
     render(YearInput, { props: { id: 'y', value: null, onchange } });
