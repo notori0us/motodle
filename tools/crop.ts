@@ -9,7 +9,7 @@
  *
  * CLI:
  *   tsx tools/crop.ts --in <image> --out <dir> --focus 0.5,0.5 [--source-crop x,y,w,h]
- *                      [--fractions 0.15,0.25,0.40,0.62,0.95] [--quality auto]
+ *                      [--fractions 0.11,0.19,0.32,0.55,0.95] [--quality auto]
  * Prints the resulting `CropOutput` as JSON to stdout on success.
  */
 
@@ -267,7 +267,7 @@ async function main(): Promise<void> {
   if (!args.in || !args.out) {
     console.error(
       'usage: tsx tools/crop.ts --in <image> --out <dir> --focus 0.5,0.5 ' +
-        '[--source-crop x,y,w,h] [--fractions 0.15,0.25,0.40,0.62,0.95] [--quality auto]',
+        '[--source-crop x,y,w,h] [--fractions 0.11,0.19,0.32,0.55,0.95] [--quality auto]',
     );
     process.exitCode = 1;
     return;

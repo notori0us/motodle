@@ -18,14 +18,14 @@ describe('baseRect', () => {
 });
 
 describe('computeExtractRects — fixture 1 (2004 Suzuki GSX-R750, 800x600, no sourceCrop)', () => {
-  const rects = computeExtractRects(800, 600, { x: 0.52, y: 0.55 }, [0.4, 0.52, 0.66, 0.82, 1.0]);
+  const rects = computeExtractRects(800, 600, { x: 0.3, y: 0.68 }, [0.3, 0.41, 0.55, 0.74, 1.0]);
 
   it('matches the literal §3.1 example rects exactly', () => {
     expect(rects.map((r) => ({ w: r.bw, h: r.bh }))).toEqual([
-      { w: 320, h: 240 },
-      { w: 416, h: 312 },
-      { w: 528, h: 396 },
-      { w: 656, h: 492 },
+      { w: 240, h: 180 },
+      { w: 328, h: 246 },
+      { w: 440, h: 330 },
+      { w: 592, h: 444 },
       { w: 800, h: 600 },
     ]);
   });
@@ -36,14 +36,14 @@ describe('computeExtractRects — fixture 1 (2004 Suzuki GSX-R750, 800x600, no s
 });
 
 describe('computeExtractRects — fixture 3 (1995 Ducati 916, 1454x1106 source-cropped)', () => {
-  const rects = computeExtractRects(1454, 1106, { x: 0.56, y: 0.55 }, [0.22, 0.36, 0.52, 0.72, 0.96]);
+  const rects = computeExtractRects(1454, 1106, { x: 0.56, y: 0.55 }, [0.17, 0.26, 0.4, 0.62, 0.96]);
 
   it('matches the §6.9 computed geometry table exactly, including the level 4/5 rect split', () => {
     expect(rects.map((r) => ({ w: r.bw, h: r.bh }))).toEqual([
-      { w: 320, h: 240 },
-      { w: 523, h: 392 },
-      { w: 756, h: 567 },
-      { w: 1047, h: 785 },
+      { w: 247, h: 185 },
+      { w: 378, h: 284 },
+      { w: 582, h: 437 },
+      { w: 901, h: 676 },
       { w: 1396, h: 1047 },
     ]);
   });

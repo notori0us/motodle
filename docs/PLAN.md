@@ -20,7 +20,7 @@ same for everyone.
 | **C1** | **Brief fixes YEAR as a guessed category. Recon proves there is NO structured year source anywhere.** | Wikidata `P571` 0/15, `P576` 0/15, `P2669` 0/15 across all 15 sampled model items (one time-valued claim total: `P5204`=1985 on GSX-R750). Commons SDC `P571` is the **photograph's** date — proven by `File:1966 Triumph Bonneville T120 TT.jpg` carrying `P571 = 2023-01-28`. `Category:<YYYY> motorcycles` exists (138 buckets) but is far too sparse (1976 = 33 files). | **NOT a blocker, and the brief already anticipated it.** The year is **operator-verified free text**, never machine-derived. `tools/fetch` extracts a *candidate* year from title/description, assigns a confidence, and **rejects `low` by default**; the operator confirms or overrides every year in the review file (§6.3) before anything ships. Every puzzle JSON carries a `yearEvidence` block recording where the year came from. **No puzzle may ship with a machine-inferred year that a human did not confirm.** |
 | **C2** | **Brief wants 3–5 committed PD/CC0 fixtures. Only 3 of recon's 5 PD/CC0 candidates have year evidence strong enough to pass the brief's own "reject low year-confidence" rule.** | Fixture 4 (`Blue Honda 750 Four.JPG`) year evidence = "NONE explicit". Fixture 5 (`Blue Moto Guzzi 850 Le Mans pic1.JPG`) = "WEAKEST year evidence of the five". | **Ship 3 fixtures** (inside the brief's 3–5 band): GSX-R750 / ZX-6R / 916. A 4th/5th is **permitted, not forbidden** — the brief explicitly allows the operator to override a low-confidence year — but it would mean hand-asserting a year with zero evidence in the very artifact meant to demonstrate the evidence rule. **The operator has fixed the count at 3** (§1.3 D3); the two weak candidates stay recorded as rejected in §6.9. |
 | **C3** | **A fixture photo prints its own answer.** `File:Ducati 916.JPG` has a museum placard reading "1995 DUCATI 916" in frame (visually confirmed at 960px during planning). | Recon §4 Fixture 3 caveat, plus direct inspection. | Adds a **`sourceCrop`** field to the puzzle contract (§3.1) — a pre-crop applied before the 5 levels. The 916 fixture uses it to remove the placard (bottom-left) and the intruding blue Yamaha (right edge). **The placard's year line sits at roughly y 0.75–0.79, and the rear wheel's bottom edge (~y 0.77) overlaps it in x — so no rect contains both wheels' bottoms and excludes the year.** The crop therefore cuts the bottom of both wheels; see §6.9 for the computed numbers. Formalized as the **`NO_LEGIBLE_YEAR` curation rule** (§6.6): brand/model badging on bodywork is *fine* (it is inherent to motorbikes and Cardle has the same property with car badges); **legible year text — placards, dated signage, registration plates, event banners — is a hard reject or a mandatory `sourceCrop`.** |
-| **C4** | **The GSX-R750 fixture source is only 800×600.** Below any sane minimum. | Recon §4 Fixture 1: "Dimensions: 800 x 600". The Commons *original* is 800×600 — there is no larger version. | Kept (it is the best-framed PD photo found), but it ships an explicit **`cropFractions` override** `[0.40, 0.52, 0.66, 0.82, 1.00]` — a feature the brief already mandates. `MIN_LEVEL1_PX = 280` is a hard validation floor, and `MIN_SOURCE_WIDTH` is **derived from it** (`ceil(280 / 0.15) = 1867`) so the fetcher can never wave through a source the crop tool will reject. The floor is checked against `min(W, round(H × CROP_ASPECT))` — the largest 4:3 width the source can actually yield — not against `W` alone (§4.7). **All three fixtures are below 1867 px and therefore all three ship an explicit `cropFractions` override** (§6.9); `DEFAULT_CROP_FRACTIONS` applies to real puzzles sourced at ≥ 1867 px. |
+| **C4** | **The GSX-R750 fixture source is only 800×600.** Below any sane minimum. | Recon §4 Fixture 1: "Dimensions: 800 x 600". The Commons *original* is 800×600 — there is no larger version. | Kept (it is the best-framed PD photo found), but it ships an explicit **`cropFractions` override** — `[0.30, 0.41, 0.55, 0.74, 1.00]` since revision 9 (§4.7a) — a feature the brief already mandates. `MIN_LEVEL1_PX = 240` is a hard validation floor, and `MIN_SOURCE_WIDTH` is **derived from it** (`ceil(240 / 0.11) = 2182`) so the fetcher can never wave through a source the crop tool will reject. The floor is checked against `min(W, round(H × CROP_ASPECT))` — the largest 4:3 width the source can actually yield — not against `W` alone (§4.7). **All three fixtures are below 2182 px and therefore all three ship an explicit `cropFractions` override** (§6.9), each re-derived on the §4.7a geometric rule; `DEFAULT_CROP_FRACTIONS` applies to real puzzles sourced at ≥ 2182 px. **Even at the floor, fixture 1's 800 px source cannot go tighter than `f1 = 0.30`, which still frames the SUZUKI wordmark — hence its `focus` moves to `{0.30, 0.68}` (§4.7a).** |
 | **C5** | **`typescript@*` resolves to 7.0.2 and hard-crashes `svelte-check` 4.7.6** (a thrown `Error`, not a lint failure). npm only warned, and its warning text was actively misleading (printed `Found: typescript@6.0.3` while installing 7.0.2). | Toolchain recon §1a. | **Pin `typescript@~6` → 6.0.3.** This is the configuration the *entire* toolchain recon was validated on (svelte-check 0 errors, tsc clean, vitest 2/2, build + e2e pass). The `--tsgo` dual-install alternative is untested and is rejected for this milestone. |
 | **C6** | The task brief for the UX recon described "the two Ant Design selects for make/model" on Cardle. **False.** | UX recon Risk 1: Cardle's fields are hand-rolled `<input type=text>` + `<ul><li data-value>` with zero ARIA. Ant Design is bundled but used only on the auth pages. | **No conflict with our brief** (which already says "No UI kit"). Recorded so nobody plans against antd `Select` props. Everything Cardle does with those fields is a defect list we are deliberately fixing (§5.3). |
 | **C7** | **Catalog build is ~900–1,000 paired API calls** and is therefore off the critical path to `npm run dev`. | Commons recon §3 call-count estimate. | A **hand-authored seed `public/catalog.json`** ships in the repo (**40–60 makes, 300–500 models**, covering the well-known bikes of every decade since 1950 plus the recon-verified models and the fixtures — §6.10). Its `makes[].country` and `models[].years` are hand-authored too, because recon proved Wikidata carries neither. `npm run catalog` regenerates it later, **preserving those hand-authored fields**. `npm run dev` never needs the network. |
@@ -202,17 +202,17 @@ Rules that apply to every contract below:
   },
   "image": {
     "aspect": "4:3",
-    "focus": { "x": 0.52, "y": 0.55 },
+    "focus": { "x": 0.30, "y": 0.68 },
     "sourceCrop": null,
-    "cropFractions": [0.40, 0.52, 0.66, 0.82, 1.00],
+    "cropFractions": [0.30, 0.41, 0.55, 0.74, 1.00],
     "levels": [
-      { "level": 1, "src": "img/0001/l1.webp", "w": 320, "h": 240, "rect": { "w": 320, "h": 240 }, "bytes": 14820 },
-      { "level": 2, "src": "img/0001/l2.webp", "w": 416, "h": 312, "rect": { "w": 416, "h": 312 }, "bytes": 22140 },
-      { "level": 3, "src": "img/0001/l3.webp", "w": 528, "h": 396, "rect": { "w": 528, "h": 396 }, "bytes": 31980 },
-      { "level": 4, "src": "img/0001/l4.webp", "w": 656, "h": 492, "rect": { "w": 656, "h": 492 }, "bytes": 46310 },
-      { "level": 5, "src": "img/0001/l5.webp", "w": 800, "h": 600, "rect": { "w": 800, "h": 600 }, "bytes": 63870 }
+      { "level": 1, "src": "img/0001/l1.webp", "w": 240, "h": 180, "rect": { "w": 240, "h": 180 }, "bytes": 6130 },
+      { "level": 2, "src": "img/0001/l2.webp", "w": 328, "h": 246, "rect": { "w": 328, "h": 246 }, "bytes": 10124 },
+      { "level": 3, "src": "img/0001/l3.webp", "w": 440, "h": 330, "rect": { "w": 440, "h": 330 }, "bytes": 15352 },
+      { "level": 4, "src": "img/0001/l4.webp", "w": 592, "h": 444, "rect": { "w": 592, "h": 444 }, "bytes": 27808 },
+      { "level": 5, "src": "img/0001/l5.webp", "w": 800, "h": 600, "rect": { "w": 800, "h": 600 }, "bytes": 38862 }
     ],
-    "full": { "src": "img/0001/full.webp", "w": 800, "h": 600, "bytes": 64110 }
+    "full": { "src": "img/0001/full.webp", "w": 800, "h": 600, "bytes": 38862 }
   },
   "credit": {
     "fileTitle": "File:2004 Suzuki GSXR-750 Left SIde.jpg",
@@ -255,7 +255,7 @@ Rules that apply to every contract below:
 | `image.aspect` | `"4:3"` | ✓ | Only value in schema 1. **Describes the five levels only** — never `image.full`. |
 | `image.focus` | `{x,y}` floats | ✓ | Fractions in `[0,1]` **of the source-cropped image**. Default `{x:0.5, y:0.5}`. |
 | `image.sourceCrop` | `{x,y,w,h}\|null` | ✓ | Fractions in `[0,1]` of the **original** file. Applied *before* level generation. Use to remove year-revealing placards, intruding vehicles, dead space. `null` = whole image. |
-| `image.cropFractions` | float[5] | ✓ | Strictly increasing, each in `(0,1]`. Written explicitly into every file even when it equals `DEFAULT_CROP_FRACTIONS`, so a puzzle is reproducible if the default ever changes. |
+| `image.cropFractions` | float[5] | ✓ | Strictly increasing, each in `(0,1]`, and **geometric** — each `f[i]/f[i-1]` within ±3 % of `(f[4]/f[0])^(1/4)` (§4.7a, contract test §7.2 #15). Written explicitly into every file even when it equals `DEFAULT_CROP_FRACTIONS`, so a puzzle is reproducible if the default ever changes. |
 | `image.levels` | Level[5] | ✓ | Ordered, `level` = 1..5. `level 1` is the **tightest**, `level 5` the widest. |
 | `image.levels[].src` | rel path | ✓ | Relative to `PUZZLE_BASE_URL`. |
 | `image.levels[].w/h` | int | ✓ | Intrinsic **output** pixels (after the `min(CROP_TARGET_WIDTH, rect.w)` resize, which never upscales). Used for `width`/`height` attrs to reserve layout (no CLS). `w/h` must be 4:3 ±1px. **Non-decreasing** across levels 1→5: two adjacent levels legitimately tie once both rects exceed `CROP_TARGET_WIDTH` (fixture 3 does exactly this — §6.9). |
@@ -1025,14 +1025,18 @@ reported. The e2e clipboard spec stubs the sink's `navigator.share` branch away 
 `schema/constants.ts`:
 
 ```ts
-export const DEFAULT_CROP_FRACTIONS = [0.15, 0.25, 0.40, 0.62, 0.95] as const;  // level 1..5
+/** Level 1..5, a GEOMETRIC sequence (revision 9, §4.7a): fᵢ = 0.11 · r^(i-1) with
+ *  r = (0.95 / 0.11)^(1/4) = 1.71428, rounded to 2 dp. Exact sequence:
+ *  0.11000, 0.18857, 0.32326, 0.55417, 0.95000. Every per-puzzle override re-derives r
+ *  from its own f1 the same way — see §4.7a and contract test §7.2 #15. */
+export const DEFAULT_CROP_FRACTIONS = [0.11, 0.19, 0.32, 0.55, 0.95] as const;  // level 1..5
 export const CROP_ASPECT = 4 / 3;
 export const CROP_TARGET_WIDTH = 900;   // max output width; never upscales
-export const MIN_LEVEL1_PX = 280;       // hard validation floor
+export const MIN_LEVEL1_PX = 240;       // hard validation floor (§4.7a decision (b))
 /** DERIVED, never hand-set: a source narrower than this cannot satisfy MIN_LEVEL1_PX
  *  at the default fractions, so the fetcher must not approve it without an override. */
 export const MIN_SOURCE_WIDTH =
-  Math.ceil(MIN_LEVEL1_PX / DEFAULT_CROP_FRACTIONS[0]);   // = 1867
+  Math.ceil(MIN_LEVEL1_PX / DEFAULT_CROP_FRACTIONS[0]);   // = 2182
 export const DEFAULT_FOCUS = { x: 0.5, y: 0.5 } as const;
 
 /** Every budget referenced anywhere in this plan lives HERE — one place, imported by
@@ -1059,8 +1063,8 @@ export const COUNTRY_NAMES: Record<string, string> = {
 
 **`MIN_SOURCE_WIDTH` is checked against the usable 4:3 width, not the raw width.** The gate is
 `min(W, round(H × CROP_ASPECT)) ≥ MIN_SOURCE_WIDTH`, where `W`/`H` are the **source-cropped**
-dimensions. A 3000×1000 panorama passes a naive `W ≥ 1867` test but has `bw0 = 1333` and a level-1
-rect of 200 px — under the floor. The same expression backs `--min-width` in `tools/fetch.ts`, so the
+dimensions. A 3000×1000 panorama passes a naive `W ≥ 2182` test but has `bw0 = 1333` and a level-1
+rect of 147 px — under the floor. The same expression backs `--min-width` in `tools/fetch.ts`, so the
 fetcher and the crop tool cannot disagree.
 
 `focus` semantics: fractions of the **source-cropped** image (after `sourceCrop`), `{0,0}` = top-left.
@@ -1076,7 +1080,7 @@ const [bw0, bh0] = (W / H >= CROP_ASPECT)
   ? [Math.round(H * CROP_ASPECT), H]      // largest 4:3 rect that fits
   : [W, Math.round(W / CROP_ASPECT)];
 
-for (const f of cropFractions) {
+for (const f of cropFractions) {          // geometric: f[i]/f[i-1] is constant, §4.7a
   let bw = Math.min(Math.round(f * bw0), W);
   let bh = Math.min(Math.round(bw / CROP_ASPECT), H);
   bw = Math.min(bw, Math.round(bh * CROP_ASPECT));          // re-fit aspect after clamping
@@ -1095,12 +1099,18 @@ why the monotonicity invariant belongs to `rect`, not to `w`.
 
 **Two invariants the tool asserts and a unit test covers:**
 1. Level-1 rect width ≥ `MIN_LEVEL1_PX`, else error: *"source too small — supply `cropFractions` or a
-   larger source"*. (This is exactly why the 800×600 GSX-R750 fixture ships an override, C4.)
+   larger source"*. (This is exactly why **all three** fixtures ship an override — every one of them
+   is below `MIN_SOURCE_WIDTH`, C4 — and the override must itself be geometric, §4.7a.)
 2. **`rect.w` is strictly increasing** across levels 1→5. A tie means the fractions collapsed against a
    clamp and the reveal would stall — hard error. **Output `w` is only required to be non-decreasing**:
    once two rects both exceed `CROP_TARGET_WIDTH` they encode to the same 900 px width, which is
    correct behaviour and which fixture 3 actually exhibits (§6.9). The §7.2 #8 contract test asserts
    exactly this pair of rules.
+
+**Level 1 is never upscaled.** `resize({ withoutEnlargement: true })` is load-bearing, not
+incidental: the level-1 file is painted into a ≤ 360 CSS px box, so on a DPR-2 phone it is already
+being upscaled ~3× by the browser, and `levels[].w` is contracted (§3.1) as the honest count of real
+output pixels. A bounded pipeline upscale was considered for revision 9 and rejected — §4.7a (c).
 
 **Quality search:** start `q = WEBP_QUALITY_START (80)`, step −`WEBP_QUALITY_STEP (4)` down to
 `WEBP_QUALITY_MIN (56)`, pick the first quality where `sum(level bytes) ≤ CROP_BUDGET_BYTES`. If none
@@ -1115,6 +1125,227 @@ fits, error.
   errors only if nothing fits. (Without a search, one detailed photo silently blows the budget.)
 - It keeps the source-cropped aspect ratio — **not** 4:3 (§3.1) — so `ResultModal` letterboxes it.
 - It is **not** counted against the 400 KB day budget (it is fetched lazily at game end).
+
+---
+
+### 4.7a Zoom schedule (revision 9) — the geometric ladder
+
+**User feedback, 2026-09-03:** *"The images should be much more cropped at first. Maybe zoom out
+logarithmically — worth a try."* The complaint is correct and it is worse than the default constant
+suggests: what the live site actually serves is the **three fixture overrides**, and fixture 1's
+level 1 (`f = 0.40` of an 800 px source) already spells **SUZUKI** across the frame. Level 1 was
+giving the make away for free, and consecutive levels differed by as little as 22 % (fixture 1's
+1.30 / 1.27 / 1.24 / 1.22) — the reveal barely moved.
+
+#### The rule
+
+> **`cropFractions` is a geometric sequence.** Pick the level-1 fraction `f1` and the level-5
+> fraction `f5`; every schedule is `fᵢ = f1 · r^(i−1)` with `r = (f5 / f1)^(1/4)`, rounded to two
+> decimals. **Consecutive ratios must stay within ±3 % of `r`.** This holds for
+> `DEFAULT_CROP_FRACTIONS` *and* for every per-puzzle override — an override re-derives `r` from its
+> own `f1`, it does not invent a shape.
+
+A constant ratio is what "zoom out logarithmically" means: each guess buys the same *multiple* of
+field of view, so the reveal feels even instead of front-loaded. The old default's ratios
+(1.67 / 1.60 / 1.55 / 1.53) were already near-geometric; the fixtures' hand-typed overrides
+(1.30 / 1.27 / 1.24 / 1.22 on fixture 1) were not, and that is the drift the rule closes.
+
+#### The chosen constant
+
+```ts
+/** Level 1..5, a geometric sequence: fᵢ = 0.11 · r^(i-1), r = (0.95/0.11)^(1/4) = 1.71428,
+ *  rounded to 2 dp. Exact sequence 0.11000, 0.18857, 0.32326, 0.55417, 0.95000. §4.7a. */
+export const DEFAULT_CROP_FRACTIONS = [0.11, 0.19, 0.32, 0.55, 0.95] as const;
+export const MIN_LEVEL1_PX = 240;   // was 280 — see decision (b)
+export const MIN_SOURCE_WIDTH = Math.ceil(MIN_LEVEL1_PX / DEFAULT_CROP_FRACTIONS[0]); // = 2182
+```
+
+Realised ratios 1.7273 / 1.6842 / 1.7188 / 1.7273 — deviations from `r` of +0.76 %, −1.75 %,
++0.26 %, +0.76 %, all inside the ±3 % band. `f5` is unchanged at 0.95, so **level 5 is the same
+full view as today**; only the approach to it changes. Level 1 now shows **46 % less area** than
+before ((0.11/0.15)² = 0.538) and each step opens up **1.71×** instead of ~1.58×.
+
+#### The four decisions, and the evidence
+
+Three candidate schedules plus today's were rendered on all three fixtures with the real
+`computeExtractRects()` / resize / quality-search pipeline out of `tools/crop.ts`, and the contact
+sheets were looked at. Two extra probes separated the two things that get confused here — **field of
+view** (set by `f1`) and **resolution** (set by `MIN_LEVEL1_PX`).
+
+**(a) Fractions — `[0.11, 0.19, 0.32, 0.55, 0.95]`, `r = 1.714`.** The level-1 field-of-view ladder
+was rendered at `f1` ∈ {0.07, 0.09, 0.11, 0.13, 0.15, 0.19} on the 916 at two focus points (one on
+structure — fork/frame/exhaust header — and one on the shipped focus, which lands on flat bodywork):
+
+| `f1` | tried | verdict from the sheets |
+|---|---|---|
+| 0.07 | brief's example, `r ≈ 1.92` | **Rejected.** Levels 1 *and* 2 are featureless colour fields at *both* focus points — a pipe and an orange smear, no scale cue, no object. Two of five guesses carry zero information. |
+| 0.09 | `r ≈ 1.80` | **Rejected.** Level 1 is still a texture patch (flat red panel + a shadow line) at both focus points. Level 2 recovers, but level 1 is a wasted guess. |
+| **0.11** | `r = 1.714` | **Chosen.** The tightest fraction at which the structured-focus crop still contains a whole recognisable object (exhaust header + trellis frame + shock spring) and the flat-focus crop still contains a body seam and a fastener. |
+| 0.13–0.15 | `r ≈ 1.65 / 1.59` | Legible, but only 25 %/0 % tighter than today — does not answer the feedback. |
+
+**(b) `MIN_LEVEL1_PX` — 240** (down from 280). One fixed field of view was encoded at 180 / 220 /
+240 / 280 / 360 / 480 px and each painted at **720 device px** — the real worst case, since the
+level-1 image is displayed at ≤ 360 CSS px and a DPR-2 phone paints that into 720 device px. On the
+high-contrast crop (fork, disc, caliper) 240 and 280 are indistinguishable and 180 smears. On the
+low-contrast crop (bodywork + Agip decal) the decal's lettering is crisp at 280 and 240, marginal at
+220, and mush at 180. **240 sits above the break with margin;** 220 sits on the slope and was
+rejected — the fixtures are bright, sharp studio-ish photos, and the floor has to survive darker and
+softer Commons sources than these.
+
+**(c) Level-1 upscale — NO.** `resize({ withoutEnlargement: true })` stays exactly as it is, and
+`tools/crop.ts` needs **no geometry change at all**. Reasons: the level-1 file is painted into a
+≤ 360 CSS px box, so at DPR 2 a 240 px encode is *already* being upscaled 3.0× by the browser —
+re-doing that upscale in libvips adds bytes and exactly zero information; and `levels[].w` is
+contracted (§3.1) as "intrinsic **output** pixels … which never upscales", i.e. it is the app's
+honest statement of how much real detail the file carries. An upscaled level 1 would make that field
+lie, for no pixel gained.
+
+**(d) `MIN_SOURCE_WIDTH` — 2182** (`ceil(240 / 0.11)`, up from 1867). The alternatives, for the
+record:
+
+| `f1` | floor | `MIN_SOURCE_WIDTH` | note |
+|---|---|---|---|
+| 0.07 | 280 / 240 | 4000 / 3429 | brief's example — excludes half the usable band |
+| 0.09 | 280 / 240 | 3112 / 2667 | |
+| 0.11 | 280 | 2546 | |
+| **0.11** | **240** | **2182** | **chosen** |
+| 0.11 | 220 | 2000 | floor too soft (b) |
+| 0.12 | 240 | 2000 | the fallback if 2182 ever proves too tight in practice |
+| 0.15 | 280 | 1867 | today |
+
+**Share of Commons motorcycle photos admitted — an estimate, and the assumption is stated because
+there is no width histogram anywhere in the §6 recon.** The recon records exactly three source
+widths (800, 960, 2048) and nothing else, so this uses the brief's own stated band, **2000–6000 px**:
+
+- uniform over [2000, 6000]: the excluded slice [2000, 2182) is 4.6 % ⇒ **≈ 95 % admitted**
+- log-uniform over [2000, 6000] (the more realistic model — camera output clusters at the high end):
+  `ln(2182/2000) / ln(3) = 7.9 %` excluded ⇒ **≈ 92 % admitted**
+
+Today's 1867 admits 100 % of that band, so the change costs **5–8 points**. The gate is checked
+against the **usable 4:3 width** `min(W, round(H × CROP_ASPECT))` (§4.7), so ordinary 3:2 and 4:3
+landscape photos are unaffected; only tall or panoramic sources lose ground, and those were already
+the ones the gate exists for.
+
+**Fetcher-gate consequence — nothing is silently binned.** §3.4's single `source-width-below-min`
+rule is unchanged and does the work: `tools/fetch.ts` **warns and leaves `decision: "pending"`** — it
+never auto-rejects on width — and `tools/schedule.ts` refuses the *approve* unless
+`operator.cropFractions` is non-null and clears `MIN_LEVEL1_PX`. Raising the floor therefore moves
+that 5–8 % from "auto-approvable" to "operator must supply a geometric override", which is exactly
+the path all three fixtures already take. The only visible change is that `--min-width`'s default
+prints **2182**.
+
+**One consequence worth naming: the focus point is now load-bearing.** At `f1 = 0.11` a focus point
+parked in the middle of a fairing panel yields a level 1 that is a colour field, and the 916's
+shipped `{0.56, 0.55}` does exactly that. **§6.3's review loop should place `focus` on a structured
+region — wheel, engine, frame, headlight, tail — not on the geometric centre of bodywork.** This is
+operator guidance, not a code change; `focus` semantics are untouched.
+
+#### Per-fixture re-derivation
+
+All three fixtures are below `MIN_SOURCE_WIDTH` (they were below the old one too, C4), so all three
+keep an explicit override. Each is re-derived on the same rule: **`f5` is unchanged**, `f1` is the
+smallest two-decimal fraction whose level-1 rect still clears the new 240 px floor, and the three
+middle terms are the geometric interpolation. Every row below was produced by the real pipeline, not
+by hand.
+
+| # | Source (after `sourceCrop`) | `bw0` | `cropFractions` | `r` | `levels[].rect.w` | `levels[].w` | Σ level bytes |
+|---|---|---|---|---|---|---|---|
+| 1 GSX-R750 | 800×600 | 800 | `[0.30, 0.41, 0.55, 0.74, 1.00]` | 1.351 | 240, 328, 440, 592, 800 | 240, 328, 440, 592, 800 | 98,276 |
+| 2 ZX-6R | 960×720 | 960 | `[0.25, 0.35, 0.49, 0.69, 0.96]` | 1.400 | 240, 336, 470, 662, 922 | 240, 336, 470, 662, **900** | 273,554 |
+| 3 Ducati 916 | 1454×1106 | 1454 | `[0.17, 0.26, 0.40, 0.62, 0.96]` | 1.542 | 247, 378, 582, **901**, 1396 | 247, 378, 582, **900, 900** | 183,342 |
+
+Byte sums are at `q = 80` — **the quality search never had to step down** for any fixture, before or
+after. `image.full` is untouched in all three (it does not depend on `cropFractions`): 800×600 /
+38,862 B, 960×720 / 159,868 B, 1400×1065 / 146,700 B.
+
+**Fixture 3 still exhibits the `levels[].w` tie** that §3.1, §4.7 invariant 2 and §7.2 #8 all cite:
+its level-4 rect lands at **901 px**, one pixel over `CROP_TARGET_WIDTH`, so levels 4 and 5 both
+encode to 900. `0.62 × 1454 = 901.48`, a deterministic `Math.round`, not a build-dependent value —
+but it is thin, so if a future `sourceCrop` tweak ever pushes it under 900 the fix is `f4 = 0.63`
+(rect 916, ratio deviation +2.2 %, still inside the ±3 % band), **not** deleting the tie from the
+contract.
+
+**Fixture 1's 800 px source is the one thing this revision cannot fix.** Even at the floor, `f1` can
+be no tighter than `240/800 = 0.30`, and at the shipped focus `{0.52, 0.55}` that crop *still* has
+**SUZUKI** in it. Moving `focus` to **`{0.30, 0.68}`** puts level 1 on the exhaust can, rear wheel,
+disc and rearsets instead, defers the wordmark to level 4, and drops the level sum a further 11 KB
+(109,098 → 98,276 B). The cost is honest and small: levels 3–4 now reach the left edge of the frame,
+so the cardboard boxes the old focus was chosen to avoid become visible there. **Recommended, and
+the table above assumes it** — a wordmark on level 1 is a worse defect than a box on level 3. If the
+operator would rather not move it, keep `{0.52, 0.55}` and the only change is Σ = 109,098 B.
+
+#### Payload effect
+
+Every fixture gets **smaller**; no budget in `schema/constants.ts` changes.
+
+| # | Day payload (JSON + 5 levels) | vs `DAY_BUDGET_BYTES` 400,000 | was | was |
+|---|---|---|---|---|
+| 1 | ≈ 100.6 KB | **25.2 %** | 131.2 KB | 32.8 % |
+| 2 | ≈ 275.9 KB | **69.0 %** | 331.6 KB | 82.9 % |
+| 3 | ≈ 185.9 KB | **46.5 %** | 226.2 KB | 56.5 % |
+
+Fixture 2 was the tight one at 82.9 % of the day budget; it now sits at 69 %. Committed WebP weight
+in the repo drops by ≈ 115 KB. `CROP_BUDGET_BYTES`, `FULL_BUDGET_BYTES` and `DAY_BUDGET_BYTES` are
+unchanged, and so are the JS/CSS/catalog budgets — this revision touches no budget, it just uses
+less of one.
+
+#### Exact edits for the implementer
+
+1. **`schema/constants.ts`** — `DEFAULT_CROP_FRACTIONS = [0.11, 0.19, 0.32, 0.55, 0.95]`;
+   `MIN_LEVEL1_PX = 240`; fix the `// = 1867` comment on `MIN_SOURCE_WIDTH` to `// = 2182`
+   (the expression itself is already derived and must not be hand-set). Nothing else in the file.
+2. **`tools/crop.ts`** — **no geometry change.** Decision (c) means `withoutEnlargement: true`
+   stays and `computeExtractRects()` / `assertInvariants()` are byte-identical. The only edits are
+   documentation: the header comment's CLI line and `main()`'s `usage:` string both quote
+   `[--fractions 0.15,0.25,0.40,0.62,0.95]` — update both to `0.11,0.19,0.32,0.55,0.95`.
+3. **`fixtures/fixtures.json`** — the three `cropFractions` arrays per the table above, and (if the
+   recommendation is taken) fixture 1's `focus` → `{ "x": 0.30, "y": 0.68 }`. `sourceCrop`, credit,
+   `yearEvidence` and every id are untouched.
+4. **Regenerate and commit** — `npm run generate`, then commit `public/puzzles/*.json`,
+   `public/puzzles/img/**` and `docs/ATTRIBUTION.md`. CI step 8's idempotency gate (§12.4) requires
+   the committed output to be byte-identical to a fresh run, so this is not optional.
+   `ATTRIBUTION.md` carries no crop numbers and should come back unchanged — if it moves, something
+   else did too.
+5. **`tools/crop.test.ts`** — two literal rect tables change:
+   - fixture-1 `describe`: fractions `[0.3, 0.41, 0.55, 0.74, 1.0]`, focus `{0.30, 0.68}` (or
+     `{0.52, 0.55}` if the focus move is declined — the rects are the same either way),
+     expected rects `240×180, 328×246, 440×330, 592×444, 800×600`.
+   - fixture-3 `describe`: fractions `[0.17, 0.26, 0.4, 0.62, 0.96]`, expected rects
+     `247×185, 378×284, 582×437, 901×676, 1396×1047`.
+   - The `baseRect` tests, the focus-clamping tests and both `assertInvariants` failure tests are
+     **unchanged and still pass**: `[0.1, …]` on 800 px gives 80 px, still under 240; `[0.4, …]` on
+     800 px gives 320 px, still over.
+6. **`tools/fetch.test.ts`** — the "no source-width warning" case uses **2000×1500**, whose usable
+   width 2000 is now *below* 2182, so it would start warning. Raise it to **2400×1800**
+   (usable 2400 ≥ 2182) and update the arithmetic in its comment. The 3000×1000 panorama case still
+   warns (usable 1333) — comment number only. The 800-px case still warns — comment number only.
+7. **`tools/schedule.test.ts`** — comment only: `MIN_SOURCE_WIDTH (1867)` → `(2182)`.
+   `WORKING_CROP_FRACTIONS` (level-1 rect 320 px) and the `tooTight` fixture (80 px) both keep their
+   meaning under the 240 floor; no assertion changes.
+8. **`tools/fetch.ts`** — the two `--min-width 1867` usage strings → `2182`.
+9. **`schema/puzzle-contracts.test.ts` — new contract test, §7.2 #15:** for every puzzle,
+   `cropFractions` is geometric — each `f[i]/f[i-1]` within **±3 %** of `(f[4]/f[0])^(1/4)`. This is
+   the only thing that stops the next hand-typed override from silently reverting this revision.
+   Verified to pass for all three new overrides (max deviation 1.2 %, 0.6 %, 0.8 %) and for the new
+   default (1.75 %).
+10. **E2E: nothing to change.** `playthrough.spec.ts` asserts the scrub by accessible name
+    (`Crop level N of 5`) and `aria-current`, never a pixel size; `mobile-layout.spec.ts` measures
+    `.scrub__seg` touch targets and the submit button's `bottom`, never the image. `ImageStage`
+    sizes the frame from `--stage-max-h` in CSS, so a different intrinsic `levels[].w/h` moves no
+    layout. Grepped: no test or spec anywhere asserts a level dimension or byte count except
+    `tools/crop.test.ts`.
+11. **Unit-test stubs** (`src/components/ImageStage.test.ts`, `src/components/ResultModal.test.ts`,
+    `src/lib/puzzle.test.ts`, `src/lib/stats.test.ts`) each hard-code
+    `cropFractions: [0.15, 0.25, 0.4, 0.62, 0.95]` as filler. Nothing asserts on it and all four
+    still pass; update them to the new default for consistency, optional.
+12. **`tsx tools/check-budget.ts`** must pass unchanged — see the payload table; every day payload
+    goes *down*.
+
+**Evidence on disk** (throwaway, not committed) —
+`/tmp/claude-1000/-home-chris-workspace/852d5747-63d4-4155-bc73-5cf062e93be6/scratchpad/zoom-design/`:
+`render.ts` (4 schedules × 3 fixtures + 3 floor-derived overrides each, 21 contact sheets),
+`probe2.ts` (the fixed-FOV resolution ladder and the level-1 field-of-view ladder), `final.ts` (the
+chosen numbers), `out/CHOSEN-*.png`, `out/sheet-*.png`, `out/final-report.txt`.
 
 ---
 
@@ -1467,6 +1698,10 @@ Every limit below is **imported from `schema/constants.ts`** (§4.7), never re-t
 | `public/catalog.json`, gzipped | `CATALOG_GZ_BUDGET_BYTES` | **150 KB** | brief |
 | Per day: `puzzles/<date>.json` + its 5 level WebPs, **raw bytes** | `DAY_BUDGET_BYTES` | **400 KB** | brief |
 | Full reveal image, raw | `FULL_BUDGET_BYTES` | 250 KB | plan (excluded from the 400 KB — lazy) |
+
+No limit in that table changed in revision 9; the geometric ladder (§4.7a) only *uses less* of the
+day budget — the three fixtures land at 25.2 %, 69.0 % and 46.5 % of `DAY_BUDGET_BYTES`, against
+32.8 %, 82.9 % and 56.5 % before.
 
 Output is a table plus a non-zero exit on any breach. The probe measured a Svelte 5 runes app at
 **10.66 KB gzipped**, so the 60 KB budget has ~5× headroom — provided `catalog.json` and the puzzle
@@ -2356,10 +2591,10 @@ tools/catalog.ts   --out public/catalog.json  [--brands <n>=40] [--depth 2]
                    [--cache .cache/wikimedia] [--dry-run] [--resume]
                    [--review-only]   # offline: re-render docs/CATALOG-REVIEW.md from the catalog
 tools/fetch.ts     --models <id,id,…> | --models-file <path>
-                   --out data/review/<batch>.json  [--per-model 20] [--min-width <MIN_SOURCE_WIDTH=1867>]
+                   --out data/review/<batch>.json  [--per-model 20] [--min-width <MIN_SOURCE_WIDTH=2182>]
                    [--licenses pd,cc0,cc-by,cc-by-sa] [--cache .cache/wikimedia] [--dry-run]
 tools/crop.ts      --in <image> --out <dir> --focus 0.5,0.5 [--source-crop x,y,w,h]
-                   [--fractions 0.15,0.25,0.40,0.62,0.95] [--quality auto]
+                   [--fractions 0.11,0.19,0.32,0.55,0.95] [--quality auto]
 tools/schedule.ts  --review data/review/<batch>.json --start 2026-09-05 [--dry-run]
 tools/generate.ts  (no args — fixtures only)
 ```
@@ -2596,8 +2831,8 @@ so there is no share-alike or attribution obligation attached to a git clone. Cr
 
 | # | Date | Answer | Commons file | M-id | Source | Licence | Year evidence | Params |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 2026-09-02 | 2004 Suzuki GSX-R750 | `File:2004 Suzuki GSXR-750 Left SIde.jpg` | M12193306 | 800×600 | PD (`PD-user`), `P275=Q98592850` | **high** — leading `2004` in title, repeated in description | `focus {0.52,0.55}` (biases away from the boxes at frame left), `cropFractions [0.40,0.52,0.66,0.82,1.00]` (C4 — 800 px source; level 1 = 320 px ≥ 280 ✓) |
-| 2 | 2026-09-03 | 2002 Kawasaki Ninja ZX-6R | `File:2002 kawasaki zx-6r.jpg` | M3111849 | 960×720 | PD (`PD-user`) | **high** — leading `2002` in title, description "2002 Kawasaki ZX-6R, U.S. model" | `focus {0.5,0.55}`, `cropFractions [0.30,0.44,0.60,0.78,0.96]` (level 1 = 288 px ≥ 280 ✓; 960 px source is below `MIN_SOURCE_WIDTH`). **Not yet rendered or downloaded by anyone — the DoD includes viewing it.** |
+| 1 | 2026-09-02 | 2004 Suzuki GSX-R750 | `File:2004 Suzuki GSXR-750 Left SIde.jpg` | M12193306 | 800×600 | PD (`PD-user`), `P275=Q98592850` | **high** — leading `2004` in title, repeated in description | `focus {0.30,0.68}`, `cropFractions [0.30,0.41,0.55,0.74,1.00]` (r = 1.351; C4 — 800 px source, so `f1` cannot go below `240/800 = 0.30`; level 1 = 240 px ≥ 240 ✓). **The focus moved in revision 9** (§4.7a): at `{0.52,0.55}` the tightest crop this source allows *still* frames the SUZUKI wordmark. `{0.30,0.68}` puts level 1 on the exhaust can, rear wheel and rearsets and defers the wordmark to level 4; the accepted cost is that levels 3–4 now reach the frame's left edge and show the cardboard boxes the old focus avoided. |
+| 2 | 2026-09-03 | 2002 Kawasaki Ninja ZX-6R | `File:2002 kawasaki zx-6r.jpg` | M3111849 | 960×720 | PD (`PD-user`) | **high** — leading `2002` in title, description "2002 Kawasaki ZX-6R, U.S. model" | `focus {0.5,0.55}`, `cropFractions [0.25,0.35,0.49,0.69,0.96]` (r = 1.400; level 1 = 240 px ≥ 240 ✓; 960 px source is below `MIN_SOURCE_WIDTH`). Rendered and inspected in revision 9: level 1 is engine case + frame + fairing edge with no badging, level 2 adds the ZX-R decal, level 3 the Kawasaki wordmark — the cleanest ladder of the three. |
 | 3 | 2026-09-04 | 1995 Ducati 916 | `File:Ducati 916.JPG` | M4303996 | 2048×1536 | PD (`PD-self`), `P275=Q98592850` | **medium→operator** — description "1995 Ducati 916, National Motor Museum in Beaulieu"; on-image placard reads "1995 DUCATI 916" | **`sourceCrop` mandatory** — see the computed block below. `creditNote` = the author's prose credit request (see below). |
 
 **Fixture 3 geometry, computed with §4.7 — use these numbers, do not re-derive by eye:**
@@ -2607,9 +2842,9 @@ so there is no share-alike or attribution obligation attached to a git clone. Cr
 | `sourceCrop` | `{ "x": 0.08, "y": 0.02, "w": 0.71, "h": 0.72 }` | x ends at 0.79 → drops the blue Yamaha at the right edge. y ends at 0.74 → drops the placard, whose year line sits at y ≈ 0.75–0.79. |
 | cropped size | 1454 × 1106 (aspect 1.315) | 0.71·2048 × 0.72·1536 |
 | base 4:3 rect | **1454 × 1091** | crop is narrower than 4:3, so `bw0 = W`; `bh0 = Math.round(1454 / (4/3)) = Math.round(1090.5) = ` **1091** — JS rounds .5 up. Use 1091; do not write 1090. |
-| min first fraction | **0.1926** (= 280 / 1454) | anything below fails `MIN_LEVEL1_PX` |
-| `cropFractions` | `[0.22, 0.36, 0.52, 0.72, 0.96]` | level **rects** 320·240, 523·392, 756·567, 1047·785, 1396·1047 — `rect.w` strictly increasing ✓, level 1 = 320 px ≥ 280 ✓ |
-| output widths (`levels[].w`) | 320, 523, 756, **900, 900** | `min(CROP_TARGET_WIDTH, rect.w)`, never upscaled. **Levels 4 and 5 legitimately tie** — both rects exceed 900. This is why `levels[].w` is *non-decreasing* and the strictly-increasing invariant belongs to `levels[].rect.w` (§3.1, §4.7, §7.2 #8). |
+| min first fraction | **0.1651** (= 240 / 1454) | anything below fails `MIN_LEVEL1_PX`; the smallest two-decimal fraction that clears it is **0.17** |
+| `cropFractions` | `[0.17, 0.26, 0.40, 0.62, 0.96]` (r = 1.542) | level **rects** 247·185, 378·284, 582·437, 901·676, 1396·1047 — `rect.w` strictly increasing ✓, level 1 = 247 px ≥ 240 ✓, geometric ✓ (§4.7a) |
+| output widths (`levels[].w`) | 247, 378, 582, **900, 900** | `min(CROP_TARGET_WIDTH, rect.w)`, never upscaled. **Levels 4 and 5 legitimately tie** — both rects exceed 900. This is why `levels[].w` is *non-decreasing* and the strictly-increasing invariant belongs to `levels[].rect.w` (§3.1, §4.7, §7.2 #8). **The tie now hangs on one pixel** — `0.62 × 1454 = 901.48 → 901` — which is deterministic, but if a future `sourceCrop` tweak pushes level 4 under 900 the fix is `f4 = 0.63` (rect 916), not deleting the tie from the contract (§4.7a). |
 | `full` | width `min(1400, 1454) = 1400`, height 1065 (aspect 1.315, **not** 4:3) | encoded from the **source-cropped** image, so the placard stays gone; `ResultModal` letterboxes it (§3.1) |
 | `focus` | `{ "x": 0.56, "y": 0.55 }` | fractions **of the cropped image**; centres on the bike's mass |
 
@@ -2756,6 +2991,10 @@ These are the tests that catch two agents disagreeing:
     and asserts it contains no `tools/lib/wikimedia.ts` and no `fetch` / `node:https` / `node:http` /
     `undici` reference. A clean-clone run cannot prove the absence of network by observation, so it is
     proved by the import graph instead (§7.5 step 5).
+15. **`cropFractions` is geometric** (§4.7a): for every puzzle file *and* for
+    `DEFAULT_CROP_FRACTIONS`, each `f[i]/f[i-1]` is within **±3 %** of `(f[4]/f[0])^(1/4)`. Strictly
+    increasing (#8) is not enough — it permits exactly the front-loaded, hand-typed ladder revision 9
+    removed, and this is the only check that stops the next override from silently reverting it.
 
 **7.2a — `schema/validate.ts`'s supported keyword subset.** It is a *tiny dependency-free* validator,
 so its capability is stated rather than assumed. Supported: `type`, `required`, `properties`,
@@ -3612,6 +3851,37 @@ was an `infra/` fix and got no section of its own.)*
 fold slack could buy the 360×640 photo +30 px via `--stage-max-h: clamp(120px, 100svh - 470px, 36svh)`
 (§5.11.6), and the UK spellings left in *test names* and source comments are optional tidying
 (§5.13). Neither blocks anything.
+
+### 11.14 Revision 9 — the zoom schedule 2026-09-03
+
+User feedback on the live site, 2026-09-03: *"The images should be much more cropped at first. Maybe
+zoom out logarithmically — worth a try."* One change, in one constant plus three fixture overrides.
+**No game rule, no scoring, no storage schema, no DOM contract, no UI layout, no CSP, no `infra/**`,
+no `.github/**`, and no budget value changes.** The full design, with the rendered evidence it was
+decided from, is **§4.7a**.
+
+| # | Change | Sections |
+|---|---|---|
+| R9-1 | **`DEFAULT_CROP_FRACTIONS` becomes a geometric sequence, `[0.11, 0.19, 0.32, 0.55, 0.95]`** (`r = (0.95/0.11)^(1/4) = 1.714`, 2 dp). Level 5 is the same 0.95 full view; level 1 shows **46 % less area** than the old 0.15 and every step now opens up by the same multiple instead of 1.67→1.53. | new §4.7a; §4.7 |
+| R9-2 | **`MIN_LEVEL1_PX` 280 → 240**, so the tighter `f1` does not price out ordinary sources. Decided from a fixed-field-of-view resolution ladder (180/220/240/280/360/480 px, each painted at 720 device px = 360 CSS px on a DPR-2 phone): 240 and 280 are indistinguishable, 220 is on the slope, 180 smears. | §4.7, §4.7a (b) |
+| R9-3 | **No level-1 upscale.** `withoutEnlargement: true` stays and **`tools/crop.ts`'s geometry is unchanged** — the browser already upscales a 240 px level 1 ~3×, so a pipeline upscale would add bytes, no information, and would make `levels[].w` lie. | §4.7, §4.7a (c) |
+| R9-4 | **`MIN_SOURCE_WIDTH` 1867 → 2182** (derived, `ceil(240/0.11)`). Estimated to admit **92–95 %** of the 2000–6000 px band the brief names, against 100 % before; the assumption is stated because the §6 recon carries no width histogram. Nothing is binned — §3.4's warn-and-pend rule is unchanged, so those candidates route to operator review with a required override. | §1.1 C4, §4.7, §4.7a (d), §6.2 |
+| R9-5 | **All three fixture overrides re-derived on the same rule** (`f5` unchanged, `f1` at the new floor, geometric between): F1 `[0.30,0.41,0.55,0.74,1.00]`, F2 `[0.25,0.35,0.49,0.69,0.96]`, F3 `[0.17,0.26,0.40,0.62,0.96]`. Fixture 3 still exhibits the `levels[].w` tie the contract cites (level-4 rect 901 px). | §3.1, §6.9, §4.7a |
+| R9-6 | **Fixture 1's `focus` moves to `{0.30, 0.68}`.** Its 800 px source floors `f1` at 0.30, and at the old focus that crop still frames the SUZUKI wordmark on level 1. Accepted cost: levels 3–4 now show the boxes at frame left. `focus` **semantics** are untouched — this is one operator value. | §6.9, §4.7a |
+| R9-7 | **New contract test §7.2 #15 — `cropFractions` must be geometric** (each ratio within ±3 % of `(f[4]/f[0])^(1/4)`). Strictly-increasing alone permits exactly the front-loaded ladder this revision removes; this is what stops the next hand-typed override from reverting it. | §3.1, §7.2 |
+| R9-8 | **Every day payload gets smaller** — 32.8 %→25.2 %, 82.9 %→**69.0 %**, 56.5 %→46.5 % of `DAY_BUDGET_BYTES`; ≈ 115 KB less committed WebP. Quality search still settles at q = 80 for all three. No budget constant changes. | §5.9, §4.7a |
+| R9-9 | **E2E is untouched.** The scrub is asserted by accessible name and `aria-current`, never by pixel size; `ImageStage` sizes its frame from `--stage-max-h` in CSS, so a different intrinsic `levels[].w/h` moves no layout. `tools/crop.test.ts` is the only test file whose *assertions* change; `fetch.test.ts` needs its 2000×1500 "no warning" case raised to 2400×1800, which is semantically correct rather than a workaround. | §4.7a, §7.4 |
+
+**One consequence recorded rather than coded:** at `f1 = 0.11` the **focus point is load-bearing** —
+a focus parked mid-fairing yields a level 1 that is a colour field, which the 916's shipped
+`{0.56, 0.55}` demonstrates. §6.3's review loop should place `focus` on structure (wheel, engine,
+frame, headlight, tail). Operator guidance; no code change.
+
+**The fallback, with its number, if 2182 ever proves too tight in the field:** `f1 = 0.12` keeps the
+rule, gives `r = 1.677`, and lands `MIN_SOURCE_WIDTH` on exactly **2000** — the bottom of the stated
+band. It was not chosen because 0.11 cleared the legibility bar with margin.
+
+---
 
 ---
 

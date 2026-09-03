@@ -6,7 +6,7 @@
  *
  * CLI:
  *   tsx tools/fetch.ts --models <id,id,…> | --models-file <path>
- *                       --out data/review/<batch>.json [--per-model 20] [--min-width 1867]
+ *                       --out data/review/<batch>.json [--per-model 20] [--min-width 2182]
  *                       [--licenses pd,cc0,cc-by,cc-by-sa] [--cache .cache/wikimedia] [--dry-run]
  */
 import { promises as fs } from 'node:fs';
@@ -432,7 +432,7 @@ async function main(): Promise<void> {
   if (modelIds.length === 0 || !outPath) {
     console.error(
       'usage: tsx tools/fetch.ts --models <id,id,…> | --models-file <path> --out data/review/<batch>.json ' +
-        '[--per-model 20] [--min-width 1867] [--licenses pd,cc0,cc-by,cc-by-sa] [--cache .cache/wikimedia] [--dry-run]',
+        '[--per-model 20] [--min-width 2182] [--licenses pd,cc0,cc-by,cc-by-sa] [--cache .cache/wikimedia] [--dry-run]',
     );
     process.exitCode = 1;
     return;

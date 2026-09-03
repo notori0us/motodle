@@ -154,9 +154,11 @@ describe('buildReviewCandidate — allowed licence, high-confidence year', () =>
   });
 
   it('no source-width warning when the usable 4:3 width meets MIN_SOURCE_WIDTH (large in both axes)', () => {
-    // 2000x1500: usable width = min(2000, round(1500*4/3)) = min(2000, 2000) = 2000 >= 1867.
+    // 2400x1800: usable width = min(2400, round(1800*4/3)) = min(2400, 2400) = 2400 >= 2182.
+    // (2000x1500 no longer clears MIN_SOURCE_WIDTH post-§4.7a: usable 2000 < 2182 — a 2000px
+    // source at f1=0.11 yields a 220px level-1 rect, under the 240px floor.)
     const candidate = buildReviewCandidate({
-      page: page({}, { imageinfo: { ...page().imageinfo, width: 2000, height: 1500 } }),
+      page: page({}, { imageinfo: { ...page().imageinfo, width: 2400, height: 1800 } }),
       makeId: 'suzuki',
       modelId: 'suzuki-gsxr750',
       sourceCategory: 'x',
@@ -167,7 +169,7 @@ describe('buildReviewCandidate — allowed licence, high-confidence year', () =>
   });
 
   it('warns on a wide-but-short panorama whose USABLE 4:3 width fails even though the raw width passes (§4.7)', () => {
-    // 3000x1000: raw width 3000 >= 1867, but usable width = min(3000, round(1000*4/3)) = 1333 < 1867.
+    // 3000x1000: raw width 3000 >= 2182, but usable width = min(3000, round(1000*4/3)) = 1333 < 2182.
     const candidate = buildReviewCandidate({
       page: page({}, { imageinfo: { ...page().imageinfo, width: 3000, height: 1000 } }),
       makeId: 'suzuki',

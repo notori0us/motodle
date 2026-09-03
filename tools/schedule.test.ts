@@ -31,7 +31,7 @@ const NO_OVERRIDE: OperatorOverride = {
 
 // The stand-in "original" every test downloads is the real 800x600 GSX-R750 fixture JPEG
 // (read-only, borrowed from fixtures/images/ — never written to). 800px is below
-// MIN_SOURCE_WIDTH (1867), so — exactly like the real fixture 1 (§6.9, C4) — it needs this same
+// MIN_SOURCE_WIDTH (2182), so — exactly like the real fixture 1 (§6.9, C4) — it needs this same
 // explicit cropFractions override to clear MIN_LEVEL1_PX. Tests that care about crop geometry
 // override this explicitly; everything else just needs SOME crop that succeeds.
 const WORKING_CROP_FRACTIONS = [0.4, 0.52, 0.66, 0.82, 1.0] as const;
@@ -191,8 +191,9 @@ describe('deriveYearEvidence', () => {
 
 describe('assertSourceWidthApprovable (§3.4/§6.3)', () => {
   it('does nothing when the usable 4:3 width already clears MIN_SOURCE_WIDTH', () => {
+    // 2400x1800: usable width = min(2400, round(1800*4/3)) = 2400 >= MIN_SOURCE_WIDTH (2182, §4.7a).
     expect(() =>
-      assertSourceWidthApprovable(candidate({ width: 2000, height: 1500, operator: NO_OVERRIDE })),
+      assertSourceWidthApprovable(candidate({ width: 2400, height: 1800, operator: NO_OVERRIDE })),
     ).not.toThrow();
   });
 
@@ -209,7 +210,7 @@ describe('assertSourceWidthApprovable (§3.4/§6.3)', () => {
   });
 
   it('still throws when operator.cropFractions is set but its level-1 rect stays below MIN_LEVEL1_PX', () => {
-    const tooTight = [0.1, 0.2, 0.4, 0.6, 0.8] as const; // 0.1 * 800 = 80px, well under 280
+    const tooTight = [0.1, 0.2, 0.4, 0.6, 0.8] as const; // 0.1 * 800 = 80px, well under 240
     expect(() =>
       assertSourceWidthApprovable(candidate({ operator: { ...NO_OVERRIDE, cropFractions: tooTight } })),
     ).toThrow(/MIN_SOURCE_WIDTH/);

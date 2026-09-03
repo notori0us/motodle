@@ -13,7 +13,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { validate, type JSONSchema } from './validate';
-import { DAY_BUDGET_BYTES, CATALOG_GZ_BUDGET_BYTES } from './constants';
+import { DAY_BUDGET_BYTES, CATALOG_GZ_BUDGET_BYTES, DEFAULT_CROP_FRACTIONS } from './constants';
 
 const ROOT = path.join(__dirname, '..');
 const PUZZLES_DIR = path.join(ROOT, 'public/puzzles');
@@ -195,6 +195,14 @@ describe('§7.2 #8 — crop geometry invariants', () => {
       }
     });
 
+    it(`${file}: cropFractions is geometric — each ratio within ±3% of r = (f5/f1)^(1/4) (§7.2 #15, §4.7a)`, () => {
+      const r = (cropFractions[4] / cropFractions[0]) ** (1 / 4);
+      for (let i = 1; i < cropFractions.length; i++) {
+        const ratio = cropFractions[i] / cropFractions[i - 1];
+        expect(Math.abs(ratio - r) / r).toBeLessThanOrEqual(0.03);
+      }
+    });
+
     it(`${file}: levels[].rect.w strictly increasing`, () => {
       for (let i = 1; i < levels.length; i++) {
         expect(levels[i].rect.w).toBeGreaterThan(levels[i - 1].rect.w);
@@ -243,5 +251,16 @@ describe('§7.2 #9 — payload budgets', () => {
 
   it('sanity: catalog is non-trivial (models[].makeId all resolve, checked fully in catalog-contracts.test.ts)', () => {
     expect(catalog.models.length).toBeGreaterThan(0);
+  });
+});
+
+describe('DEFAULT_CROP_FRACTIONS (§4.7a)', () => {
+  it('is geometric — each ratio within ±3% of r = (f5/f1)^(1/4) (§7.2 #15)', () => {
+    const f = DEFAULT_CROP_FRACTIONS;
+    const r = (f[4] / f[0]) ** (1 / 4);
+    for (let i = 1; i < f.length; i++) {
+      const ratio = f[i] / f[i - 1];
+      expect(Math.abs(ratio - r) / r).toBeLessThanOrEqual(0.03);
+    }
   });
 });

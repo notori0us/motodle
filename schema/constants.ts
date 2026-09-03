@@ -15,14 +15,16 @@ export const PUZZLE_NUMBER_OFFSET = 1;
 // Crop geometry (§4.7)
 // ---------------------------------------------------------------------------------------------
 
-export const DEFAULT_CROP_FRACTIONS = [0.15, 0.25, 0.4, 0.62, 0.95] as const; // level 1..5
+/** Level 1..5, a geometric sequence: fᵢ = 0.11 · r^(i-1), r = (0.95/0.11)^(1/4) = 1.71428,
+ *  rounded to 2 dp. Exact sequence 0.11000, 0.18857, 0.32326, 0.55417, 0.95000. §4.7a. */
+export const DEFAULT_CROP_FRACTIONS = [0.11, 0.19, 0.32, 0.55, 0.95] as const; // level 1..5
 export const CROP_ASPECT = 4 / 3;
 export const CROP_TARGET_WIDTH = 900; // max output width; never upscales
-export const MIN_LEVEL1_PX = 280; // hard validation floor
+export const MIN_LEVEL1_PX = 240; // hard validation floor — was 280, §4.7a (b)
 
 /** DERIVED, never hand-set: a source narrower than this cannot satisfy MIN_LEVEL1_PX at the
  *  default fractions, so the fetcher must not approve it without an override. */
-export const MIN_SOURCE_WIDTH = Math.ceil(MIN_LEVEL1_PX / DEFAULT_CROP_FRACTIONS[0]); // = 1867
+export const MIN_SOURCE_WIDTH = Math.ceil(MIN_LEVEL1_PX / DEFAULT_CROP_FRACTIONS[0]); // = 2182
 
 export const DEFAULT_FOCUS = { x: 0.5, y: 0.5 } as const;
 
