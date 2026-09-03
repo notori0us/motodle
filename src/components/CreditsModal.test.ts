@@ -48,7 +48,7 @@ describe('CreditsModal', () => {
     render(CreditsModal, { props: baseProps() });
     expect(
       screen.getByText(
-        'Photos come from Wikimedia Commons under Creative Commons or public-domain licences and are cropped, resized and re-encoded.',
+        'Photos come from Wikimedia Commons under Creative Commons or public-domain licenses and are cropped, resized and re-encoded.',
       ),
     ).toBeInTheDocument();
   });

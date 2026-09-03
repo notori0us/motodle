@@ -94,8 +94,8 @@
           type="button"
           class="icon-button"
           aria-pressed={game.prefs.colorblind}
-          aria-label="Toggle colourblind mode"
-          title="Toggle colourblind mode"
+          aria-label="Toggle colorblind mode"
+          title="Toggle colorblind mode"
           onclick={() => game.toggleColorblind()}
         >
           &#9681;
@@ -157,7 +157,7 @@
     <footer class="app-footer">
       Photos: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
         >Wikimedia Commons</a
-      >, Creative Commons licences ·
+      >, Creative Commons licenses ·
       <button type="button" id="mtd-credits-link" class="link-button" onclick={() => game.openCredits()}
         >Photo credits</button
       >

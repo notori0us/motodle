@@ -120,7 +120,7 @@ describe('ImageStage', () => {
       render(ImageStage, {
         props: { image: testImage(), unlockedLevel: 1, viewLevel: 1, onchangeLevel: vi.fn(), credit: testCredit() },
       });
-      const link = screen.getByRole('link', { name: /Photo licence/ }) as HTMLAnchorElement;
+      const link = screen.getByRole('link', { name: /Photo license/ }) as HTMLAnchorElement;
       expect(link).toHaveTextContent('Photo: Public domain');
       expect(link).toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/Template:PD-user');
       expect(link).toHaveAttribute('id', 'mtd-photo-licence');
@@ -138,7 +138,7 @@ describe('ImageStage', () => {
           credit: jurisdictionCredit(),
         },
       });
-      const link = screen.getByRole('link', { name: /Photo licence/ });
+      const link = screen.getByRole('link', { name: /Photo license/ });
       // license.id is "CC-BY-SA-2.0" (no jurisdiction token) — only license.name carries "de".
       expect(link).toHaveTextContent('Photo: CC BY-SA 2.0 de');
       expect(link).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/2.0/de/deed.en');
@@ -160,7 +160,7 @@ describe('ImageStage', () => {
       render(ImageStage, {
         props: { image: testImage(), unlockedLevel: 5, viewLevel: 5, onchangeLevel: vi.fn(), credit: testCredit() },
       });
-      expect(screen.getByRole('link', { name: /Photo licence/ })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Photo license/ })).toBeInTheDocument();
     });
   });
 });

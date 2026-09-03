@@ -152,9 +152,26 @@ a {
   color: var(--color-danger);
 }
 
+/* One focus ring for every interactive element (§5.11.4 U10 — nothing defined :focus-visible
+   before, so each control fell back to a different UA default and the <select>'s was nearly
+   invisible on the dark surface). --color-accent is theme-aware, so light, dark and colorblind
+   are all covered by one rule. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+/* An accent ring on an accent fill is invisible — flip it to the foreground there. */
+.button--primary:focus-visible {
+  outline-color: var(--color-fg);
+}
+
+/* Replaces `opacity: 0.5` (§5.11.4 U5 root cause): opacity fades text and border together and
+   drops a disabled label's contrast well under 4.5:1. */
 .button:disabled,
 .button.is-disabled {
-  opacity: 0.5;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border-color: var(--color-border);
 }
 
 /* §5.10.5: a footnote-style link that opens an in-page dialog, not a game control — the 44px

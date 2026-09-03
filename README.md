@@ -5,8 +5,8 @@
 This repo is private, so the badge image above only renders for viewers authenticated with repo
 access — it shows as broken in an anonymous or mirrored context. That's expected, not a config bug.
 
-A daily motorbike-guessing game, in the shape of Wordle/Cardle: guess the make, model and year
-of a motorbike from a progressively-revealed photo. Fully static — Vite + TypeScript + Svelte 5,
+A daily motorbike-guessing game, in the shape of Wordle/Cardle. Guess the motorbike in 5 tries.
+A new motorbike is available each day. Fully static — Vite + TypeScript + Svelte 5,
 no runtime dependencies, no backend, no third-party scripts. See `docs/PLAN.md` for the full
 design (data contracts, game logic, content pipeline, test plan, implementation workstreams).
 

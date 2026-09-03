@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import HelpModal from './HelpModal.svelte';
 
 describe('HelpModal', () => {
+  it('renders the §5.12 tagline verbatim as its intro', () => {
+    render(HelpModal, { props: { open: true, onclose: vi.fn() } });
+    expect(screen.getByText('Guess the motorbike in 5 tries. A new motorbike is available each day.')).toBeInTheDocument();
+  });
+
   it('renders the §5.6 wording for all three yellow bands when open', () => {
     render(HelpModal, { props: { open: true, onclose: vi.fn() } });
     expect(screen.getByText(/same country/)).toBeInTheDocument();

@@ -71,7 +71,7 @@
       href={credit.license.url}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`Photo licence: ${credit.license.name} (opens the licence deed)`}
+      aria-label={`Photo license: ${credit.license.name} (opens the license deed)`}
     >Photo: {credit.license.name}</a>
 
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -- roving-arrow-key navigation

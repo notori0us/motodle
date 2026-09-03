@@ -1,6 +1,8 @@
 <!-- Make/model dropdowns + year + submit/give-up (§5.3, §5.4, §4.3 locking). Two cascading native
      <select>s: DOM contract is frozen (§5.3.1) so the e2e workstream can address #mtd-make /
-     #mtd-model by id and catalog id, independent of anything else here. -->
+     #mtd-model by id and catalog id, independent of anything else here.
+     Layout: one two-column grid at every width (§5.11.2) — the DOM changes are markup/CSS only,
+     the DOM contract itself (ids, option values, label texts, accessible names) is unchanged. -->
 <script lang="ts">
   import type { CatalogIndex, TodayState } from '../../schema/types';
   import { getMake, getModel, listMakes, modelsForMake } from '../lib/catalog';
@@ -122,82 +124,76 @@
      disabled attribute. Our own aria-invalid/aria-describedby message (§5.3.4) is the only
      validation UI; a native tooltip would also be unreachable in a headless e2e run. -->
 <form class="guess-form" onsubmit={handleSubmit} novalidate>
-  <div class="guess-form__names">
-    <div class="guess-form__field">
+  <div class="guess-form__grid">
+    <div class="guess-form__label-row" data-area="make-label">
       <label for="mtd-make">Make</label>
-      <div class="select-row">
-        <select
-          id="mtd-make"
-          name="make"
-          class="select"
-          value={effectiveMakeId}
-          disabled={formDisabled || makeLocked}
-          aria-invalid={makeInvalid ? 'true' : undefined}
-          aria-describedby={makeInvalid ? 'mtd-make-error' : undefined}
-          aria-label={makeLocked && lockedMakeName ? `Make — locked to ${lockedMakeName}` : undefined}
-          onchange={handleMakeChange}
-          onkeydown={handleSelectKeydown}
-        >
-          <option value="">Choose a make…</option>
-          {#each makeOptions as make (make.id)}
-            <option value={make.id}>{make.name}</option>
-          {/each}
-        </select>
-        {#if makeLocked}
-          <span class="lock-chip">Locked</span>
-        {/if}
-      </div>
-      {#if makeInvalid}
-        <p id="mtd-make-error" class="field-error">Choose a make</p>
-      {/if}
+      {#if makeInvalid}<p id="mtd-make-error" class="field-error">Choose a make</p>{/if}
+      {#if makeLocked}<span class="lock-chip">Locked</span>{/if}
     </div>
-
-    <div class="guess-form__field">
+    <div class="guess-form__label-row" data-area="model-label">
       <label for="mtd-model">Model</label>
-      <div class="select-row">
-        <select
-          id="mtd-model"
-          name="model"
-          class="select"
-          value={effectiveModelId}
-          disabled={formDisabled || modelLocked || !effectiveMakeId}
-          aria-invalid={modelInvalid ? 'true' : undefined}
-          aria-describedby={modelInvalid ? 'mtd-model-error' : undefined}
-          aria-label={modelLocked && lockedModelName ? `Model — locked to ${lockedModelName}` : undefined}
-          onchange={handleModelChange}
-          onkeydown={handleSelectKeydown}
-        >
-          <option value="">{effectiveMakeId ? 'Choose a model…' : 'Choose a make first'}</option>
-          {#each modelOptions as model (model.id)}
-            <option value={model.id}>{model.name}</option>
-          {/each}
-        </select>
-        {#if modelLocked}
-          <span class="lock-chip">Locked</span>
-        {/if}
-      </div>
-      {#if modelInvalid}
-        <p id="mtd-model-error" class="field-error">Choose a model</p>
+      {#if modelInvalid}<p id="mtd-model-error" class="field-error">Choose a model</p>{/if}
+      {#if modelLocked}<span class="lock-chip">Locked</span>{/if}
+    </div>
+
+    <div class="guess-form__cell" data-area="make" data-locked={makeLocked}>
+      <select
+        id="mtd-make"
+        name="make"
+        class="select"
+        value={effectiveMakeId}
+        disabled={formDisabled || makeLocked}
+        aria-invalid={makeInvalid ? 'true' : undefined}
+        aria-describedby={makeInvalid ? 'mtd-make-error' : undefined}
+        aria-label={makeLocked && lockedMakeName ? `Make — locked to ${lockedMakeName}` : undefined}
+        onchange={handleMakeChange}
+        onkeydown={handleSelectKeydown}
+      >
+        <option value="">Choose a make…</option>
+        {#each makeOptions as make (make.id)}
+          <option value={make.id}>{make.name}</option>
+        {/each}
+      </select>
+    </div>
+    <div class="guess-form__cell" data-area="model" data-locked={modelLocked}>
+      <select
+        id="mtd-model"
+        name="model"
+        class="select"
+        value={effectiveModelId}
+        disabled={formDisabled || modelLocked || !effectiveMakeId}
+        aria-invalid={modelInvalid ? 'true' : undefined}
+        aria-describedby={modelInvalid ? 'mtd-model-error' : undefined}
+        aria-label={modelLocked && lockedModelName ? `Model — locked to ${lockedModelName}` : undefined}
+        onchange={handleModelChange}
+        onkeydown={handleSelectKeydown}
+      >
+        <option value="">{effectiveMakeId ? 'Choose a model…' : 'Choose a make first'}</option>
+        {#each modelOptions as model (model.id)}
+          <option value={model.id}>{model.name}</option>
+        {/each}
+      </select>
+    </div>
+
+    <div class="guess-form__label-row" data-area="year-label">
+      <label for="mtd-year">Year</label>
+      {#if yearInvalid}
+        <p id="mtd-year-error" class="field-error">Enter a year between 1885 and {MAX_YEAR}</p>
       {/if}
     </div>
-  </div>
-
-  <div class="guess-form__bottom">
-    <div class="guess-form__field guess-form__field--year">
-      <label for="mtd-year">Year</label>
+    <div class="guess-form__cell" data-area="year" data-locked={today.locks.year !== null}>
       <YearInput
         id="mtd-year"
         value={yearValue}
         locked={today.locks.year !== null}
         disabled={formDisabled}
         invalid={yearInvalid}
-        invalidMessage={`Enter a year between 1885 and ${MAX_YEAR}`}
         onchange={(v) => {
           yearValue = v;
         }}
       />
     </div>
-    <div class="guess-form__actions">
+    <div class="guess-form__cell" data-area="submit">
       <button
         type="submit"
         class="button button--primary"
@@ -207,169 +203,260 @@
       >
         Guess {today.guesses.length + 1} of 5
       </button>
-      {#if !gameOver}
-        {#if confirmingGiveUp}
-          <span class="give-up-confirm">
-            Give up? This counts as a loss.
-            <button type="button" class="button button--danger" onclick={confirmGiveUp}>Confirm</button>
-            <button type="button" class="button" onclick={() => (confirmingGiveUp = false)}>Cancel</button>
-          </span>
-        {:else}
-          <button type="button" class="button button--danger" disabled={disabled} onclick={() => (confirmingGiveUp = true)}>
-            Give up
-          </button>
-        {/if}
-      {/if}
     </div>
   </div>
+
+  {#if !gameOver}
+    <div class="guess-form__secondary">
+      {#if confirmingGiveUp}
+        <p class="guess-form__confirm-text">Give up? This counts as a loss.</p>
+        <button type="button" class="button" onclick={() => (confirmingGiveUp = false)}>Cancel</button>
+        <button type="button" class="button button--danger is-confirm" onclick={confirmGiveUp}>Confirm</button>
+      {:else}
+        <button type="button" class="button button--danger" disabled={disabled} onclick={() => (confirmingGiveUp = true)}>
+          Give up
+        </button>
+      {/if}
+    </div>
+  {/if}
 </form>
 
 <style>
+  /* One layout at every width (§5.11.2). The height-keyed LAYOUT branch is gone; the only
+     height-keyed rule left is the gap tightening at the bottom of this block. */
   .guess-form {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
   }
 
-  .guess-form__field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-  }
-
-  .guess-form__field label {
-    font-size: 0.85rem;
-    color: var(--color-muted);
-  }
-
-  .guess-form__names {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-
-  .select-row {
-    display: flex;
+  .guess-form__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'make-label  model-label'
+      'make        model'
+      'year-label  year-label'
+      'year        submit';
+    column-gap: var(--space-2);
+    row-gap: var(--space-1); /* label -> its own control: 4px, they are one unit */
     align-items: center;
+  }
+
+  [data-area='make-label'] {
+    grid-area: make-label;
+  }
+  [data-area='model-label'] {
+    grid-area: model-label;
+  }
+  [data-area='make'] {
+    grid-area: make;
+  }
+  [data-area='model'] {
+    grid-area: model;
+  }
+  [data-area='year'] {
+    grid-area: year;
+  }
+  [data-area='submit'] {
+    grid-area: submit;
+  }
+  /* The one place the rhythm opens up: 4px row-gap + 8px = 12px between the two control blocks,
+     so "label sticks to its control, blocks breathe" is a single rule, not four ad-hoc gaps (U11).
+     justify-content: flex-start (not the .guess-form__label-row default of space-between) because
+     this row spans both columns — space-between would push the error to the far right, over the
+     submit column instead of the year field it describes. Sit it right next to the label instead. */
+  [data-area='year-label'] {
+    grid-area: year-label;
+    margin-top: var(--space-2);
+    justify-content: flex-start;
+  }
+
+  /* The label line exists in EVERY state — that is what makes an error cost zero layout (U6).
+     Label at the start; the field's error OR its Locked chip at the end of the same line. */
+  .guess-form__label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
     gap: var(--space-2);
-  }
-
-  .select {
-    flex: 1;
     min-width: 0;
-    min-height: var(--touch-target);
-    font-size: 1rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-elevated);
-    color: inherit;
-    padding: 0 var(--space-3);
-    touch-action: manipulation;
-    text-overflow: ellipsis;
+    min-height: 1.05rem;
+    line-height: 1.05rem;
   }
 
-  .select:disabled {
-    opacity: 0.75;
+  .guess-form__label-row label {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+
+  .field-error {
+    margin: 0;
+    min-width: 0;
+    padding-right: var(--space-1); /* keeps a long message off the neighbouring label at narrow widths */
+    font-size: 0.75rem;
+    line-height: 1.05rem;
+    color: var(--color-danger);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* a longer future message truncates; it never wraps and never shifts */
+  }
+
+  [data-area='year-label'] .field-error {
+    text-align: left;
+    padding-right: 0;
   }
 
   .lock-chip {
     display: inline-flex;
     align-items: center;
-    min-height: var(--touch-target);
-    padding: 0 var(--space-3);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
+    height: 1.05rem;
+    padding: 0 var(--space-2);
     border: 1px solid var(--color-border);
-    font-size: 0.9rem;
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-muted);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase; /* presentational only — textContent stays "Locked" (§5.11.3) */
     white-space: nowrap;
   }
 
-  .guess-form__bottom {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+  .guess-form__cell {
+    min-width: 0;
   }
 
-  .guess-form__actions {
+  /* Every control in the form: same height, same radius, same border, same 16px floor. YearInput's
+     own controls match via the same tokens in its own <style> — Svelte scopes styles per
+     component, so the shared look is "same tokens", not one shared selector. */
+  .select,
+  .guess-form__cell .button {
+    height: var(--touch-target);
+    min-height: var(--touch-target);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    font-size: 1rem; /* 16px floor — iOS focus auto-zoom (§5.3.5) */
+  }
+
+  .select {
+    width: 100%;
+    min-width: 0;
+    padding: 0 var(--space-3);
+    background: var(--color-bg-elevated);
+    color: inherit;
+    text-overflow: ellipsis;
+    touch-action: manipulation;
+  }
+
+  .guess-form__cell .button {
+    width: 100%;
+  } /* fixes U4 — the button fills its column */
+
+  /* Two different "not editable" states, deliberately drawn differently (§5.3.3):
+     LOCKED   = the player got it right; the value is theirs and settled -> full-strength text.
+     DISABLED = the control is dead (game over, catalog failed, "choose a make first") -> muted.
+     Neither uses opacity: opacity fades text and border together and drops the label under 4.5:1. */
+  .select:disabled {
+    opacity: 1;
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: not-allowed;
+  }
+
+  [data-locked='true'] .select:disabled {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
+  /* Soft-disabled submit (§5.3.4: aria-disabled, still clickable so it can explain itself). NOT a
+     half-transparent accent fill (U5) — it takes the neutral control skin and snaps to the accent
+     fill the moment the guess is complete, which is itself the affordance. An accent border/text
+     keeps it reading as the CTA (rather than a disabled select) while the guess is incomplete;
+     once the button is actually inert (game over) it drops to the same neutral skin as everything
+     else — the rule below wins the tie on source order for the state where both apply. */
+  .button--primary.is-disabled {
+    opacity: 1;
+    background: var(--color-surface);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .button--primary:disabled {
+    opacity: 1;
+    background: var(--color-surface);
+    color: var(--color-muted);
+    border-color: var(--color-border);
+    cursor: not-allowed;
+  }
+
+  /* Give up is secondary and destructive: below a hairline, centered, quiet, never on the primary
+     button's line and never at a competing weight (U4). */
+  .guess-form__secondary {
     display: flex;
-    align-items: center;
-    gap: var(--space-3);
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-1);
   }
 
-  /* Short viewports (e.g. 360x640, §5.8): make + model sit side by side (each keeps its own
-     visible label), and the year field and the submit/give-up row go on one line too —
-     recovering enough height to keep the whole form (now two selects plus year/actions)
-     reachable without scrolling (review B3). */
-  @media (max-height: 1000px) {
+  .guess-form__secondary .button--danger {
+    background: transparent;
+    border-color: transparent;
+    color: var(--color-muted);
+    padding: 0 var(--space-3);
+    font-size: 0.9rem;
+  }
+  .guess-form__secondary .button--danger:hover {
+    color: var(--color-danger);
+  }
+  .guess-form__secondary .button--danger:disabled {
+    opacity: 0.55;
+  }
+
+  /* Cancel and Confirm read as a matched pair, not a near-miss — same minimum width regardless
+     of label length. */
+  .guess-form__secondary .button {
+    flex: 0 0 auto;
+    min-width: 96px;
+  }
+
+  /* The confirmation replaces the row's contents in place (U9): prompt on its own full-width line,
+     Cancel then Confirm under it. Only this row grows; the grid above the hairline does not move. */
+  .guess-form__confirm-text {
+    flex: 1 1 100%;
+    margin: 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+  .guess-form__secondary .button--danger.is-confirm {
+    color: var(--color-danger);
+    border-color: var(--color-border);
+  }
+
+  /* The height-keyed rules that survive: gap tightening, plus — on the confirm row only — one
+     line instead of two, which is what keeps Cancel/Confirm on-screen at 360x640 (review
+     improvement #1). 700px, not 1000px: 360x640 and 320x568 need the 8px, and nothing taller
+     does (§5.11.5). */
+  @media (max-height: 700px) {
     .guess-form {
       gap: var(--space-2);
     }
-
-    .guess-form__names {
-      flex-direction: row;
-      gap: var(--space-2);
+    [data-area='year-label'] {
+      margin-top: var(--space-1);
     }
-
-    .guess-form__names > .guess-form__field {
-      flex: 1 1 0;
-      min-width: 0;
+    .guess-form__secondary {
+      flex-wrap: nowrap;
     }
-
-    /* A locked field's chip shares an already-narrow column with its select (§5.3.3) — tighten
-       both so the select keeps as much width as possible for its (still fully visible via
-       scroll/ellipsis) selected option text. */
-    .select-row {
-      gap: var(--space-1);
-    }
-
-    .lock-chip {
-      flex: 0 0 auto;
-      padding: 0 var(--space-2);
-      font-size: 0.8rem;
-    }
-
-    .guess-form__bottom {
-      flex-direction: row;
-      align-items: flex-end;
-      flex-wrap: wrap;
-    }
-
-    .guess-form__field--year {
-      flex: 0 1 auto;
-      min-width: 6rem;
-    }
-
-    .guess-form__actions {
+    .guess-form__confirm-text {
       flex: 1 1 auto;
-    }
-
-    /* The visible "Year" label is redundant once the field sits next to the buttons on one line
-       (the year input's own value and steppers make its purpose clear) — hidden the same way
-       app.css's .visually-hidden utility does, so it stays in the accessibility tree. */
-    .guess-form__field--year label {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
+      min-width: 0;
+      text-align: left;
       white-space: nowrap;
-      border: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-  }
-
-  .give-up-confirm {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: 0.9rem;
-  }
-
-  .field-error {
-    color: var(--color-danger);
-    font-size: 0.85rem;
-    margin: 0;
   }
 </style>

@@ -1245,6 +1245,10 @@ submitting an incomplete form sets the inline message pattern already used by th
 | make chosen, no model | *"Choose a model"* | `aria-invalid="true"`, `aria-describedby="mtd-model-error"` |
 | year empty / out of range | *"Enter a year between 1885 and {maxYear}"* (unchanged, §5.4) | on `#mtd-year` |
 
+**Placement changed by revision 8 (§5.11.3):** the messages keep these exact texts and these exact
+ids, but they now render on their field's *label line* rather than below the control, so an error
+costs zero layout. `GuessForm` owns all three (`YearInput` no longer renders its own).
+
 **Every** offending control is marked on the same submit attempt — `attemptedInvalid` is one flag and
 each field derives its own invalid state from it — so a player who fixes one field is not ambushed by
 the next. The flag clears on the next valid submit. The `<form>` keeps `novalidate` for the reason
@@ -1265,9 +1269,10 @@ our own handler runs.
   `min-height: 44px`, `touch-action: manipulation`, full-width within the content column.
 - On a phone the OS picker is used verbatim — no `dvh`/`svh` popup sizing, no visual-viewport flip
   logic, no outside-dismissal listener. Those three §5.3 hazards are gone with the combobox.
-- The form must still be reachable without scrolling at 360×640 (§5.8): the two selects stack, and the
-  existing `@media (max-height: 900px)` rule keeps the year field and the action row on one line.
-  E2E item 12 (§7.4) is the machine check.
+- The form must still be reachable without scrolling at 360×640 (§5.8). **Superseded by §5.11**: the
+  layout is now one two-column grid at every width (Make | Model, then Year | Guess), the
+  height-keyed *layout* branch is deleted, and the submit button clears the fold by 64.5 px instead
+  of 27.1 px (§5.11.5). E2E item 12 (§7.4) is still the machine check.
 - `prefers-reduced-motion` and the theming rules are untouched.
 
 #### 5.3.6 Svelte state shape — exactly what lives in `GuessForm.svelte`
@@ -1352,7 +1357,11 @@ not add new names.
 `<input type="number" inputmode="numeric" min="1885" max={currentYear+1} step="1">` plus `−`/`+`
 stepper buttons (≥44 px, `aria-label="Earlier year"` / `"Later year"`, auto-repeat on hold).
 Out-of-range or empty blocks submit with an inline message. Never validated by string length
-(Cardle's `"abcd"` bug). Font-size ≥ 16 px.
+(Cardle's `"abcd"` bug). Font-size ≥ 16 px. **Revision 8 (§5.11.3)**: the component keeps `invalid`
+(and therefore `aria-invalid` + `aria-describedby="{id}-error"`) but drops `invalidMessage` and no
+longer renders the message element — `GuessForm` renders all three messages, on the Year label line.
+The native `input[type=number]` spinner is suppressed (§5.11.4); the `−`/`+` steppers are the only
+steppers.
 
 ### 5.5 Image reveal and scrub — `ImageStage.svelte`
 
@@ -1379,7 +1388,8 @@ Out-of-range or empty blocks submit with an inline message. Never validated by s
 absolutely positioned inside a 450 px column, as Cardle does). Esc closes, focus returns to the
 opener, background scroll locked via `overscroll-behavior: contain`.
 
-- **HelpModal** — rules, the three tile colours with worked examples, the multiplier table, and "a new
+- **HelpModal** — the §5.12 tagline as its intro, then the rules, the three tile colors with worked
+  examples (heading: **`Tile colors`**, US spelling, §5.13), the multiplier table, and "a new
   Motodle every day at midnight, your time". Auto-opens on first visit. It must explain **all three
   yellow bands in a player's words**, using `COUNTRY_NAMES` (§4.7) so a country code is never shown:
 
@@ -1415,7 +1425,11 @@ redefines only the tokens; `[data-theme="dark"]` / `[data-theme="light"]` on `<h
 media query in **both** directions. `color-scheme: light dark` on `:root`. Colourblind mode swaps the
 tile palette (green→orange, yellow→blue, red→near-black) **and** adds a glyph (`✓ ~ ✗`) inside each
 tile — colour is never the only signal. Cardle sets a glyph but leaves the fills unchanged; we change
-both. **In the share text the colourblind red is `⬜`, not `⬛`** (§4.4) — on-screen the tile stays
+both. The toggle's own label and tooltip read **`Toggle colorblind mode`** (US spelling, §5.13).
+`app.css` also defines the app's single focus ring, `outline: 2px solid var(--color-accent)` at
+`outline-offset: 2px`, flipped to `--color-fg` on the accent-filled primary button — one rule that
+covers light, dark and colorblind because the accent is itself a theme token (§5.11.4).
+**In the share text the colourblind red is `⬜`, not `⬛`** (§4.4) — on-screen the tile stays
 near-black against the app's own background, but a shared grid is read in someone else's dark-themed
 chat client, where `⬛` disappears.
 
@@ -1496,7 +1510,7 @@ Markup, replacing the bare `.scrub` sibling in `ImageStage.svelte`:
     href={credit.license.url}
     target="_blank"
     rel="noopener noreferrer"
-    aria-label={`Photo licence: ${credit.license.name} (opens the licence deed)`}
+    aria-label={`Photo license: ${credit.license.name} (opens the license deed)`}
   >Photo: {credit.license.name}</a>
 
   <!-- the existing role="group" aria-label="Crop level" scrub, unchanged -->
@@ -1550,6 +1564,10 @@ current layout at 360×640 (measured against `vite preview` on the real build, 2
 | **submit button** | 568.9 | **612.9** | 44 |
 | viewport | — | **640** | — |
 
+*(Revision 8 re-measured this table against the new form layout: the submit button now sits at
+575.5 and the slack is 64.5 px — see §5.11.5. The paragraph below records why the licence row was
+free under the **previous** layout, which is still the reason it exists.)*
+
 **Slack above the fold: 27.1 px.** That is the entire budget, and it is why a new full-height row is
 forbidden: a 0.7 rem line plus a `--space-2` gap is ~25 px, which would consume 92 % of it. The
 alternative — adding the row and paying for it by bumping the `100svh − 500px` term to `− 525px` —
@@ -1598,7 +1616,7 @@ modal.
 
 **Copy.** Title `Photo credits`. Intro, verbatim:
 
-> Photos come from Wikimedia Commons under Creative Commons or public-domain licences and are
+> Photos come from Wikimedia Commons under Creative Commons or public-domain licenses and are
 > cropped, resized and re-encoded.
 
 Then one row per eligible past puzzle, **newest first** (descending `number`):
@@ -1707,7 +1725,7 @@ interface Props {
 ```svelte
 <footer class="app-footer">
   Photos: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
-    >Wikimedia Commons</a>, Creative Commons licences ·
+    >Wikimedia Commons</a>, Creative Commons licenses ·
   <button type="button" id="mtd-credits-link" class="link-button" onclick={() => game.openCredits()}
     >Photo credits</button>
 </footer>
@@ -1738,6 +1756,568 @@ to 44 px would make the footer taller than the practice bar.
   `#mtd-year` DOM contract are untouched. `docs/ATTRIBUTION.md` remains the generated, in-repo record
   (§6.3); it is **not** shipped in `dist/`, which is precisely why the credits view has to build
   itself from the manifest at runtime rather than link to it.
+
+### 5.11 Guess form layout (revision 8)
+
+User feedback, 2026-09-03: *"Fix the input/button stack, it's kinda ugly."* This section replaces the
+**visual layout** of `GuessForm.svelte` + `YearInput.svelte` and nothing else.
+
+**Frozen and untouched by this section:** every rule in §4, the §5.3.1 DOM contract (`#mtd-make`,
+`#mtd-model`, `#mtd-year`, option values = catalog ids, the visible label texts `Make` / `Model` /
+`Year`, and the accessible names `Guess {n} of 5` / `Give up` / `Confirm` / `Cancel`), the §5.3.2
+cascade, the §5.3.3 locking rules, the §5.3.4 message **texts** and their `mtd-*-error` ids, the
+§5.3.6 state shape, the storage schema, the payload budgets, the CSP, and **§5.8's fold rule** —
+which this layout does not merely survive but improves by 37.4 px (§5.11.5).
+
+**Supersedes.** These passages are now dead text; where they disagree, this section wins:
+§5.3.5's third bullet where it says *"the existing `@media (max-height: 900px)` rule keeps the year
+field and the action row on one line"* (there is no height-keyed **layout** rule any more, only a
+height-keyed **gap** rule); §5.3.4's implicit placement of the messages *below* their control;
+§5.4's *"inline message"* ownership (the message is now rendered by `GuessForm`, §5.11.3); and the
+"before/after" numbers in §5.10.2's second table, which measured the previous layout.
+
+#### 5.11.1 What was ugly, and why — measured against the running build
+
+Screenshots at 360×640 / 390×844 / 768×1024 / 1280×800, light and dark, plus the locked and
+error states (`vite preview` on the real build, clock pinned 2026-09-03T12:00:00).
+
+| # | Defect | Evidence |
+|---|---|---|
+| U1 | **Two different layouts keyed on nothing meaningful.** `@media (max-height: 1000px)` decides the whole structure, so a 768×1024 tablet gets a full-width *vertical stack* (Make, Model, Year, buttons — the "stack" the feedback names) while a 1280×800 desktop gets a cramped single row. Height, not width, picked the layout. | form height 281.1 px at 768×1024 vs **119 px** at 1280×800, same column width (480 px) |
+| U2 | **The bottom row silently wraps at 360 px.** `.guess-form__bottom` is `flex-wrap`, and year (124) + submit (125.9) + give-up (90.8) + gaps > 336, so the year field lands **alone** on its own line with 212 px of dead space beside it and the buttons drop below. Nobody designed that row; the wrap did. | `.guess-form__bottom` height 100 px = two 44 px lines |
+| U3 | **An orphaned control.** In exactly that state the visible `Year` label is `position: absolute`-hidden by the `max-height: 1000px` rule, so the loneliest field on the page is also the only one with no label. | `.guess-form__field--year label` clip rule |
+| U4 | **Mismatched button widths.** Submit is 125.9 px, give-up 90.8 px, both auto-width, side by side, at equal visual weight — two peers, one of which ends the game. | measured at every viewport |
+| U5 | **The primary button reads as broken.** Soft-disabled (`aria-disabled`, still clickable by design, §5.3.4) is drawn as `opacity: 0.5` over the accent fill: a washed-out lilac whose white label falls well under 3:1 against it. | `.button.is-disabled { opacity: 0.5 }` |
+| U6 | **Errors shove the layout.** Each `field-error` is an unreserved block below its control, so submitting an empty form moves the year row down ~20 px and the submit button down ~40 px — the layout jumps under the thumb that just tapped it. | error state vs clean state |
+| U7 | **A second, native stepper.** `input[type=number]` renders the WebKit spin buttons *next to* our own 44 px `−`/`+`, at every width where the field is wider than ~60 px. | 768×1024 and 1280×800 screenshots |
+| U8 | **The `Locked` chip eats the field.** It sits *inside* the control row, taking 60.5 px of a 164 px column, so a locked make shows less of its own value than an unlocked one. | locked-make measurement: select 99.5 px + chip 60.5 px |
+| U9 | **The give-up confirmation detonates the form.** `.give-up-confirm` is an inline `<span>` of text + 2 buttons inside the wrapping action row: the prompt wraps to two lines, the submit button is stranded alone on the line above, and everything below moves. | give-up screenshot at 390×844 |
+| U10 | **No focus ring of our own.** Nothing in `app.css` or any component defines `:focus-visible`, so every control falls back to a different UA default and the `<select>`'s is nearly invisible on the dark surface. | `grep -rn "focus-visible\|outline" src/` → one hit, `Modal.svelte`'s `outline: none` |
+| U11 | **Inconsistent spacing rhythm.** `.guess-form` gap 12 → 8 under the media query, `.guess-form__bottom` gap stays 12, `.select-row` gap 8 → 4, label gap 4. Four different vertical gaps inside one 175 px form. | component CSS |
+
+#### 5.11.2 Target layout — one grid, every width
+
+The content column is capped at `--content-max-width: 30rem`, so the form is never wider than 480 px
+and never narrower than ~296 px (320 px viewport minus the safe-area padding). **One two-column grid
+covers that entire range**, which is why the `@media (max-height: 1000px)` *layout* branch is deleted
+rather than adjusted (U1). Make sits above Year, Model sits above Guess: two columns, four rows, one
+alignment.
+
+```
+ 320–480 px (every phone AND the desktop column — identical structure)
+
+  Make          Choose a make    Model        Choose a model        <- label line: label at the
+ ┌───────────────────────────┐  ┌───────────────────────────┐          start, error OR the Locked
+ │ #mtd-make            44px │  │ #mtd-model           44px │          chip at the end
+ └───────────────────────────┘  └───────────────────────────┘
+  Year               Enter a year between 1885 and 2027              <- spans both columns
+ ┌────┐ ┌──────────────┐ ┌────┐  ┌───────────────────────────┐
+ │ −  │ │  #mtd-year   │ │ +  │  │      Guess 1 of 5         │
+ └────┘ └──────────────┘ └────┘  └───────────────────────────┘
+ ─────────────────────────────────────────────────────────────       <- hairline separator
+                        Give up                                      <- quiet, centered, 44px
+
+ Locked make (§5.3.3)                     Give-up confirmation
+  Make               ⟨LOCKED⟩              ────────────────────────────
+ ┌───────────────────────────┐              Give up? This counts as a loss.
+ │ Kawasaki      (disabled)  │                 ┌────────┐  ┌─────────┐
+ └───────────────────────────┘                 │ Cancel │  │ Confirm │
+  the chip moved to the label line,            └────────┘  └─────────┘
+  so the select keeps the full column          nothing above the hairline moves
+```
+
+Grid areas, verbatim:
+
+```
+"make-label  model-label"
+"make        model"
+"year-label  year-label"
+"year        submit"
+```
+
+Row 3 spans both columns because that is the only row whose message is long: *"Enter a year between
+1885 and 2027"* is ~200 px at 0.75 rem and does not fit a 144 px column, whereas *"Choose a make"*
+(~78 px) and *"Choose a model"* (~87 px) fit theirs at 320 px with room to spare.
+
+#### 5.11.3 Markup — the only DOM changes this revision makes
+
+```svelte
+<form class="guess-form" onsubmit={handleSubmit} novalidate>
+  <div class="guess-form__grid">
+    <div class="guess-form__label-row" data-area="make-label">
+      <label for="mtd-make">Make</label>
+      {#if makeInvalid}<p id="mtd-make-error" class="field-error">Choose a make</p>{/if}
+      {#if makeLocked}<span class="lock-chip">Locked</span>{/if}
+    </div>
+    <div class="guess-form__label-row" data-area="model-label">
+      <label for="mtd-model">Model</label>
+      {#if modelInvalid}<p id="mtd-model-error" class="field-error">Choose a model</p>{/if}
+      {#if modelLocked}<span class="lock-chip">Locked</span>{/if}
+    </div>
+
+    <div class="guess-form__cell" data-area="make" data-locked={makeLocked}>
+      <select id="mtd-make" name="make" class="select" …unchanged attributes… />
+    </div>
+    <div class="guess-form__cell" data-area="model" data-locked={modelLocked}>
+      <select id="mtd-model" name="model" class="select" …unchanged attributes… />
+    </div>
+
+    <div class="guess-form__label-row" data-area="year-label">
+      <label for="mtd-year">Year</label>
+      {#if yearInvalid}
+        <p id="mtd-year-error" class="field-error">Enter a year between 1885 and {MAX_YEAR}</p>
+      {/if}
+    </div>
+    <div class="guess-form__cell" data-area="year" data-locked={today.locks.year !== null}>
+      <YearInput id="mtd-year" … invalid={yearInvalid} />   <!-- no invalidMessage prop any more -->
+    </div>
+    <div class="guess-form__cell" data-area="submit">
+      <button type="submit" class="button button--primary" …unchanged…>Guess {n} of 5</button>
+    </div>
+  </div>
+
+  <div class="guess-form__secondary">
+    {#if !gameOver}
+      {#if confirmingGiveUp}
+        <p class="guess-form__confirm-text">Give up? This counts as a loss.</p>
+        <button type="button" class="button" onclick={() => (confirmingGiveUp = false)}>Cancel</button>
+        <button type="button" class="button button--danger is-confirm" onclick={confirmGiveUp}>Confirm</button>
+      {:else}
+        <button type="button" class="button button--danger" disabled={disabled}
+                onclick={() => (confirmingGiveUp = true)}>Give up</button>
+      {/if}
+    {/if}
+  </div>
+</form>
+```
+
+Rules on that markup:
+
+- **`.select-row`, `.guess-form__names`, `.guess-form__bottom`, `.guess-form__actions`,
+  `.guess-form__field`, `.guess-form__field--year` and `.give-up-confirm` are all deleted.** They are
+  presentational wrappers; nothing outside the component references any of them (verified:
+  `grep -rn "guess-form\|lock-chip\|field-error\|year-input" e2e/ src/ --include='*.ts'` returns
+  exactly two hits, both the `.lock-chip` locators in `playthrough.spec.ts`).
+- **`.lock-chip` and its `Locked` text content survive verbatim** — `e2e/playthrough.spec.ts` asserts
+  `page.locator('.lock-chip')` `toHaveText('Locked')` and a count of 2, and `GuessForm.test.ts`
+  asserts `getAllByText('Locked')`. The chip **moves** from the control row to the label line; it is
+  not renamed, re-worded or removed. The `text-transform: uppercase` in §5.11.4 is presentational
+  only — `textContent` stays `Locked`, which is what both of those assertions read.
+- **The three error `<p>` ids are unchanged** (`mtd-make-error`, `mtd-model-error`,
+  `mtd-year-error`), so every `aria-describedby` in §5.3.4 and every test that reads it is unaffected.
+  Only their **position in the flow** changes — onto the label line of their own field.
+- **A field is never invalid and locked at once** (a locked field is `disabled` and pre-filled from
+  the player's own green guess, §5.3.3), so the error and the chip can share the end of the label
+  line without a collision case.
+- `data-area` / `data-locked` are **style hooks only**. They are not part of the §5.3.1 contract and
+  no test may key on them.
+- **`YearInput` stops rendering its own message.** It drops the `invalidMessage` prop, keeps
+  `invalid`, and keeps `aria-describedby={invalid ? `${id}-error` : undefined}` — `GuessForm` now
+  owns all three messages, in one place, in one style. It already computes `MAX_YEAR`.
+
+#### 5.11.4 Exact CSS
+
+`GuessForm.svelte`'s `<style>` block, in full:
+
+```css
+/* One layout at every width (§5.11.2). The height-keyed LAYOUT branch is gone; the only
+   height-keyed rule left is the gap tightening at the bottom of this block. */
+.guess-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.guess-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    'make-label  model-label'
+    'make        model'
+    'year-label  year-label'
+    'year        submit';
+  column-gap: var(--space-2);
+  row-gap: var(--space-1);          /* label -> its own control: 4px, they are one unit */
+  align-items: center;
+}
+
+[data-area='make-label']  { grid-area: make-label; }
+[data-area='model-label'] { grid-area: model-label; }
+[data-area='make']        { grid-area: make; }
+[data-area='model']       { grid-area: model; }
+[data-area='year']        { grid-area: year; }
+[data-area='submit']      { grid-area: submit; }
+/* The one place the rhythm opens up: 4px row-gap + 8px = 12px between the two control blocks,
+   so "label sticks to its control, blocks breathe" is a single rule, not four ad-hoc gaps (U11). */
+[data-area='year-label']  { grid-area: year-label; margin-top: var(--space-2); }
+
+/* The label line exists in EVERY state — that is what makes an error cost zero layout (U6).
+   Label at the start; the field's error OR its Locked chip at the end of the same line. */
+.guess-form__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 1.05rem;
+  line-height: 1.05rem;
+}
+
+.guess-form__label-row label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.field-error {
+  margin: 0;
+  min-width: 0;
+  font-size: 0.75rem;
+  line-height: 1.05rem;
+  color: var(--color-danger);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;   /* a longer future message truncates; it never wraps and never shifts */
+}
+
+.lock-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 1.05rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;  /* presentational only — textContent stays "Locked" (§5.11.3) */
+  white-space: nowrap;
+}
+
+.guess-form__cell { min-width: 0; }
+
+/* Every control in the form: same height, same radius, same border, same 16px floor.
+   That single rule is most of what "make it look designed" means here. */
+.select,
+.year-input__field,
+.year-input__step,
+.guess-form__cell .button {
+  height: var(--touch-target);
+  min-height: var(--touch-target);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 1rem;               /* 16px floor — iOS focus auto-zoom (§5.3.5) */
+}
+
+.select {
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--space-3);
+  background: var(--color-bg-elevated);
+  color: inherit;
+  text-overflow: ellipsis;
+  touch-action: manipulation;
+}
+
+/* − [ field ] + as a grid, not a flex row: the steppers are EXACTLY 44px and the field takes what
+   is left, instead of the field collapsing and the steppers stretching. */
+.year-input {
+  display: grid;
+  grid-template-columns: var(--touch-target) minmax(0, 1fr) var(--touch-target);
+  gap: var(--space-1);
+}
+
+.year-input__step {
+  width: 100%;
+  background: var(--color-bg-elevated);
+  font-size: 1.25rem;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.year-input__field {
+  width: 100%;
+  padding: 0 var(--space-1);
+  text-align: center;
+  background: var(--color-bg-elevated);
+  /* Kill the native spinner (U7): it is a second, 12px-wide stepper sitting beside our own two. */
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.year-input__field::-webkit-outer-spin-button,
+.year-input__field::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.guess-form__cell .button { width: 100%; }   /* fixes U4 — the button fills its column */
+
+/* Two different "not editable" states, deliberately drawn differently (§5.3.3):
+   LOCKED   = the player got it right; the value is theirs and settled -> full-strength text.
+   DISABLED = the control is dead (game over, catalog failed, "choose a make first") -> muted.
+   Neither uses opacity: opacity fades text and border together and drops the label under 4.5:1. */
+.select:disabled,
+.year-input__field:disabled,
+.year-input__step:disabled {
+  opacity: 1;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+[data-locked='true'] .select:disabled,
+[data-locked='true'] .year-input__field:disabled {
+  color: var(--color-fg);
+  font-weight: 600;
+}
+
+/* Soft-disabled submit (§5.3.4: aria-disabled, still clickable so it can explain itself). NOT a
+   half-transparent accent fill (U5) — it takes the neutral control skin and snaps to the accent
+   fill the moment the guess is complete, which is itself the affordance. */
+.button--primary.is-disabled,
+.button--primary:disabled {
+  opacity: 1;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border-color: var(--color-border);
+}
+.button--primary:disabled { cursor: not-allowed; }
+
+/* Give up is secondary and destructive: below a hairline, centered, quiet, never on the primary
+   button's line and never at a competing weight (U4). */
+.guess-form__secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-1);
+}
+
+.guess-form__secondary .button--danger {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-muted);
+  padding: 0 var(--space-3);
+  font-size: 0.9rem;
+}
+.guess-form__secondary .button--danger:hover { color: var(--color-danger); }
+
+/* The confirmation replaces the row's contents in place (U9): prompt on its own full-width line,
+   Cancel then Confirm under it. Only this row grows; the grid above the hairline does not move. */
+.guess-form__confirm-text {
+  flex: 1 1 100%;
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.guess-form__secondary .button--danger.is-confirm {
+  color: var(--color-danger);
+  border-color: var(--color-border);
+}
+
+/* The ONLY height-keyed rule that survives, and it changes gaps, not structure. 700px, not
+   1000px: 360x640 and 320x568 need the 8px, and nothing taller does (§5.11.5). */
+@media (max-height: 700px) {
+  .guess-form { gap: var(--space-2); }
+  [data-area='year-label'] { margin-top: var(--space-1); }
+}
+```
+
+Two rules move to `app.css`, because they are app-wide, not form-local:
+
+```css
+/* One focus ring for every interactive element (U10 — there was none, so each control fell back
+   to a different UA default and the <select>'s was near-invisible on the dark surface).
+   --color-accent is theme-aware, so light, dark and colorblind are all covered by one rule. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+/* An accent ring on an accent fill is invisible — flip it to the foreground there. */
+.button--primary:focus-visible { outline-color: var(--color-fg); }
+
+/* Replaces `.button:disabled, .button.is-disabled { opacity: 0.5 }`, which was U5's root cause and
+   applied to every button in the app, not just this form. */
+.button:disabled,
+.button.is-disabled {
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border-color: var(--color-border);
+}
+```
+
+`Modal.svelte`'s existing `outline: none` stays: it is on the dialog container, which is focused
+programmatically, not by keyboard traversal.
+
+**Theming.** Every value above is a token from `tokens.css`; the block adds no literal color. Light,
+dark and colorblind therefore all follow automatically — and the form deliberately uses **no** tile
+token (`--tile-green-bg` and friends), so the colorblind palette swap cannot reach it. The one
+temptation, tinting the `Locked` chip with `--tile-green-bg` to echo the green tile, is rejected:
+`#3b7d22` as text on the dark surface `#1c1c1f` is ~2.6:1.
+
+#### 5.11.5 The fold argument — measured, not argued
+
+§5.8's frozen rule, enforced by `e2e/mobile-layout.spec.ts`: at 360×640, unfocused, `scrollY === 0`,
+`submit.getBoundingClientRect().bottom <= window.innerHeight`, and no horizontal overflow. Both
+layouts measured the same way as §5.10.2 — `vite preview` on the real build, clock pinned
+2026-09-03T12:00:00, the new CSS + markup injected into the live page, `window.scrollTo(0, 0)` before
+every read.
+
+**360×640, box by box (new layout):**
+
+| Box | top | bottom | height |
+|---|---:|---:|---:|
+| header | 12 | 56 | 44 |
+| image frame (`--stage-max-h` **unchanged**) | 64 | 204 | 140 |
+| licence + scrub row | 212 | 256 | 44 |
+| scoreboard | 264 | 429.9 | 165.9 |
+| form | 437.9 | 632.5 | 194.6 |
+| Make / Model selects | 458.7 | 502.7 | 44 |
+| year group **and** submit (one row) | 531.5 | 575.5 | 44 |
+| **submit button** | 531.5 | **575.5** | 44 |
+| give-up row | 588.5 | 632.5 | 44 |
+| viewport | — | **640** | — |
+
+**Submit bottom: 612.9 → 575.5. Slack above the fold: 27.1 px → 64.5 px.** The form is 19.6 px
+*taller* (175 → 194.6) and its submit button is still 37.4 px *higher*, because the wrapped
+orphan row (U2) cost a whole 44 px line plus a 12 px gap and the new layout puts the year and the
+submit on the row that used to hold the year alone.
+
+**All six viewports, and the states that used to move things:**
+
+| Viewport | submit bottom, before | submit bottom, after | give-up bottom, after | `scrollW` vs `clientW` | verdict |
+|---|---:|---:|---:|---|---|
+| 320×568 | 592.9 (**> 568, already failing**) | **555.5** | 612.5 | 320 = 320 | now passes |
+| 360×640 (the frozen case) | 612.9 | **575.5** | 632.5 | 360 = 360 | passes, +37.4 px |
+| 390×844 | 747.4 | **714.0** | 775.0 | 390 = 390 | passes |
+| 412×915 | 763.9 | **730.5** | 791.5 | 412 = 412 | passes |
+| 768×1024 | 1015.0 | **875.5** | 936.5 | 768 = 768 | passes, +139.5 px (U1's stack) |
+| 1280×800 | 660.9 | **727.5** | 788.5 | 1280 = 1280 | passes, 66.6 px lower — the desktop form was the *cramped* one; it gains the visible `Year` label and a real give-up row |
+
+**Zero layout shift, measured (U6, U9).** At 360×640 the form's geometry is byte-identical in all
+three states — clean, after a failed submit with two messages showing, and with the make locked:
+
+| State at 360×640 | form height | submit bottom |
+|---|---:|---:|
+| clean | 194.6 | 575.5 |
+| invalid (`Choose a make` + `Enter a year between 1885 and 2027` both showing) | **194.6** | **575.5** |
+| make locked (`LOCKED` chip on the label line) | **194.6** | **575.5** |
+| give-up confirmation open | 246.1 (grows *downward only*) | **575.5** |
+
+**The photo does not get smaller.** `--stage-max-h` is untouched: 140 px at 360×640, 274.5 at
+390×844, 291 at 412×915, 360 at 768×1024, 288 at 1280×800 — identical before and after, at every
+viewport measured.
+
+**Touch targets and font sizes hold.** Both selects, the year field, both steppers, the submit and
+the give-up button all measure 44 px tall; the steppers are exactly 44 px wide by grid template; all
+five text controls are at `font-size: 1rem` = 16 px. The narrowest case is 320 px, where each column
+is 144 px: the year field still measures 48 px (four digits at 16 px ≈ 36 px) and the submit's
+`Guess 1 of 5` needs 125.9 px including padding.
+
+#### 5.11.6 Considered and deliberately not done
+
+- **Spending the recovered slack on the photo.** `--stage-max-h: clamp(120px, 100svh - 500px, 36svh)`
+  could become `100svh - 470px`, which at 360×640 grows the stage from 140 → 170 px (+21 %) and still
+  leaves 34.5 px of fold slack. It affects only short-and-narrow viewports (at 390×844 and wider the
+  stage is already width-bound, so the number does not move). **Not taken in this revision**: the
+  feedback's constraint is "the photo must not get smaller", the recovered slack is the design's
+  safety margin against a longer licence label or a larger default font, and it would push the
+  give-up row 30 px below the fold at 360×640. Recorded here with the numbers so it is a one-line
+  decision later, not a re-measurement.
+- **A custom-styled `<select>`.** §5.3 is explicit: native selects open the OS picker. Untouched.
+- **Dropping the `Locked` chip in favour of colouring the field alone.** Color would then be the only
+  signal, which §5.7 forbids.
+- **A US-English rename of `.image-stage__licence` / `#mtd-photo-licence`.** Identifiers, not copy;
+  `#mtd-photo-licence` is in the §5.10.1 contract and asserted by e2e (§5.13).
+
+#### 5.11.7 Tests — what changes, and what must not
+
+| File | Change |
+|---|---|
+| `e2e/mobile-layout.spec.ts` | Existing assertions are **unchanged and still pass** (measured: 575.5 ≤ 640, `scrollW` 360 = `clientW` 360, `#mtd-photo-licence` visible, five 44×44 scrub segments). **Add one assertion**: read the submit button's `bottom` before and after a failed submit (click submit with nothing chosen) and assert the two are **equal** — that is the U6 guarantee, and it is robust in a way a "give-up is also above the fold" assertion (7.5 px of margin) would not be. |
+| `src/components/YearInput.test.ts` | The `renders the inline invalid message…` case loses `expect(screen.getByText('Enter a year'))` and the `invalidMessage` prop; it keeps `aria-invalid="true"` and `aria-describedby="y-error"`, and is renamed to say the message itself belongs to the parent. |
+| `src/components/GuessForm.test.ts` | **No change.** Every assertion is on ids, roles, accessible names, `aria-*`, option values/text, `getAllByText('Locked')` and the give-up copy — all preserved. It is the regression net for the DOM contract during this refactor. |
+| `e2e/playthrough.spec.ts` | **No change.** `.lock-chip` still exists, still reads `Locked`, still appears twice once the model locks. |
+
+---
+
+### 5.12 Tagline and description copy (revision 8)
+
+One sentence, used everywhere the game describes itself. **Verbatim, including the full stops:**
+
+> Guess the motorbike in 5 tries. A new motorbike is available each day.
+
+Every occurrence of the old sentence and its close variants, found by
+`grep -rn "zooms out\|A new puzzle every day\|make, model and year" . --exclude-dir=node_modules --exclude-dir=dist`:
+
+| # | Where | Old | New |
+|---|---|---|---|
+| T1 | `index.html:7`, `<meta name="description" content="…">` | `Motodle — guess the motorbike's make, model and year from a photo that zooms out with every guess. A new puzzle every day.` | the sentence above, as the **entire** attribute value — no `Motodle — ` prefix |
+| T2 | `src/components/HelpModal.svelte`, the intro `<p>` under `<h2>How to play</h2>` | `Guess the motorbike's <strong>make</strong>, <strong>model</strong> and <strong>year</strong> in 5 tries. Every wrong guess zooms the photo out a little.` | the sentence above, as plain text — no `<strong>` markup |
+| T3 | `README.md:8–9`, first sentence of the description paragraph | `A daily motorbike-guessing game, in the shape of Wordle/Cardle: guess the make, model and year of a motorbike from a progressively-revealed photo.` | `A daily motorbike-guessing game, in the shape of Wordle/Cardle. Guess the motorbike in 5 tries. A new motorbike is available each day.` — the `Fully static — Vite + TypeScript + Svelte 5…` sentence that follows is unchanged |
+| T4 | `docs/PLAN.md §10.5` | the head snippet does not list the description meta at all | add the `<meta name="description">` line carrying the new sentence, so §10.5 stays the single source of truth for `index.html`'s head |
+
+- **There are no OG / Twitter-card tags** in `index.html` (verified: `grep -n "og:\|twitter:" index.html` is empty). If any are ever added they carry this same sentence verbatim, and §10.5 is where that is recorded.
+- **`public/404.html` is not a place this sentence belongs** — its copy (`Nothing here`, `That page doesn't exist…`, `Play today's Motodle`) is about the 404, not the game, and is unchanged by T1–T4.
+- **T2 deliberately drops two facts** from the help modal: that the three fields are make/model/year, and that a wrong guess zooms the photo out. The first is fully covered by the rules table immediately below it (its row headers *are* Make / Model / Year) and by the form's own labels; the second is self-evident on the second guess. **The "How to play" rules table, the scoring table and the midnight line are unchanged** — this is an intro swap, not a rewrite.
+- The `HelpModal` test file asserts none of the old intro text, so nothing breaks; §5.13 adds one assertion that pins the new sentence.
+
+### 5.13 US English across the app (revision 8)
+
+**Rule.** Every user-facing string in the shipped app uses US spelling: *color / colors / colorblind*
+(not *colour…*), *license* (not *licence*), *gray*, *center*, *organize*, *favorite*, and so on.
+
+**Scope, precisely:**
+
+- **In scope**: anything a person can read or hear — rendered text, `aria-label`, `title`, `alt`,
+  `placeholder`, option text, modal headings, the footer, `index.html`'s `<title>`/`<meta>`, and
+  `public/404.html`.
+- **Out of scope, and deliberately left alone**: code identifiers (variables, functions, CSS class
+  names, `data-*` attributes, test ids) — including `#mtd-photo-licence`, `.image-stage__licence`,
+  `credits.ts`'s types, and every DOM id in §5.3.1's contract; source comments; `README.md` and
+  `docs/PLAN.md` prose, **except** where they quote app copy that changed (those quotes are updated:
+  §5.6's HelpModal bullet, §5.10.1's `aria-label` snippet, §5.10.4's intro block quote, §5.10.5's
+  footer snippet, §10.5's head snippet).
+- **Data, not copy**: license names that come from Wikimedia — `CC BY-SA 2.0 de`, `Public domain`,
+  `PD-user` — are values in `puzzle.credit.license.name`. They are **never** rewritten, and the
+  `Photo: ` + `license.name` rule of §5.10.1 stays verbatim.
+
+**Every user-facing string that changes** (`grep -rniE "colour|licence|centre|grey|organis|favourite|catalogue|behaviour" src/ index.html public/404.html`, then filtered to rendered strings):
+
+| # | File:line | Kind | Old | New |
+|---|---|---|---|---|
+| E1 | `src/App.svelte:97` | `aria-label` | `Toggle colourblind mode` | `Toggle colorblind mode` |
+| E2 | `src/App.svelte:98` | `title` (tooltip) | `Toggle colourblind mode` | `Toggle colorblind mode` |
+| E3 | `src/App.svelte:160` | footer text | `, Creative Commons licences ·` | `, Creative Commons licenses ·` |
+| E4 | `src/components/CreditsModal.svelte:30–31` | modal body text | `Photos come from Wikimedia Commons under Creative Commons or public-domain licences and are cropped, resized and re-encoded.` | `…or public-domain licenses and are cropped, resized and re-encoded.` |
+| E5 | `src/components/HelpModal.svelte:24` | `<h3>` heading | `Tile colours` | `Tile colors` |
+| E6 | `src/components/ImageStage.svelte:74` | `aria-label` | `` `Photo licence: ${credit.license.name} (opens the licence deed)` `` | `` `Photo license: ${credit.license.name} (opens the license deed)` `` |
+
+Nothing else in `src/`, `index.html` or `public/404.html` renders a UK spelling. The remaining 50+
+grep hits are comments, test names, CSS class names and the `#mtd-photo-licence` id — all out of
+scope by the rule above. `src/lib/share.ts` contains **no words at all** (header line, emoji grid,
+`SITE_URL`), so the share text is unaffected; the emoji grid is untouched in every case.
+
+**Tests and e2e that assert these strings, and must move with them:**
+
+| # | File:line | Assertion | New value |
+|---|---|---|---|
+| A1 | `src/App.test.ts:89` | `getByRole('button', { name: 'Toggle colourblind mode' })` | `'Toggle colorblind mode'` |
+| A2 | `e2e/colorblind.spec.ts:29` | same locator | `'Toggle colorblind mode'` |
+| A3 | `e2e/colorblind.spec.ts:45` | same locator | `'Toggle colorblind mode'` |
+| A4 | `src/components/CreditsModal.test.ts:51` | the intro sentence, verbatim | the E4 sentence |
+| A5 | `src/components/ImageStage.test.ts:123` | `getByRole('link', { name: /Photo licence/ })` | `/Photo license/` |
+| A6 | `src/components/ImageStage.test.ts:141` | same | `/Photo license/` |
+| A7 | `src/components/ImageStage.test.ts:163` | same | `/Photo license/` |
+| A8 | `src/components/HelpModal.test.ts` | *(new)* nothing pins the intro | add one case asserting the §5.12 sentence renders verbatim |
+
+`e2e/mobile-layout.spec.ts:47` and `e2e/playthrough.spec.ts:56` locate `#mtd-photo-licence` **by id**
+and assert `Photo: Public domain` — an id and a data value. Both are unchanged. Test *names* that
+contain `colourblind` (`App.test.ts:74`, `Scoreboard.test.ts:57`, `share.test.ts:81`,
+`colorblind.spec.ts:11`) are descriptions, not app copy; updating them is optional tidying and is not
+required by this revision.
 
 ---
 
@@ -2194,13 +2774,18 @@ proved that without it `mount()` throws `lifecycle_function_unavailable`.
 | Component | Tests |
 |---|---|
 | `GuessForm` | `#mtd-make` carries the `"Choose a make…"` placeholder first and then **every** catalog make, alphabetical by display name, `option.value` = make id; `#mtd-model` is `disabled` with `"Choose a make first"` until a make is chosen; choosing a make fills `#mtd-model` with **exactly that make's models — all of them, families and depth-2 variants, no year filtering**, alphabetical, option text = model name with the make **not** repeated, and no other make's model present; **changing the make resets `#mtd-model` to the placeholder**; a complete make+model+year submit calls `onsubmit` **once** with `{makeId, modelId, make, model, year}`; **submit with nothing chosen is never silently dead** — the button is `aria-disabled="true"`, `#mtd-make` gets `aria-invalid="true"` + `aria-describedby` and the inline *"Choose a make"* renders; with a make but no model the same happens on `#mtd-model` with *"Choose a model"*; out-of-range/empty year shows the year message (all offending fields marked on the same attempt); **locked MAKE** ⇒ `#mtd-make` is `disabled` showing the locked make with the locked chip and `aria-label`, while `#mtd-model` still lists that make's models and stays enabled; **locked MODEL** ⇒ `#mtd-model` is `disabled` too, showing **the player's own chosen model** (never `answer.model`), and only `#mtd-year` is editable; a **resumed** game whose locks are already set pre-fills both selects on mount (the §5.3.6 `$effect`, not `$state(prop)`); selections survive a submitted guess and are never silently cleared; give-up shows the confirmation step and only then calls `ongiveup` |
-| `YearInput` | steppers clamp at 1885 and `currentYear+1`; non-numeric blocked; disabled + pre-filled when year is locked |
+| `YearInput` | steppers clamp at 1885 and `currentYear+1`; non-numeric blocked; disabled + pre-filled when year is locked; **revision 8 (§5.11.7)**: it sets `aria-invalid` + `aria-describedby="{id}-error"` when `invalid`, but no longer renders the message element — the parent does |
 | `Scoreboard` | 5×3 tiles; colours match results, **including yellow in the make and model columns** (RULES A and B); colourblind glyphs present |
 | `ImageStage` | level N shown during guess N; scrub back allowed, forward disabled; **all 5 levels unlock once `status !== 'in_progress'`**; `viewLevel` persists; full reveal is **not requested** before game end; **the in-play licence line (§5.10.1)**: `#mtd-photo-licence` renders exactly `Photo: ` + `credit.license.name` and its `href` is `credit.license.url` (assert with a jurisdiction-suffixed fixture, `CC BY-SA 2.0 de`, so nobody re-derives the label from `license.id`); and the **spoiler assertion** — `container.innerHTML` (attributes included, so a `title=`/`aria-label=` leak is caught too) contains **none of** `credit.author`, `credit.fileTitle`, `credit.descriptionUrl`, `credit.creditNote`; a PD fixture renders `Photo: Public domain`, still linked |
 | `ResultModal` | attribution renders (author, licence link, Commons link) **even when `attributionRequired` is false**; **`credit.modified` renders beside the licence link**; `creditNote` renders verbatim; a non-4:3 `full` image is **letterboxed, not distorted**; the `Photo credits` affordance `#mtd-credits-link-result` is present and its click closes the result modal **and** opens the credits view (both callbacks fire, never two dialogs at once — §5.10.3) |
 | `StatsModal` | 8 distribution buckets always present; today's bucket highlighted; countdown format |
 | `HelpModal` | auto-opens when `seenHelp` is unset; sets the flag; does not re-open |
 | `CreditsModal` *(new, §5.10.4)* | with `status='ready'` and three rows, `#mtd-credits` renders three `[data-mtd-credit-row]` items **newest first**, each carrying puzzle number, date, `year make model`, `photo by <author>`, the licence name linked to `license.url`, `Source on Commons` linked to `descriptionUrl`, and `credit.modified`; a row whose `creditNote` is non-null renders it verbatim; the intro sentence renders verbatim; `rows: []` + `ready` renders `#mtd-credits-empty` and **no** `#mtd-credits`; `hasMore=false` renders no `#mtd-credits-more`, `hasMore=true` renders it labelled `Show more (N remaining)` and calls `onmore` once per click; `loadingMore=true` renders it `disabled` and labelled `Loading…`; `status='failed'` renders the failure copy + a `Retry` that calls `onretry` |
+
+**Revision 8 changes exactly one row of this table** — `YearInput`, above. `GuessForm`'s row is
+unchanged and is the regression net for the §5.3.1 DOM contract during the §5.11 layout refactor:
+every assertion in it is on ids, roles, accessible names, `aria-*`, option values/text,
+`getAllByText('Locked')` and the give-up copy, all of which §5.11.3 preserves.
 
 `GuessCombobox.test.ts` is **deleted** with its component (§5.3.7). Its assertions have no analogue: a native
 `<select>` needs no `aria-expanded`, no `aria-activedescendant`, no always-mounted listbox and no `pointerdown`
@@ -2294,6 +2879,10 @@ button. Option **values are catalog ids**, so specs address them by id and never
     stronger check — focusing a control can itself scroll the page, which would pass the assertion
     for the wrong reason (§5.8) — so the e2e spec asserts that, not a "focus `#mtd-model` then check"
     variant. (The keyboard-open case is §7.5 step 10 — headless Chromium cannot simulate it, §5.8.)
+    **Revision 8 adds one assertion to this spec** (§5.11.7): the submit button's
+    `getBoundingClientRect().bottom` is read before and after a failed submit (click submit with
+    nothing chosen) and the two must be **equal** — the §5.11 layout reserves the error's space, so a
+    validation message may never move the form.
 13. **The in-play licence chip, and what it must not say** (§5.10.1) — in the win spec, clock pinned
     to 2026-09-02, after the help modal closes and **before any guess**: `#mtd-photo-licence` is
     visible, its text is exactly `Photo: Public domain` (fixture #1's `license.name`) and its `href`
@@ -2701,11 +3290,14 @@ export default defineConfig({
 ```html
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="description" content="Guess the motorbike in 5 tries. A new motorbike is available each day.">
 <title>Motodle</title>
 ```
 
 No `user-scalable=no`. No `maximum-scale`. No webfont `@import`. No third-party script tags.
-**W0 writes this file in full and it is final** — no other stream edits `index.html` (§8).
+**W0 writes this file in full and it is final** — no other stream edits `index.html` (§8), with one
+recorded exception: revision 8 rewrites the `description` above (§5.12 T1). There are no OG or
+Twitter-card tags; if any are added they carry the same sentence verbatim.
 
 ### 10.6 `src/config.ts` — pinned, because three streams depend on the exact values
 
@@ -2999,6 +3591,27 @@ and a second `D8` would make every "(D8)" citation ambiguous) — R6-8's MIT dec
 and in the README instead. No CSP edit: the credits view fetches same-origin `/puzzles/*.json` under
 the existing `connect-src 'self'` and adds only `<a>` navigations, so §13.2.6's policy string and
 `schema/constants.ts` stay byte-identical. No `infra/*.tf` edit of any kind.
+
+### 11.13 Revision 8 — guess-form layout, tagline, US English 2026-09-03
+
+User feedback on the live site, 2026-09-03. Three changes, all **presentation and copy**: no game
+rule, no scoring, no storage schema, no payload budget, no CSP, no `infra/**`, no `.github/**` and no
+`schema/constants.ts` is touched. *(Revision 7 is the R7 deploy-trust note at the head of §11, which
+was an `infra/` fix and got no section of its own.)*
+
+| # | Change | Sections |
+|---|---|---|
+| R8-1 | **New §5.11 — the guess form is one two-column grid at every width** (Make \| Model, then Year \| Guess, then a quiet Give up under a hairline). Deletes the `@media (max-height: 1000px)` *layout* branch in `GuessForm.svelte`, the four wrapper divs, the hidden `Year` label, the native number spinner and the `opacity: 0.5` disabled skin. Adds one app-wide `:focus-visible` ring. | new §5.11; §5.3.4, §5.3.5, §5.4, §5.7 amended |
+| R8-2 | **Errors and the `Locked` chip move onto their field's label line**, which exists in every state — so a validation message costs **zero** layout and the form never shifts. `GuessForm` owns all three messages; `YearInput` drops `invalidMessage`. | §5.11.3, §5.11.4; §5.3.4, §5.4, §7.3 |
+| R8-3 | **The fold rule is improved, not merely preserved**: at 360×640 the submit button's bottom goes 612.9 → **575.5** against a 640 px viewport (slack 27.1 → 64.5 px), measured on the real build at six viewports, in the clean, invalid, locked and give-up-confirmation states. 320×568, which **failed** the rule before, now passes. `--stage-max-h` is untouched, so the photo does not get smaller at any viewport. | §5.11.5; §5.10.2 annotated |
+| R8-4 | **New §5.12 — one tagline everywhere**: *"Guess the motorbike in 5 tries. A new motorbike is available each day."* Replaces the `index.html` meta description, the HelpModal intro and the README's first sentence; added to §10.5's head snippet. The How-to-play rules table, the scoring table and the midnight line are unchanged. | new §5.12; §5.6, §10.5 |
+| R8-5 | **New §5.13 — US English for every user-facing string.** Six rendered strings change (two `aria-label`/`title` pairs on the colorblind toggle, the footer's *Creative Commons licenses*, the credits intro, the `Tile colors` heading, the photo-license `aria-label`); seven test/e2e assertions move with them. Code identifiers, DOM ids (`#mtd-photo-licence`), CSS class names, comments and Wikimedia license *names* are explicitly out of scope. | new §5.13; §5.6, §5.7, §5.10.1, §5.10.4, §5.10.5 quotes updated |
+| R8-6 | **The DOM contract is byte-identical.** `#mtd-make` / `#mtd-model` / `#mtd-year`, option values = catalog ids, the label texts `Make` / `Model` / `Year`, the accessible names `Guess {n} of 5` / `Give up` / `Confirm` / `Cancel`, the `mtd-*-error` ids, the `.lock-chip` element and its `Locked` text all survive verbatim — which is why `GuessForm.test.ts` and `playthrough.spec.ts` need **no** edit. | §5.3.1 unchanged; §5.11.3, §5.11.7 |
+
+**Two follow-ups left standing, both recorded with their numbers rather than done:** the recovered
+fold slack could buy the 360×640 photo +30 px via `--stage-max-h: clamp(120px, 100svh - 470px, 36svh)`
+(§5.11.6), and the UK spellings left in *test names* and source comments are optional tidying
+(§5.13). Neither blocks anything.
 
 ---
 

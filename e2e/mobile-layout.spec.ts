@@ -56,4 +56,17 @@ test('360x640: submit button is above the fold unfocused, and pinch-zoom stays e
     expect(box.w).toBeGreaterThanOrEqual(44);
     expect(box.h).toBeGreaterThanOrEqual(44);
   }
+
+  // §5.11.7: the error/Locked chip lives on the field's own label line, which exists in every
+  // state (§5.11.4 U6) -- so a failed submit must cost the layout nothing. A "give-up is also
+  // above the fold" assertion was rejected in the plan as too brittle (7.5px of margin); the
+  // submit button's own position not moving is the real guarantee.
+  const bottomBefore = m.bottom;
+  // { force: true }: aria-disabled, not natively disabled (§5.3.4) -- Playwright's own
+  // actionability check treats aria-disabled as disabled by design (see blocked-submit.spec.ts).
+  await submit.click({ force: true }); // nothing chosen -- fails validation, surfaces "Choose a make" etc.
+  const bottomAfter = await page.evaluate(
+    () => document.querySelector('button[type="submit"]')!.getBoundingClientRect().bottom,
+  );
+  expect(bottomAfter).toBe(bottomBefore);
 });

@@ -27,7 +27,7 @@
 <Modal {open} titleId="credits-title" {onclose}>
   <h2 id="credits-title">Photo credits</h2>
   <p class="credits-intro">
-    Photos come from Wikimedia Commons under Creative Commons or public-domain licences and are
+    Photos come from Wikimedia Commons under Creative Commons or public-domain licenses and are
     cropped, resized and re-encoded.
   </p>
 

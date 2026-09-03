@@ -16,12 +16,9 @@
 
 <Modal {open} titleId="help-title" onclose={() => onclose()}>
   <h2 id="help-title">How to play</h2>
-  <p>
-    Guess the motorbike's <strong>make</strong>, <strong>model</strong> and <strong>year</strong> in
-    5 tries. Every wrong guess zooms the photo out a little.
-  </p>
+  <p>Guess the motorbike in 5 tries. A new motorbike is available each day.</p>
 
-  <h3>Tile colours</h3>
+  <h3>Tile colors</h3>
   <table class="help-grid">
     <colgroup>
       <col style="width: 19%" />

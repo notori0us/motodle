@@ -64,13 +64,12 @@ describe('YearInput', () => {
     expect(selectSpy).toHaveBeenCalled();
   });
 
-  it('renders the inline invalid message with aria-invalid/aria-describedby', () => {
+  it('sets aria-invalid/aria-describedby when invalid — the message itself belongs to the parent (§5.11.3)', () => {
     render(YearInput, {
-      props: { id: 'y', value: null, onchange: vi.fn(), invalid: true, invalidMessage: 'Enter a year' },
+      props: { id: 'y', value: null, onchange: vi.fn(), invalid: true },
     });
     const input = screen.getByRole('spinbutton');
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAttribute('aria-describedby', 'y-error');
-    expect(screen.getByText('Enter a year')).toBeInTheDocument();
   });
 });

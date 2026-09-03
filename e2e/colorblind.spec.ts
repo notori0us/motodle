@@ -26,7 +26,7 @@ test('colourblind palette wins over both explicit dark and prefers-color-scheme:
 
   // Explicit [data-theme="dark"] + [data-colorblind="true"]: equal (0,2,0) specificity, so the
   // colourblind block (declared last) must win.
-  await page.getByRole('button', { name: 'Toggle colourblind mode' }).click();
+  await page.getByRole('button', { name: 'Toggle colorblind mode' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-colorblind', 'true');
   expect(await greenBg()).toBe(COLORBLIND_GREEN);
 
@@ -42,7 +42,7 @@ test('colourblind palette wins over both explicit dark and prefers-color-scheme:
 
   // Toggle colourblind back OFF, still under prefers-color-scheme: dark emulation: must revert
   // to the base green -- the other half of "proves a difference".
-  await page.getByRole('button', { name: 'Toggle colourblind mode' }).click();
+  await page.getByRole('button', { name: 'Toggle colorblind mode' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-colorblind', 'false');
   expect(await greenBg()).toBe(BASE_GREEN);
 });

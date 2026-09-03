@@ -86,7 +86,7 @@ describe('App', () => {
     await fireEvent.click(themeButton); // light -> system
     expect(root).not.toHaveAttribute('data-theme');
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Toggle colourblind mode' }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Toggle colorblind mode' }));
     expect(root).toHaveAttribute('data-colorblind', 'true');
   });
 
