@@ -11,11 +11,22 @@
         "modelId": "suzuki-gsxr750",
         "model": "GSX-R750",
         "year": 2004,
-        "acceptModelIds": ["suzuki-gsxr750"]
+        "acceptModelIds": [
+          "suzuki-gsxr750"
+        ]
       },
-      "focus": { "x": 0.30, "y": 0.68 },
+      "focus": {
+        "x": 0.3,
+        "y": 0.68
+      },
       "sourceCrop": null,
-      "cropFractions": [0.30, 0.41, 0.55, 0.74, 1.00],
+      "cropFractions": [
+        0.3,
+        0.41,
+        0.55,
+        0.74,
+        1.0
+      ],
       "credit": {
         "fileTitle": "File:2004 Suzuki GSXR-750 Left SIde.jpg",
         "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2004_Suzuki_GSXR-750_Left_SIde.jpg",
@@ -48,11 +59,22 @@
         "modelId": "kawasaki-ninja-zx6r",
         "model": "Ninja ZX-6R",
         "year": 2002,
-        "acceptModelIds": ["kawasaki-ninja-zx6r"]
+        "acceptModelIds": [
+          "kawasaki-ninja-zx6r"
+        ]
       },
-      "focus": { "x": 0.5, "y": 0.55 },
+      "focus": {
+        "x": 0.5,
+        "y": 0.55
+      },
       "sourceCrop": null,
-      "cropFractions": [0.25, 0.35, 0.49, 0.69, 0.96],
+      "cropFractions": [
+        0.25,
+        0.35,
+        0.49,
+        0.69,
+        0.96
+      ],
       "credit": {
         "fileTitle": "File:2002 kawasaki zx-6r.jpg",
         "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2002_kawasaki_zx-6r.jpg",
@@ -85,15 +107,31 @@
         "modelId": "ducati-916",
         "model": "916",
         "year": 1995,
-        "acceptModelIds": ["ducati-916"]
+        "acceptModelIds": [
+          "ducati-916"
+        ]
       },
-      "focus": { "x": 0.56, "y": 0.55 },
-      "sourceCrop": { "x": 0.08, "y": 0.02, "w": 0.71, "h": 0.72 },
-      "cropFractions": [0.17, 0.26, 0.40, 0.62, 0.96],
+      "focus": {
+        "x": 0.27,
+        "y": 0.62
+      },
+      "sourceCrop": {
+        "x": 0.08,
+        "y": 0.02,
+        "w": 0.71,
+        "h": 0.72
+      },
+      "cropFractions": [
+        0.17,
+        0.26,
+        0.4,
+        0.62,
+        0.96
+      ],
       "credit": {
         "fileTitle": "File:Ducati 916.JPG",
         "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Ducati_916.JPG",
-        "author": "Przemysław Jahr",
+        "author": "Przemys\u0142aw Jahr",
         "license": {
           "id": "PD",
           "name": "Public domain",
@@ -102,7 +140,7 @@
         },
         "attributionRequired": false,
         "modified": "cropped, resized, re-encoded to WebP",
-        "creditNote": "Przemysław Jahr / Wikimedia Commons"
+        "creditNote": "Przemys\u0142aw Jahr / Wikimedia Commons"
       },
       "yearEvidence": {
         "confidence": "operator",
