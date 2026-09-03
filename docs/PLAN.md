@@ -2749,6 +2749,9 @@ D5 stays a one-line change.
 
 ## 11. Revision log
 
+> **R7 (2026-09-03, first deploy):** the first `deploy.yml` run failed `AssumeRoleWithWebIdentity`. CloudTrail showed GitHub issuing the *immutable* OIDC subject `repo:reenchree@213154582/motodle@1355164768:ref:refs/heads/main` (owner and repo numeric ids) rather than the classic `repo:reenchree/motodle:ref:refs/heads/main`. The trust policy now lists both forms (`local.github_subs`, ids in `variables.tf`). terraform-core's `GitHubOIDCECRPushRole` (`repo:reenchree/*:*`) has the same exposure.
+
+
 This revision applied every BLOCKER from both critics, the cheap-and-clearly-right IMPROVEMENTS, the
 operator's five open-question decisions, and two new game rules. Terse index of what changed and where.
 
@@ -4191,7 +4194,10 @@ The rendered trust policy — this is the shape to eyeball in the plan output:
       },
       "Condition": {
         "StringEquals": {
-          "token.actions.githubusercontent.com:sub": "repo:reenchree/motodle:ref:refs/heads/main",
+          "token.actions.githubusercontent.com:sub": [
+            "repo:reenchree/motodle:ref:refs/heads/main",
+            "repo:reenchree@213154582/motodle@1355164768:ref:refs/heads/main"
+          ],
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
         }
       }

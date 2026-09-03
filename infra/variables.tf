@@ -33,3 +33,18 @@ variable "content_security_policy" {
   type        = string
   default     = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'"
 }
+
+# GitHub now issues OIDC subjects in an "immutable" form that embeds numeric ids
+# (repo:OWNER@OWNER_ID/REPO@REPO_ID:ref:...). The trust policy accepts both forms.
+# Find them with: gh api repos/reenchree/motodle --jq '.owner.id, .id'
+variable "github_owner_id" {
+  description = "Numeric id of the GitHub owner (org/user) for the immutable OIDC subject."
+  type        = number
+  default     = 213154582
+}
+
+variable "github_repository_id" {
+  description = "Numeric id of the GitHub repository for the immutable OIDC subject."
+  type        = number
+  default     = 1355164768
+}
