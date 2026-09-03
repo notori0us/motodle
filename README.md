@@ -138,7 +138,7 @@ from the day budget). It prints one row per measurement with its actual size and
 
 ## Image licensing
 
-Code is MIT, see LICENSE; photos keep their own licences, see docs/ATTRIBUTION.md.
+© 2026 Chris Wallace. Everything in this repo except the photographs is licensed MIT (see LICENSE). The photographs are third-party Wikimedia Commons works under their own Creative Commons or public-domain terms, covered by neither the MIT grant nor that copyright line — see docs/ATTRIBUTION.md.
 
 The images under `fixtures/images/` and `public/puzzles/img/` are **not** covered by this
 repository's code licence. Each is a cropped, resized, WebP-re-encoded derivative of a Wikimedia

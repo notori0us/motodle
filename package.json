@@ -21,7 +21,7 @@
     "schedule": "tsx tools/schedule.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Chris Wallace",
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.62.1",
