@@ -34,6 +34,7 @@ These build the catalog and the daily puzzles from Wikimedia Commons; see `docs/
 npm run generate    # offline: fixtures/ -> public/puzzles/** + docs/ATTRIBUTION.md (idempotent)
 npm run catalog      # network: rebuild public/catalog.json from Commons/Wikidata
 npm run fetch         # network: find candidate photos -> data/review/<batch>.json for approval
+npm run prefetch       # network: cache approved candidates' originals (schedule needs them) + write review thumbnails
 npm run crop           # offline: crop.ts's five WebP levels + full reveal for one source image
 npm run schedule        # offline: an approved review batch -> public/puzzles/** + manifest.json
 ```

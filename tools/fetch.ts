@@ -115,6 +115,23 @@ export interface RawFilePage {
   };
 }
 
+/** Wire shape of a `prop=imageinfo` page under `formatversion=2`: `imageinfo` is an ARRAY (one
+ *  entry per revision; `iilimit` defaults to 1) and is absent for pages that carry no file. The
+ *  first live run (2026-09-03) crashed on `.extmetadata` of that array — normalize before use. */
+export interface RawQueryPage {
+  pageid: number;
+  title: string;
+  imageinfo?: RawFilePage['imageinfo'] | RawFilePage['imageinfo'][];
+}
+
+/** Collapses the wire shape to the object shape `buildReviewCandidate()` reads; `null` when the
+ *  page has no usable imageinfo (caller logs and skips — never a crash). */
+export function normalizeQueryPage(page: RawQueryPage): RawFilePage | null {
+  const info = Array.isArray(page.imageinfo) ? page.imageinfo[0] : page.imageinfo;
+  if (!info || !info.extmetadata) return null;
+  return { pageid: page.pageid, title: page.title, imageinfo: info };
+}
+
 export interface BuildCandidateParams {
   page: RawFilePage;
   makeId: string;
@@ -258,7 +275,7 @@ export function parseLicenseFamilies(spec: string | undefined): Set<LicenseFamil
 
 interface QueryResponse {
   query?: {
-    pages?: RawFilePage[];
+    pages?: RawQueryPage[];
   };
 }
 
@@ -344,7 +361,12 @@ export async function fetchCandidates(opts: FetchOptions): Promise<FetchResult> 
     const mIds = pages.map((p) => `M${p.pageid}`);
     const p275Map = await fetchP275(client, mIds);
 
-    for (const page of pages) {
+    for (const rawPage of pages) {
+      const page = normalizeQueryPage(rawPage);
+      if (!page) {
+        console.error(`fetch.ts: "${rawPage.title}" has no imageinfo — skipping`);
+        continue;
+      }
       const built = buildReviewCandidate({
         page,
         makeId: make.id,

@@ -11,6 +11,7 @@ import {
   parseLicenseFamilies,
   parseRestrictions,
   stripHtml,
+  normalizeQueryPage,
   type RawFilePage,
 } from './fetch';
 import { validate, type JSONSchema } from '../schema/validate';
@@ -478,5 +479,27 @@ describe('fetchCandidates — counts licence-rejected/family-filtered candidates
     expect(written.candidates).toHaveLength(1);
     const schema = JSON.parse(await fs.readFile(path.join(ROOT, 'schema/review.schema.json'), 'utf8')) as JSONSchema;
     expect(validate(schema, written)).toEqual([]);
+  });
+});
+
+// -----------------------------------------------------------------------------------------
+// normalizeQueryPage — formatversion=2 returns `imageinfo` as an ARRAY (live run 2026-09-03)
+// -----------------------------------------------------------------------------------------
+
+describe('normalizeQueryPage', () => {
+  it('collapses the formatversion=2 array to the object shape', () => {
+    const wire = { pageid: 1, title: 'File:x.jpg', imageinfo: [page().imageinfo] };
+    expect(normalizeQueryPage(wire)).toEqual(page({}, { pageid: 1, title: 'File:x.jpg' }));
+  });
+
+  it('passes an already-object imageinfo through unchanged', () => {
+    expect(normalizeQueryPage(page())).toEqual(page());
+  });
+
+  it('returns null (never throws) for a page with no imageinfo or no extmetadata', () => {
+    expect(normalizeQueryPage({ pageid: 2, title: 'File:none.jpg' })).toBeNull();
+    expect(normalizeQueryPage({ pageid: 3, title: 'File:empty.jpg', imageinfo: [] })).toBeNull();
+    const noMeta = { ...page().imageinfo, extmetadata: undefined as unknown as RawFilePage['imageinfo']['extmetadata'] };
+    expect(normalizeQueryPage({ pageid: 4, title: 'File:nometa.jpg', imageinfo: [noMeta] })).toBeNull();
   });
 });
