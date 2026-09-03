@@ -25,7 +25,10 @@
     <ul class="archive-list">
       {#each past as p (p.id)}
         <li>
-          <a href={`?d=${p.date}`}>Motodle #{p.number} <span class="archive-list__date">{p.date}</span></a>
+          <a href={`?d=${p.date}`}>
+            <span class="archive-list__num">Motodle #{p.number}</span>
+            <span class="archive-list__date">{p.date}</span>
+          </a>
         </li>
       {/each}
     </ul>
@@ -47,19 +50,32 @@
   .archive-list a {
     display: flex;
     justify-content: space-between;
-    min-height: var(--touch-target);
     align-items: center;
+    min-height: var(--touch-target);
     padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg);
+    font-weight: 500;
     text-decoration: none;
+    transition: background-color 120ms ease-out, border-color 120ms ease-out;
   }
 
-  .archive-list a:hover {
+  .archive-list a:hover,
+  .archive-list a:focus-visible {
     background: var(--color-surface);
+  }
+
+  .archive-list__num {
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
   }
 
   .archive-list__date {
     color: var(--color-muted);
-    font-size: 0.85rem;
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
   }
 </style>

@@ -59,13 +59,15 @@
     {#each ORDER as score (score)}
       {@const count = stats.scoreDistribution[String(score) as '0']}
       {@const pct = Math.max(6, Math.round((count / maxCount) * 100))}
+      {@const highlighted = highlightScore === score}
       <div class="distribution__row">
         <span class="distribution__label">{score}</span>
         <div class="distribution__track">
           <div
             class="distribution__bar"
-            class:distribution__bar--highlight={highlightScore === score}
-            style={`width: ${pct}%`}
+            class:distribution__bar--highlight={highlighted}
+            class:distribution__bar--zero={count === 0}
+            style={count === 0 ? undefined : `width: ${pct}%`}
           >
             {count}
           </div>
@@ -75,39 +77,61 @@
   </div>
 
   <div class="countdown">
-    <span>Next Motodle</span>
-    <strong>{formatHMS(remainingMs)}</strong>
+    <span class="countdown__label">Next Motodle</span>
+    <strong class="countdown__value">{formatHMS(remainingMs)}</strong>
   </div>
 
   {#if canShare}
-    <button type="button" class="button button--primary" onclick={onshare}>Share</button>
+    <button type="button" class="button button--primary stats-cta" onclick={onshare}>Share</button>
   {/if}
 </Modal>
 
 <style>
+  h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin: 0 0 var(--space-2);
+  }
+
   .stats-summary {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--space-2);
     text-align: center;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
   }
 
   .stats-summary strong {
     display: block;
-    font-size: 1.4rem;
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.5rem;
   }
 
   .stats-summary span {
     font-size: 0.75rem;
+    font-weight: 600;
     color: var(--color-muted);
+  }
+
+  /* K11: "Current streak" wraps to two lines and breaks the grid at 360px. Two columns under
+     380px, not a shortened caption — the caption strings are frozen copy. */
+  @media (max-width: 380px) {
+    .stats-summary {
+      grid-template-columns: repeat(2, 1fr);
+      row-gap: var(--space-4);
+    }
   }
 
   .distribution {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
   }
 
   .distribution__row {
@@ -119,24 +143,43 @@
   .distribution__label {
     width: 2rem;
     text-align: right;
-    font-size: 0.85rem;
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
     color: var(--color-muted);
   }
 
+  /* review improvement #3: a day-one player (all eight buckets at 0) used to see eight identical
+     full-width grey plates before a single game had ever painted one — the FILLED bar was fixed
+     (K11), but the TRACK it sits in was always opaque regardless. A hairline baseline instead of a
+     plate: a real bar still reads as "filling toward" something, an empty row reads as empty. */
   .distribution__track {
     flex: 1;
-    background: var(--color-surface);
-    border-radius: var(--radius-sm);
+    border-bottom: 1px solid var(--color-border);
   }
 
+  /* K11: a zero-count bucket used to render as a colour-filled stub identical in kind to a real
+     result — eight of them on a first-time player's very first look at the modal. Non-zero bars
+     fill in ink at low alpha with an ink label (not the accent — colour still belongs to the
+     scoreboard); a zero bucket carries no fill at all, just its count at the track's left edge. */
   .distribution__bar {
     min-width: 1.5rem;
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
+    background: color-mix(in oklab, var(--color-fg) 12%, transparent);
+    color: var(--color-fg);
     border-radius: var(--radius-sm);
     padding: 0 var(--space-2);
-    font-size: 0.8rem;
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
     text-align: right;
+  }
+
+  .distribution__bar--zero {
+    width: auto;
+    background: transparent;
+    color: var(--color-muted);
+    padding-left: 0;
+    text-align: left;
   }
 
   .distribution__bar--highlight {
@@ -146,12 +189,25 @@
 
   .countdown {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
     margin-bottom: var(--space-4);
   }
 
-  .countdown strong {
+  .countdown__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .countdown__value {
+    font-family: var(--font-numeric);
     font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+
+  .stats-cta {
+    margin-top: var(--space-2);
   }
 </style>

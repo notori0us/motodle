@@ -79,16 +79,17 @@
 
   <p>A new Motodle every day at midnight, your time.</p>
 
-  <button type="button" class="button button--primary" onclick={() => onclose()}>Got it</button>
+  <button type="button" class="button button--primary help-cta" onclick={() => onclose()}>Got it</button>
 </Modal>
 
 <style>
   .help-grid,
   .help-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin-bottom: var(--space-3);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
   }
 
   .help-grid th,
@@ -97,12 +98,13 @@
   .help-table td {
     text-align: left;
     vertical-align: top;
-    padding: var(--space-2) var(--space-1);
-    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-2) var(--space-2);
   }
 
-  .help-grid thead th {
-    font-weight: 600;
+  .help-grid thead th,
+  .help-table thead th {
+    font-weight: 700;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .help-grid thead .swatch {
@@ -120,19 +122,28 @@
     table-layout: fixed;
   }
 
+  /* Multiplier numbers are data (§5.14.3 Instrument Rule): the guess column stays plain sans. */
+  .help-table tbody td:nth-child(2) {
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+  }
+
   .help-note {
     margin-top: 0;
   }
 
+  /* Full 24x24 tiles drawn from the same CSS as a real scoreboard tile — fill + glyph — so the
+     legend and the actual board are visibly the same object (§5.14.7 item 9). */
   .swatch {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    vertical-align: -0.2em;
+    font-size: 0.875rem;
+    font-weight: 600;
+    vertical-align: -0.35em;
     margin-right: var(--space-1);
   }
 
@@ -156,5 +167,18 @@
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
+  }
+
+  h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin: var(--space-5) 0 var(--space-2);
+  }
+
+  .help-cta {
+    margin-top: var(--space-2);
   }
 </style>

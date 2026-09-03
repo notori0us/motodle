@@ -2556,6 +2556,1142 @@ required by this revision.
 
 ---
 
+### 5.14 Impeccable pass — design brief (revision 10)
+
+Operator ask, 2026-09-03: *"add impeccable style to the project."* This section is the **design
+brief** the implementing agent builds from. It is written by the Impeccable `init` + `document` pass
+(skill v4.1.3, `/home/chris/workspace/motodle/.claude/skills/impeccable`) and it changes **look, not
+law**: every rule in §3, §4, §5.3.1, §5.8's fold rule, §5.9's budgets, §5.10's spoiler rule, §5.12's
+tagline and §5.13's US English is untouched and binding. Where this section and any frozen contract
+disagree, **the frozen contract wins and the design is wrong**.
+
+Two new files at the repo root carry the durable context: **`PRODUCT.md`** (product truth — users,
+purpose, positioning, constraints, principles) and **`DESIGN.md`** (a scan-mode record of the visual
+system *as built on 2026-09-03*, i.e. the baseline this brief replaces). `DESIGN.md` must be
+regenerated (`/impeccable document`) once this pass lands.
+
+**Visitor mode: Operate**, with one **Experience moment** at the reveal. Scanability, stable
+structure, native affordances and the fold outrank expression on the game screen; the result modal is
+where the product is allowed to be a moment rather than a form.
+
+#### 5.14.0 How this brief was produced
+
+- `node .claude/skills/impeccable/scripts/context.mjs` → `NO_PRODUCT_MD` + `EXISTING_VISUAL_SYSTEM`
+  (an incumbent world exists; this is a **refinement/extension**, not a redesign — the identity is
+  preserved and elevated, never replaced).
+- Impeccable's `init` interview could not be run: this session had **no structured question tool and
+  no decision-page channel**. Every product fact was therefore inferred from the operator's brief and
+  the repository, and the inferred ones are marked **[assumed]** in `PRODUCT.md` for correction.
+- `document` (scan mode) → `DESIGN.md`. The `.impeccable/design.json` sidecar that `document`
+  normally writes alongside it was **not** written: `.impeccable/` was outside this pass's writable
+  file set. Anyone re-running `/impeccable document` after the implementation will produce both.
+- Baseline evidence: `npm run build` + `vite preview` on 127.0.0.1:4173, then **90 screenshots** —
+  15 screens/states × {360×640, 1280×800} × {light, dark, colorblind} — plus measured layout metrics.
+  Screenshot directory:
+  `/tmp/claude-1000/-home-chris-workspace/852d5747-63d4-4155-bc73-5cf062e93be6/scratchpad/shots/`
+  (`metrics-360x640.json` and `frame-heights.json` sit beside them).
+
+#### 5.14.1 Baseline — what the evidence actually shows
+
+**Detector, static pass** — `node .claude/skills/impeccable/scripts/detect.mjs src index.html public/404.html`.
+Before `DESIGN.md` existed: **zero findings** (`--json` returned `[]`), and that is the bar this pass
+must not drop below. *After* `DESIGN.md` landed, the same command reports **12 advisory
+design-system-drift findings** (exit code still 0 — advisories never fail): eleven literal
+`font-size` values that are off the documented ramp — `0.65rem` (the `LOCKED` chip), `0.8rem` ×3,
+`0.9rem` ×4, `1.1rem`, `1.4rem` — and, on `public/404.html`, one color and one radius outside the
+system entirely. Those are not new defects; they are the one-off sizes §5.14.3's role scale exists to
+absorb, and they should read as zero again once the ramp is adopted and `DESIGN.md` regenerated.
+
+The rendered (URL) pass, which is the one that measures computed font sizes, contrast and spacing
+rhythm in a real browser, **could not run**: it needs `puppeteer`, which is not installed and cannot
+be fetched offline. Treat the static pass as a floor, not a verdict — several findings below (C9 in
+particular: the 10.4 px chip sits under the detector's own 11 px functional-text floor) are exactly
+what a URL pass would have raised.
+
+**Measured (real build, `vite preview`, light theme):**
+
+| Measurement | Value |
+|---|---|
+| App CSS gzipped | **3.92 KB** of a 20 KB budget → ~16 KB of headroom |
+| App JS gzipped | **29.54 KB** of 60 KB → ~30 KB of headroom |
+| Fold slack at 360×640 (submit bottom 575.5 vs innerHeight 640) | **64.5 px unused** |
+| Photo frame (w×h) at 360×640 / 390×844 / 768×1024 / 1280×800 / 1920×1080 | 186.7×**140** / 366×**274.5** / 480×**360** / 384×**288** / 480×**360** |
+
+The frame heights above are the **floor** for this pass (§5.14.7 raises four of the five; none may
+regress). Note the plan's earlier note of *291 px at 768×1024* does not reproduce on the current
+build — the measured value is 360 px, because the frame is width-limited by the 30 rem column there.
+
+**Critique of the render (the part no detector catches):**
+
+| # | Finding | Evidence |
+|---|---|---|
+| C1 | **The header speaks in emoji.** `?`, `📊`, `📅`, `◈`, `◑` are Unicode characters rendered by the platform emoji font: inconsistent color, weight and optical size, and the last two are indistinguishable from each other at 44 px. Impeccable's craft floor bans glyph-as-icon outright. | `01`–`15` screenshots, every viewport |
+| C2 | **Nothing on the page is Motodle.** Remove the photo and the tiles and the screen is an unbranded form: stock system sans at one weight, stock zinc grays, a stock framework blue (`#2563eb`), stock 6/10/16 radii. The identity is carried entirely by content. | all |
+| C3 | **The accent collides with a game state.** App accent `#2563eb` vs colorblind "close" `#1d4ed8` = **1.3:1**. In colorblind mode the primary button, the active crop segment and a "close" tile are the same blue. | `06-play-l3__*__cb` |
+| C4 | **The colorblind "wrong" tile disappears in dark mode.** `#17171a` on the dark ground `#121214` = **1.04:1**; only the white label and the `✗` glyph are visible, the plate is not. (The share text already knows this — §4.4 sends `⬜`, not `⬛`.) | tokens.css, dark + `data-colorblind` |
+| C5 | **Flat rhythm.** One 16 px gap (8 px under 1000 px height) separates *every* section, and the same hairline box wraps everything, so header, photo, board and form all read at the same weight. The squint test finds no primary element. | `02`, `06` at both viewports |
+| C6 | **Desktop is a phone in the middle of a 1280 px screen.** A 480 px column, a 384×288 photo, and ~800 px of empty white on either side. The hero of the product is smaller on a laptop than on a tablet. | `*__1280x800__*` |
+| C7 | **The reveal reads like a receipt.** The emotional peak — the full photograph, the answer, the score — is a stack of left-aligned paragraphs; the score `3 × 4 = 12 / 15` is body text, the attribution is a muted wall, and the modal's own `×` sits above the headline. | `08-win-result`, `13-loss-result` |
+| C8 | **Destructive copy truncates.** At 360×640 the give-up confirmation renders `Give up? This count…` — the sentence that explains the consequence is ellipsized by the `max-height: 700px` rule. | `04-giveup-confirm__360x640__*` |
+| C9 | **Micro-type below the legibility floor.** The `LOCKED` chip is 0.65 rem = **10.4 px** (detector floor for functional text is 11 px); the license line is 0.7 rem = 11.2 px, i.e. one hair above it. | GuessForm.svelte, ImageStage.svelte |
+| C10 | **No tonal separation in light mode.** `--color-bg` and `--color-bg-elevated` are both `#ffffff`; a 1.41:1 hairline is the only thing separating a modal, a card or a control from the page. | tokens.css |
+| C11 | **Zero-count stat bars are loud.** Eight accent-blue stubs labelled `0` compete with the one bar that has data; `Current streak` wraps to two lines at 360 px. | `10-stats__360x640__*` |
+| C12 | **`public/404.html` is a different product.** Green button (`#3b7d22` — the *tile* green), `#fafafa` ground, no wordmark, no header, none of the app's tokens. | `15-404__*` |
+| C13 | **The no-puzzle screen is missing its countdown.** §5.1 specifies "friendly message + Play the archive + **next-midnight countdown**"; the countdown is not rendered. Two-thirds of the screen is empty. | `14-no-puzzle__*` |
+| C14 | **Browser surfaces ship undesigned.** No `::selection`, no caret color, no scrollbar treatment, no `text-underline-offset`, and `tabular-nums` is set exactly once (the stats countdown) while every other number in the app — years, scores, level numbers, dates — renders proportional. | app.css |
+
+C13 adds behavior, so it is **optional and operator-gated**: implement it only if the operator wants
+it; it is otherwise recorded here as a spec/implementation gap, not a design task.
+
+#### 5.14.2 The direction
+
+**Motodle is a pit board.** The world the audience already knows by heart is not "a word game with
+photos" — it is the paddock's own information design: the timing board, the scrutineer's card, the
+instrument binnacle, the service-manual plate. That world is built from exactly the elements this
+game already has: a **photograph** as the object under examination, a **five-row board** of stamped
+plates that read at a glance in three states, **numbers** that mean something (year, score, lap,
+countdown) and therefore want an instrument voice, and a **crop ladder** that is a lap counter. So
+the pass spends its budget on four things: a ground and ink that feel like **asphalt, bone and
+petrol** rather than framework zinc; a **single rare accent** (deep petrol blue) that means *action*
+and nothing else, leaving green / amber / red to mean *state* and nothing else; **tabular, mono-set
+numerals** everywhere a number is data; and **drawn icons and a stamped wordmark** replacing the
+emoji header. The photograph gets bigger at every viewport and the reveal becomes a moment instead of
+a receipt. Nothing about the shape of the game changes: this is the same five guesses, in a case that
+finally looks like it was made for them.
+
+**The named rules this direction ships with** (put them in the regenerated `DESIGN.md`):
+
+- **The One Signal Rule.** Green, amber and red belong to the scoreboard. No decorative element, no
+  button, no link, no chart may borrow a state color — the single sanctioned exception stays the
+  stats modal's "today's bucket" bar, which *is* a game state.
+- **The Rare Accent Rule.** Petrol is the color of *action*: the primary button's fill, links, and
+  the focus ring. On the game screen there is exactly **one** accent-filled element at a time (the
+  submit button). Current-position state (the active crop segment, a selected row) is drawn in
+  **ink**, not accent.
+- **The Instrument Rule.** Every number a player reads as data — year, score, multiplier, puzzle
+  number, crop level, countdown, dates — is set in the numeric stack with `tabular-nums` and
+  `slashed-zero` where available. Words are never set in it.
+- **The Two-Signal Rule (unchanged, restated).** Color never speaks alone: colorblind mode swaps the
+  fill *and* renders the glyph, and in colorblind mode the accent itself steps out of the blue band
+  so that blue means exactly one thing.
+- **The Photograph First Rule.** At every viewport the photo frame is at least as large as the
+  2026-09-03 baseline in §5.14.1, and any vertical space this pass recovers goes to the photo before
+  it goes to anything else.
+
+#### 5.14.3 Type system
+
+**Families — system stacks, and the honest reason.** This pass ships **no webfont**. Not because the
+policy forbids it — `schema/constants.ts`'s `CONTENT_SECURITY_POLICY` *already* contains
+`font-src 'self'`, so a self-hosted subset would need **no CSP edit and no `infra/variables.tf`
+edit** — but because the session that wrote this brief had no network and there is no `.woff2`
+anywhere on disk to subset (verified: the only font files in the tree are Playwright's own
+`codicon.ttf`). A webfont is therefore a **later, optional** revision under the operator's own rules
+(≤ 60 KB total font bytes, `font-display: swap`, preloaded, self-hosted, plus the `e2e/csp.spec.ts`
+check); this brief is designed to look deliberate **without** one, and the implementer must not
+attempt a font download.
+
+```css
+--font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
+             'Apple Color Emoji', 'Segoe UI Emoji';            /* unchanged */
+--font-numeric: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+                'Liberation Mono', 'DejaVu Sans Mono', monospace;   /* NEW */
+```
+
+`--font-numeric` is a **data** face, never a costume: it is allowed on years, scores, multipliers,
+puzzle numbers, crop-level digits, dates and the countdown, and nowhere else. Set
+`font-variant-numeric: tabular-nums slashed-zero` on it.
+
+**Scale** (16 px root; no value below **0.75 rem / 12 px** renders anywhere in the app — C9):
+
+| Role | Size / weight / tracking / leading | Where |
+|---|---|---|
+| `wordmark` | 1.375 rem, 800, `letter-spacing: 0.06em`, `text-transform: uppercase`, line-height 1 | `h1` "Motodle" (CSS transform only — `textContent` stays `Motodle`, and `App.test.ts` asserts the accessible name) |
+| `display` | 1.5 rem, 750–800, `-0.015em`, 1.15 | the result modal's verdict line only |
+| `headline` | 1.25 rem, 700, `-0.01em`, 1.2 | modal `h2` (`How to play`, `Statistics`, `Photo credits`, `Archive`) |
+| `section` | 0.8125 rem, 700, `0.08em`, uppercase, `--color-muted` | modal `h3` (`Tile colors`, `Scoring`, `Score distribution`) and the scoreboard column heads |
+| `body` | 1 rem, 400, 0, **1.5** (up from 1.4) | modal prose, option text, buttons, the year field |
+| `control` | 1 rem, 500 | select values, button labels |
+| `label` | 0.75 rem, 600, `0.07em`, uppercase, muted | `Make` / `Model` / `Year` field labels, the `LOCKED` chip (chip drops uppercase-at-10 px and takes this role at 12 px) |
+| `tile` | 0.875 rem, 600, `-0.005em`, 1.1 | scoreboard tile labels; the year tile additionally takes `--font-numeric` |
+| `meta` | 0.75 rem, 400 | license line (**up from 0.7 rem**), footer, credit rows, captions |
+| `data-sm` / `data-lg` | `--font-numeric`, 0.875 rem / 1.5 rem, `tabular-nums` | crop-level digits, credit dates / stat values, countdown, score |
+
+**Measure and stress.** Modal prose is capped at `max-width: 62ch` inside the 30 rem dialog (it
+already lands near 60 ch — make it explicit). Long content that must survive: a 30-character model
+name in a tile (ellipsis, unchanged), `Current streak` in the stats grid (see C11 fix), and the
+`Give up? This counts as a loss.` sentence (C8 — it must **wrap, not truncate**).
+
+Do **not** introduce a second display family, a serif, or an italic voice; do not letter-space
+lowercase text; do not set body copy in `--font-numeric`.
+
+#### 5.14.4 Color system
+
+Neutrals get a **cool asphalt tint** (a trace of blue-green in the grays) rather than the current
+pure zinc, light mode gains a **real elevated surface** (C10), and the accent moves from framework
+blue to **petrol** — a deep cyan-blue that is unmistakably not the tile blue of colorblind mode. All
+values below are computed and checked; the ratios are in the right-hand columns.
+
+**Light (`:root`)**
+
+| Token | Value | Checks |
+|---|---|---|
+| `--color-bg` | `#f4f6f7` | page ground ("bone") |
+| `--color-bg-elevated` | `#ffffff` | now genuinely above the ground (C10) |
+| `--color-surface` | `#e7eaed` | empty tiles, tracks, disabled fields |
+| `--color-fg` | `#15181d` | 16.4:1 on bg |
+| `--color-muted` | `#585e68` | 6.0:1 on bg, 6.5:1 on elevated (was 5.3:1) |
+| `--color-border` | `#ccd2d9` | hairline |
+| `--color-accent` | `#0d6b8a` | 5.6:1 on bg, 6.0:1 on elevated |
+| `--color-accent-fg` | `#ffffff` | 6.0:1 on the accent fill |
+| `--color-danger` | `#a81f1f` | 6.7:1 on bg |
+| `--color-overlay` | `rgb(10 14 18 / 55%)` | scrim, slightly cooler and deeper |
+
+**Dark (`@media (prefers-color-scheme: dark) :root:not([data-theme='light'])` **and**
+`:root[data-theme='dark']` — both blocks, byte-identical, exactly as today)**
+
+| Token | Value | Checks |
+|---|---|---|
+| `--color-bg` | `#101318` | "night asphalt" |
+| `--color-bg-elevated` | `#171b21` | |
+| `--color-surface` | `#1f242c` | |
+| `--color-fg` | `#eef1f5` | 16.4:1 |
+| `--color-muted` | `#9ba4b0` | 7.4:1 |
+| `--color-border` | `#333b46` | |
+| `--color-accent` | `#5cc4e6` | 9.3:1 on bg |
+| `--color-accent-fg` | `#08121a` | 9.4:1 on the accent fill |
+| `--color-danger` | `#ff8f8f` | 8.5:1 |
+| `--color-overlay` | `rgb(4 6 9 / 72%)` | |
+
+**Tiles.** `--tile-green-bg` **must stay `#3b7d22`** and the colorblind "right" fill **must stay
+`#c2410c`**: `e2e/colorblind.spec.ts` asserts both hex strings verbatim, in light *and* dark, and that
+spec is not in this pass's writable set. Everything else moves:
+
+| State | Light | Dark | Text | Ratios (fill vs its text / vs its ground) |
+|---|---|---|---|---|
+| right | `#3b7d22` *(frozen)* | `#3b7d22` *(frozen)* | `#ffffff` | 5.07 / 4.7 light, 3.7 dark |
+| close | `#8a6100` (was `#946c0a`) | `#8a6100` | `#ffffff` | **5.54** (was 4.76) / 5.1 light, 3.4 dark |
+| wrong | `#b3261e` (was `#b32222`) | `#c5372c` (was `#a13a3a`) | `#ffffff` | 6.54 light, 5.31 dark / 6.0 light, 3.5 dark |
+| empty | `--color-surface` + hairline | same | `--color-muted` | — |
+
+**Colorblind (`:root[data-colorblind='true']`, still the last block in the file)**
+
+| Token | Light | Dark (`:root[data-colorblind='true'][data-theme='dark']` **and** the `prefers-color-scheme` twin) | Why |
+|---|---|---|---|
+| `--tile-green-bg` | `#c2410c` *(frozen)* | `#c2410c` *(frozen)* | e2e-asserted |
+| `--tile-yellow-bg` | `#1d4ed8` | `#3b6fe8` | 4.5:1 with white text, 4.1:1 against the dark ground |
+| `--tile-red-bg` / `--tile-red-fg` | `#17171a` / `#ffffff` | **`#e9ecef` / `#15181d`** | fixes C4: on the dark ground the near-black plate is 1.04:1, i.e. invisible. Inverting it to bone in dark mode is also exactly what the share grid already does (`⬜`, §4.4) |
+| `--color-accent` / `--color-accent-fg` | `#15181d` / `#ffffff` | `#eef1f5` / `#101318` | fixes C3: in colorblind mode blue **is** the "close" tile, so the action color steps out of the blue band and becomes ink. Links, the focus ring and the primary fill all follow the token, so this is a two-line change |
+
+Contrast to preserve, and to re-verify after any tweak: body/placeholder text ≥ 4.5:1, large text
+≥ 3:1, controls/icons/focus ring ≥ 3:1 against their own ground, tile fill vs its label ≥ 4.5:1,
+tile fill vs the page ground ≥ 3:1 wherever it can be met.
+
+**Tinting rule:** neutrals carry the asphalt hue; secondary text on a colored surface is derived from
+that surface's own hue or its foreground — never a generic gray. No gradients, no glass, no glow.
+
+#### 5.14.5 Space, shape, elevation
+
+**Space.** Keep the 4 px-base scale and add one step for section separation:
+
+```css
+--space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
+--space-5: 1.5rem; --space-6: 2rem;   /* unchanged */
+```
+
+Rhythm replaces uniformity (C5): **inside a group 4–8 px, between groups 16–24 px**, and more space
+above a heading than below it. Concretely — the photo stage and its license/scrub row are one group
+(8 px); the scoreboard's header row and its five rows are one group (4–8 px); the form's label→control
+is 4 px and control-block→control-block is 12 px (as today); the *gaps between* stage, board and form
+go to `--space-5` (24 px) on tall viewports and stay at `--space-2` under `max-height: 1000px`. The
+give-up row keeps its hairline and gains `padding-top: var(--space-3)`.
+
+**Shape.** Tighten the radius ladder one step toward "stamped plate":
+
+```css
+--radius-sm: 4px;   /* tiles, crop segments, distribution bars, archive rows */
+--radius-md: 8px;   /* every 44px control: buttons, selects, year field, icon buttons */
+--radius-lg: 14px;  /* modal dialog, photo frame */
+--radius-pill: 999px;
+```
+
+One hairline weight (`1px --color-border`) stays the only separator. No colored left-borders, no
+double borders, no 2 px rules.
+
+**Elevation.** Still flat, still one shadow, but a real one with offset *and* soft blur, plus a
+second token for the one element that should feel physically placed:
+
+```css
+--shadow-modal: 0 18px 48px -12px rgb(8 12 18 / 34%);   /* dark: 0 18px 48px -12px rgb(0 0 0 / 62%) */
+--shadow-plate: 0 1px 0 rgb(8 12 18 / 6%);              /* the photo frame + filled tiles, light only */
+```
+
+Nothing else lifts. No hover elevation on the game screen.
+
+#### 5.14.6 Motion
+
+One authored moment, not scattered effects. Every rule below is CSS `@keyframes` /
+`transition` — **never** a Svelte `transition:` directive, which calls the Web Animations API that
+jsdom does not implement and which would crash the component tests (this is why `ImageStage`'s
+cross-fade is already written as a keyframe animation).
+
+| Moment | Spec |
+|---|---|
+| **The stamp** (signature) | A newly submitted guess row's three tiles animate in: `opacity 0→1`, `translateY(3px)→0`, `scale(.98)→1`, **150 ms**, `cubic-bezier(.2,.8,.2,1)`, staggered **60 ms** per column (make → model → year) via `animation-delay`. Only the newest row animates — mark it in `Scoreboard.svelte` with `class:is-new={i === guesses.length - 1}`; every earlier row is static. |
+| **Crop change** | Keep the existing 200 ms cross-fade; add `scale(1.015)→1` on the same keyframe so the photo *settles* instead of blinking. |
+| **The reveal** (Experience moment) | In `ResultModal`: scrim `opacity 0→1` 160 ms; the dialog `translateY(8px)→0` + `opacity` 220 ms; the full photo `opacity 0→1` + `scale(1.02)→1` 260 ms with a 60 ms delay; the verdict line and the score row follow at 120 ms / 180 ms delays, 180 ms each. One orchestrated entrance, nothing repeated elsewhere. |
+| **Controls** | `background-color`, `border-color`, `color` transitions at **120 ms** `ease-out` on buttons, selects, crop segments and links. No transform on hover, no scale on tap beyond the tile stamp. |
+| **Focus** | Instant. The focus ring never animates. |
+| **Reduced motion** | `app.css`'s global `prefers-reduced-motion` block already collapses every duration to ~0 and it stays; the result modal's own **logical** 400 ms auto-open delay is also skipped under reduced motion, exactly as §5.5's reduced-motion path already does for the crop swap. Verify with `page.emulateMedia({ reducedMotion: 'reduce' })`. |
+
+No parallax, no marquee, no pulsing dot, no bounce/elastic easing, no layout-affecting transitions.
+
+#### 5.14.7 Component-by-component change list
+
+Every item names the file and the exact CSS/markup intent. **Class names and DOM hooks that tests
+depend on must survive verbatim:** `#mtd-make`, `#mtd-model`, `#mtd-year`, `#mtd-photo-licence`,
+`#mtd-credits`, `#mtd-credits-empty`, `#mtd-credits-more`, `#mtd-credits-link`,
+`#mtd-credits-link-result`, `[data-mtd-credit-row]`, `[data-date]`, `.scrub__seg`, `.tile`,
+`[data-color]`, `.scoreboard__row`, `.distribution__label`, `.distribution__bar--highlight`,
+`.result-image img`, and every `aria-label` / accessible name in §5.3.1 and §5.13.
+
+**1. Tokens — `src/styles/tokens.css`.** Apply §5.14.4 and §5.14.5 wholesale. Add `--font-numeric`,
+`--radius-pill`, `--shadow-plate`, and the two colorblind accent overrides (light + dark). Keep the
+file's structure and its comments about cascade specificity; the colorblind block stays last, and the
+new `[data-colorblind='true'][data-theme='dark']` block goes after it at `(0,3,0)`.
+
+**2. Global — `src/styles/app.css`.** Body `line-height: 1.5`. Add the browser-surface layer (C14),
+which is the cheapest possible signal that the page was designed:
+
+```css
+::selection { background: color-mix(in oklab, var(--color-accent) 22%, transparent); color: var(--color-fg); }
+:root { accent-color: var(--color-accent); caret-color: var(--color-accent);
+        scrollbar-color: var(--color-border) transparent; scrollbar-width: thin; }
+a { color: var(--color-accent); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+```
+
+(`color-mix` is supported by every browser this app targets; if the implementer prefers, use a static
+rgba value per theme instead.) Keep the single global `:focus-visible` rule and its
+`--color-fg` flip on `.button--primary`. Give `.button` a `font-weight: 500` and the 120 ms color
+transition. Add the wide-viewport composition described in item 4 **here**, not in `App.svelte`:
+Svelte scopes a component's styles to its own markup, so a rule that positions child *components*
+(`.app-main > .image-stage`, `> .scoreboard`, `> .guess-form`) only works from the global sheet.
+
+**3. Header + wordmark — `src/App.svelte`.**
+
+- **Icons (C1).** Replace all five glyph labels with authored inline SVG: 20×20 viewBox,
+  `stroke="currentColor"`, `stroke-width="1.75"`, `stroke-linecap="round"`, `stroke-linejoin="round"`,
+  `fill="none"`, `aria-hidden="true"`, `focusable="false"`. One consistent family, drawn as:
+  help = a question mark in a circle; statistics = three ascending bars; archive = a calendar/grid;
+  theme = a circle with a half-filled disc; colorblind = a circle split into two contrasting halves
+  with the `✓ ~ ✗` idea reduced to a single diagonal. **Every `aria-label` and `title` stays exactly
+  as it is today** (`How to play`, `Statistics`, `Archive`, `Change theme`, the `themeTitle`
+  expression, `Toggle colorblind mode`), and `aria-pressed` stays on the colorblind toggle. No icon
+  package, no icon font — inline SVG only (§5.2).
+- **Wordmark.** `h1` takes the `wordmark` type role (uppercase via CSS, `textContent` unchanged — the
+  accessible name `Motodle` is asserted by `App.test.ts:49`). Prefix it with an `aria-hidden="true"`
+  inline-SVG mark: three ascending ticks / a chevron cut from the same 1.75 px stroke family, 18 px,
+  in `--color-accent`. It must not add text to the heading.
+- **Header rule.** Give the header a `border-bottom: 1px solid var(--color-border)` and
+  `padding-bottom: var(--space-2)` so the board below reads as a separate group (C5). Icon buttons:
+  radius `--radius-md`, transparent background at rest, `--color-surface` on hover/focus, muted
+  stroke that goes to `--color-fg` on hover; the colorblind toggle's `aria-pressed="true"` state gets
+  an ink fill with `--color-bg` stroke so "on" is visible without color alone.
+- At `max-width: 380px` keep the existing 2 px gap escape hatch; verify the five 44 px buttons plus
+  the wordmark still fit under DejaVu Sans (the CI runner's fallback).
+
+**4. Layout — `src/App.svelte` + `app.css`.**
+
+- **Phone (unchanged topology).** Single column, `max-width: 30rem`, order header · practice bar ·
+  stage · board · form · footer. Only the rhythm changes (§5.14.5).
+- **The photo gets bigger (P1).** In `ImageStage.svelte`, change
+  `--stage-max-h: clamp(120px, 100svh - 500px, 36svh)` to
+  **`clamp(140px, 100svh - 470px, 40svh)`**. Predicted frames: 360×640 → 226×**170** (+30 px);
+  390×844 → 450×**337** (+63 px); 768×1024 → 480×**360** (unchanged, width-limited); 1280×800 →
+  426×**320** (+32 px); 1920×1080 → 480×**360** (unchanged, then superseded by the wide layout
+  below). The 360×640 fold has 64.5 px of slack today, so a +30 px stage leaves ~34 px — **measure,
+  do not assume**: `e2e/mobile-layout.spec.ts` is the gate, and if it fails, spend the difference by
+  reducing the short-viewport section gap rather than shrinking the photo back.
+- **Wide viewports (P2, recommended).** At `@media (min-width: 900px) and (min-height: 620px)`, widen
+  the column to `min(72rem, 100%)` and lay `.app-main` out as a two-column grid from the global
+  sheet, DOM order untouched:
+
+  ```css
+  .app-main { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(21rem, .9fr);
+              grid-template-areas: 'stage board' 'stage form'; align-content: start;
+              column-gap: var(--space-6); row-gap: var(--space-4); }
+  .app-main > .image-stage { grid-area: stage; }
+  .app-main > .scoreboard  { grid-area: board; }
+  .app-main > .guess-form  { grid-area: form; }
+  .app-main > .state-message { grid-column: 1 / -1; }
+  ```
+
+  with `--stage-max-h` released to `min(60svh, 34rem)` inside that media query, which puts the
+  1280×800 frame near 512×**384** — well above the 288 px floor. The header and footer stay
+  full-width. If any e2e spec (they run at Playwright's 1280×720 desktop default) proves unhappy,
+  fall back to the single column plus the larger `--stage-max-h`; the photo floor is what matters,
+  the two-column layout is the upside.
+- **Skeleton.** The loading skeleton keeps the reserved 4:3 box; give it a subtle two-stop shimmer
+  that respects reduced motion, or leave it flat — never a spinner.
+
+**5. Image stage — `src/components/ImageStage.svelte`.**
+
+- Frame: `--radius-lg`, `--shadow-plate` in light mode, a 1 px `--color-border` in dark, and
+  `background: var(--color-surface)`. Add a hover/focus affordance for "tap to enlarge": a small
+  ink-on-bone corner mark (inline SVG, `aria-hidden`) at 8 px inset, visible at rest at 55 % opacity —
+  today nothing suggests the photo is interactive.
+- Crop scrub: segments keep `min 44×44`, take `--radius-sm` and `--font-numeric`. **The current
+  segment is ink, not accent** (`background: var(--color-fg); color: var(--color-bg);`), the unlocked
+  ones are `--color-bg-elevated` with a hairline, and locked ones drop to `--color-surface` with
+  `--color-muted` and no border. This frees the accent for the submit button (Rare Accent Rule) and
+  reads as "you are here" rather than "click me".
+- License line: 0.75 rem (up from 0.7), `--color-muted`, `text-underline-offset: .18em`, unchanged
+  text and `aria-label`, unchanged position in the shared row. **Nothing from `credit` other than
+  `license.name` / `license.url` may enter this subtree** (§5.10.1 — the component test asserts it).
+
+**6. Scoreboard — `src/components/Scoreboard.svelte`.** This is the signature component; it should
+read as a board of stamped plates.
+
+- Column heads take the `section` type role (0.8125 rem, uppercase, tracked, muted) and sit above a
+  1 px `--color-border` rule that spans the board.
+- Tiles: `--radius-sm`, `--shadow-plate` in light, `border-color` matching the fill as today, tile
+  type role, and the **year column set in `--font-numeric` with `tabular-nums`** so five years form a
+  column that lines up. Empty tiles get a slightly inset look — `background: var(--color-surface)`,
+  `border: 1px solid var(--color-border)` and no shadow — so filled rows advance visually.
+- Keep `min-height: 2rem` (1.6 rem under `max-height: 1000px`), keep the `role="table"` structure,
+  the visually-hidden per-cell sentences, the live region, and the colorblind glyph markup exactly.
+- Add the stamp animation (§5.14.6) via a new `is-new` class on the latest row only.
+
+**7. Guess form — `src/components/GuessForm.svelte` + `YearInput.svelte`.** The §5.11 grid is good
+work; keep the structure and restyle it.
+
+- Labels take the `label` role (0.75 rem, 600, uppercase, tracked, muted). **The `<label>` element's
+  text content stays exactly `Make` / `Model` / `Year`** — uppercase is `text-transform` only,
+  because those strings are the selects' accessible names (`App.test.ts:53–54`).
+- `LOCKED` chip (C9): 0.75 rem, weight 600, `--radius-pill`, ink-on-surface at
+  `background: var(--color-surface); color: var(--color-fg); border-color: var(--color-border)`, with
+  a 10 px inline lock SVG (`aria-hidden`) before the word. It must sit on **its own field's** label
+  line — today at 360 px the make chip visually collides with the neighbouring `Model` label; give
+  the label row `justify-content: space-between` per column and let the chip shrink first.
+- Selects: `--radius-md`, `--color-bg-elevated`, 1 px border, `font-weight: 500`. Locked selects keep
+  full-strength ink at 600 (the value is the player's own) plus a 1 px `--color-fg` left edge? **No —
+  no colored left borders** (craft floor). Signal "settled" with the chip and the ink weight only.
+- Primary submit: the **one** accent-filled element on the screen. Accent fill, `--color-accent-fg`
+  text, `--radius-md`, weight 600, 120 ms color transition. The soft-disabled state keeps today's
+  semantics (`aria-disabled`, clickable so it can explain itself) drawn as an accent **outline** on
+  the surface fill; the truly inert state stays the neutral muted skin. Do not use `opacity` for
+  either.
+- Give-up row: keep the hairline and the quiet treatment; **fix C8** by removing
+  `white-space: nowrap` / ellipsis from `.guess-form__confirm-text` in the `max-height: 700px` block
+  and letting the sentence wrap onto two lines (the row may grow; only the submit button's position
+  is contractual, and it sits above the hairline). `Cancel` and `Confirm` keep their 96 px matched
+  minimum; `Confirm` takes `--color-danger` text with a `--color-danger` hairline so it reads as the
+  destructive one.
+- `YearInput`: steppers take `--radius-md` and the same 1 px border; the field takes
+  `--font-numeric`, `tabular-nums`, weight 600, `font-size: 1rem` (the 16 px floor is contractual).
+  Keep the native-spinner suppression and the auto-repeat behavior verbatim.
+
+**8. Modal shell — `src/components/Modal.svelte`.** `--radius-lg`, the new `--shadow-modal`, the new
+overlay color, `padding: var(--space-5)`, and a `max-width: 32rem`. Move the close button so it no
+longer overlaps the title's optical space: keep it at the top-right but give the dialog
+`padding-top: var(--space-6)` so `h2` starts below it, and draw it as a bordered 44 px icon button
+with an inline-SVG `×` (two strokes, same family as the header icons) instead of the `&times;`
+character — its `aria-label="Close"` is unchanged. Keep the focus trap, Esc handling, backdrop
+`pointerdown` close, opener refocus and `overscroll-behavior` exactly as they are.
+
+**9. Help modal — `src/components/HelpModal.svelte`.** Copy is frozen (§5.12/§5.13/§5.6). Restyle
+only: `h3`s take the `section` role; the rules table gets `border-collapse: separate`,
+`border-spacing: 0`, a hairline under the header row only, and `padding: var(--space-2) var(--space-2)`;
+the three column-head swatches become full 24×24 tiles drawn from the *same* CSS as a real scoreboard
+tile (fill + glyph) so the legend and the board are visibly the same object; the multiplier table's
+numbers take `--font-numeric` + `tabular-nums`. `Got it` is the accent-filled primary and should be
+full-width on phones.
+
+**10. Stats modal — `src/components/StatsModal.svelte`.** All four stat values take `data-lg`
+(`--font-numeric`, 1.5 rem, tabular); the captions take the `label` role, and **`Current streak` must
+not wrap awkwardly at 360 px** (C11) — either shorten the visible caption to `Streak` / `Best` with a
+visually-hidden long form, or give the grid `grid-template-columns: repeat(2, 1fr)` under 380 px.
+Distribution (C11): the track keeps `--color-surface`; a **zero-count** bar renders as a bare label
+with no filled bar at all (just the `0` in muted ink at the track's left edge) instead of a colored
+stub; non-zero bars fill with `--color-fg` at 12 % opacity plus an ink label — **not** the accent —
+and today's bucket keeps `--tile-green-bg` with `--tile-green-fg` (this is the sanctioned state-color
+exception). `.distribution__label` and `.distribution__bar--highlight` **must keep their class names**
+(component test). Countdown keeps `tabular-nums`, takes `data-lg`, and gets a `Next Motodle` label in
+the `label` role above it.
+
+**11. Result modal — `src/components/ResultModal.svelte`. This is the Experience moment.**
+
+- Compose it as: **verdict** (`display` role — `You got it!` / `Better luck tomorrow`, unchanged
+  strings) → **answer** (`2002 Kawasaki Ninja ZX-6R`; the year in `--font-numeric`, the make/model in
+  the sans at 1.125 rem/600) → **the photograph, edge to edge** (negative horizontal margin equal to
+  the dialog padding, corners squared off against the dialog's own radius on the top edge if it
+  reaches it, `--radius-sm` otherwise) → **score row** → **attribution caption** → **actions**.
+- Score row: `points × multiplier = score / 15` where every numeral is `--font-numeric`; render it as
+  three ink-on-surface plates in a row (`points`, `multiplier`, `total`) with `label`-role captions,
+  not as a sentence. The existing `<p class="result-score">` text may become that row; keep the same
+  numbers and the same `/ 15` denominator.
+- Attribution: keep every field and every link exactly as specified in §5.10.3 (author · license link
+  · `credit.modified` · `Source on Commons` · `creditNote`), set at 0.75 rem `meta`, above a hairline,
+  with the links underlined at the new offset. It is a caption now, not a wall.
+- Actions: `Share` is the accent-filled primary and is full-width on phones; `Photo credits` stays a
+  `link-button` and keeps `id="mtd-credits-link-result"` and its close-then-open handler.
+- The `.result-image img` selector and the letterboxing behavior (`aspect-ratio: 4 / 3`,
+  `object-fit: contain`) are asserted by the component test — keep both.
+- Apply the reveal motion from §5.14.6.
+
+**12. Credits modal — `src/components/CreditsModal.svelte`.** Keep every DOM hook and every string.
+Restyle each row as a two-line record: line 1 = `Motodle #N` in `--font-numeric` + the date in muted
+`--font-numeric`, then the bike; line 2 = `photo by …` and the two links in `meta` role. Hairline
+between rows (already there), `--space-3` internal rhythm, `creditNote` stays italic muted. The
+`Show more (N remaining)` button is a neutral `.button`, full-width.
+
+**13. Archive — `src/components/ArchiveList.svelte`.** Each row becomes a plate: `--radius-sm`,
+`--color-bg-elevated`, hairline, 44 px min-height, `Motodle #N` in `--font-numeric` at the start and
+the date muted `--font-numeric` at the end, hover to `--color-surface`, no underline. Empty state
+copy unchanged.
+
+**14. Toast — `src/components/Toast.svelte`.** Keep the role/live-region and position; take
+`--radius-md`, the new `--shadow-modal`, and `--color-fg`/`--color-bg` inversion as today. Entrance:
+`translateY(6px)→0` + opacity, 160 ms, reduced-motion-safe.
+
+**15. Footer + state messages + banners — `src/App.svelte`.** Footer: `meta` role, muted,
+`border-top: 1px solid var(--color-border)`, `padding-top: var(--space-3)`; `.link-button` keeps its
+relaxed touch target (§5.10.5) and gains the new underline offset. State messages
+(`no-puzzle` / `load-failed` / `catalog-failed`): `--radius-lg`, `--color-bg-elevated`, hairline,
+`--space-5` padding, centered on wide viewports, with the message in `body` and the action as the
+accent primary. Practice bar and the stale-day banner: `--radius-md`; the banner keeps the accent fill
+(it is an action prompt, and it is never on screen at the same time as the submit button's own
+accent... verify that claim on a real rollover, and if both can co-exist, draw the banner in ink with
+an accent underline instead).
+
+**16. `public/404.html` (C12).** Self-contained by design (no access to `tokens.css`), so inline the
+same values: `#f4f6f7` ground / `#15181d` ink / `#0d6b8a` accent in light, `#101318` / `#eef1f5` /
+`#5cc4e6` under `prefers-color-scheme: dark`, `--radius-md` button at 44 px with the accent fill, and
+the **wordmark** above the message in the same uppercase-tracked treatment (plain text, no SVG needed).
+Copy stays exactly as it is (§5.12 explicitly keeps 404 copy out of the tagline rule).
+
+**17. `index.html`.** Update the two `theme-color` metas to the new grounds (`#f4f6f7` light,
+`#101318` dark) and regenerate the inline-SVG favicon in the new palette (ink plate, accent or bone
+letterform) — it currently uses the tile green, which the One Signal Rule reserves for "right".
+**Whoever makes this edit must also update §10.5's head snippet**, which is the single source of truth
+for `index.html`'s head.
+
+#### 5.14.8 Explicitly NOT changed
+
+- **Every game rule, score, lock, share string and storage key.** §4 in full, `src/lib/**`,
+  `src/state/**`, `schema/**` — this pass touches presentation only. `src/lib/share.ts` in
+  particular: the emoji grid, including `⬜` for colorblind red, is untouched.
+- **The §5.3.1 DOM contract**: `#mtd-make`, `#mtd-model`, `#mtd-year`, option values = catalog ids,
+  the visible label texts `Make` / `Model` / `Year`, native `<select>`s (no combobox, no typeahead,
+  ever), and the accessible names `Guess {n} of 5`, `Give up`, `Confirm`, `Cancel`, `Close`,
+  `How to play`, `Statistics`, `Archive`, `Change theme`, `Toggle colorblind mode`, `Enlarge image`,
+  `Crop level N of 5`, `Earlier year`, `Later year`.
+- **All credits/licence hooks**: `#mtd-photo-licence` and its `Photo: ` + `license.name` text,
+  `#mtd-credits*`, `[data-mtd-credit-row]`, `[data-date]`, and the spoiler rule that keeps `author`,
+  `fileTitle`, `descriptionUrl` and `creditNote` out of the image-stage subtree.
+- **Copy.** The §5.12 tagline verbatim, the help rules table and its wording, the scoring table, the
+  credits intro, the empty/failed-state sentences, the footer sentence, US English (§5.13). Any copy
+  change is an operator decision, not a design one.
+- **Theming contract.** Light on bare `:root`; dark in **both** the `prefers-color-scheme` block
+  (guarded `:root:not([data-theme='light'])`) and `:root[data-theme='dark']`; colorblind last;
+  `color-scheme: light dark`; the glyphs; `--tile-green-bg: #3b7d22` and the colorblind
+  `#c2410c` (e2e-asserted verbatim).
+- **The fold rule, touch targets and input sizing.** 44 px minimum for interactive controls, 16 px
+  minimum for focusable text fields, `100svh` (never `dvh`), `env(safe-area-inset-*)` padding, pinch
+  zoom never suppressed, `prefers-reduced-motion` honored for animation **and** logical delays.
+- **Budgets and dependencies.** CSS ≤ 20 KB gz, JS ≤ 60 KB gz, per-day payload untouched, **no
+  runtime dependency**, no UI kit, no icon package, no webfont from any host, no `@import`.
+- **CSP and infrastructure.** `schema/constants.ts`'s policy is unchanged (it already allows
+  `font-src 'self'`), `infra/**`, `.github/**`, `tools/**` and `public/puzzles/**` are untouched.
+- **Svelte 5 idioms.** No `let x = $state(prop)`; no exported reassigned `$state` in `.svelte.ts`
+  (§10.7 #8/#9). Keep animations as CSS keyframes, not `transition:` directives.
+- **Photo floor.** No viewport may render the frame smaller than the §5.14.1 baseline.
+
+#### 5.14.9 The gate before this pass may be called done
+
+1. `npm run build` — budgets green (CSS is the one to watch; there is ~16 KB of gzip headroom).
+2. `npx vitest run --maxWorkers=1` and `npm run check` — clean.
+3. `npx playwright test --workers=1` — all specs, `mobile-layout` and `colorblind` in particular.
+4. `node .claude/skills/impeccable/scripts/detect.mjs src index.html public/404.html` — **zero
+   non-advisory findings**, and the advisory `design-system-*` list (12 at baseline, §5.14.1) should
+   be empty once the §5.14.3 ramp is in and `DESIGN.md` has been regenerated. Every remaining
+   advisory needs a one-line reason.
+5. Re-measure the photo frame at 360×640, 390×844, 768×1024, 1280×800, 1920×1080 and confirm every
+   value is **≥** the §5.14.1 baseline; re-measure the 360×640 fold (`submit.bottom ≤ innerHeight`,
+   `scrollWidth ≤ clientWidth`).
+6. Re-shoot the 15 states × 2 viewports × 3 themes matrix and look at them, colorblind-dark included
+   (that is where C4 lives).
+7. Re-run `/impeccable document` so `DESIGN.md` describes the world that actually shipped, and record
+   the pass in §11.
+
+#### 5.14.10 Critique findings and decisions (revision 10)
+
+`/impeccable critique`, 2026-09-03, run against the current build (`npm run build` + the init pass's
+90-screenshot matrix in
+`/tmp/claude-1000/-home-chris-workspace/852d5747-63d4-4155-bc73-5cf062e93be6/scratchpad/shots/`,
+looked at directly, plus a fresh `detect.mjs` run and a source read of every `.svelte` file, the two
+stylesheets, `index.html` and `public/404.html`).
+
+**⚠️ DEGRADED: single-context (no sub-agent/Task tool exposed in this session).** `critique.md`
+requires Assessment A (design review) and Assessment B (detector + browser evidence) to run as two
+isolated sub-agents. This session's tool surface exposes no `Task`/subagent tool (probed:
+`ToolSearch select:Task,Agent` → no match), so both assessments were run sequentially in one context:
+the design review was written from the screenshots and sources **before** the detector was run, and
+the detector output was folded in afterward. **Two further substitutions, disclosed per the skill's
+`AUTONOMY_DIRECTIVE_CHECK`:** (1) there is no `AskUserQuestion` tool and no decision-page channel
+(probed, no match), so the playbook's closing questions could not be asked — they are recorded below
+as **§5.14.10.9 Open questions for the operator** instead of being put to a human; (2) the run's
+snapshot was **not** persisted to `.impeccable/critique/`, because `.impeccable/` is outside this
+pass's writable file set. This subsection *is* the archive.
+
+Numbering: findings here are **K1…K13** so they never collide with §5.14.1's **C1…C14**. Where a
+K-finding restates a C-finding it says so and adds only what is new. **§5.14.10.6 lists the places
+where this critique overrides the init brief** — those amendments win over §5.14.2–§5.14.7.
+
+##### 5.14.10.1 Design health score
+
+Mode is **Operate** (§5.14), so all ten heuristics apply; none is scored `n/a`.
+
+| # | Heuristic | Score | Key issue |
+|---|---|---|---|
+| 1 | Visibility of system status | 3 | Strong in play (`Guess n of 5` on the button, the board, the live region, `LOCKED` chips, the stale-day banner). But nothing on the page says *which* puzzle this is (`#N` exists only inside the archive/credits modals and the share text), and once the game ends the screen reports no status at all — see K1. |
+| 2 | Match between system and real world | 3 | `Make` / `Model` / `Year`, `Give up` and the multiplier table are the player's language. Against that: `Photo by uploader was User:HellbillyD at en.wikipedia` is a raw Commons field shown verbatim at the emotional peak; `0 × 1 = 0 / 15` is arithmetic notation where a result belongs; the archive lists ISO dates (`2026-09-02`). |
+| 3 | User control and freedom | 2 | Esc / backdrop / close on every dialog, Cancel on give-up, practice + `Back to today`. But the reveal **cannot be reopened** — `openResult()` in `src/state/game.svelte.ts:352` has no caller anywhere in `src/` (verified by grep), so closing the result modal permanently removes the answer photo, the attribution and the score from the session; and the auto-opened first-run help modal hides its own `Got it` below an un-hinted scroll at 360×640 (K3). |
+| 4 | Consistency and standards | 2 | The engineering is consistent (one control height, one focus ring, one token file). The *visual language* is not: four icon idioms in a single header row (a text `?`, a color emoji `📊`, a color emoji `📅`, two near-identical geometric circles `◐`/`◑`), eleven distinct `font-size` literals, and a `public/404.html` built from an entirely different palette. |
+| 5 | Error prevention | 3 | Genuinely good: native `<select>`s make an invalid make/model unrepresentable, the model list is gated on the make, the year is clamped to 1885…+1 and validated by parse rather than length, `novalidate` keeps validation in the app's own voice, and give-up is confirmed. One point off because the confirmation sentence that states the consequence is the one string that truncates at 360×640 (C8). |
+| 6 | Recognition rather than recall | 2 | Every option is visible in the selects and every field is labelled. But the entire header is icon-only with no visible text; two of the five icons are indistinguishable at 44 px; and the theme button's glyph never changes, so the only way to learn which of the three theme states you are in is a `title` tooltip that does not exist on touch (`App.svelte` says so in a comment). |
+| 7 | Flexibility and efficiency of use | 3 | More accelerators than the surface suggests: Enter-to-submit wired explicitly through the `<select>`s, arrow-key roving on the crop scrub, press-and-hold auto-repeat on the year steppers with keyboard equivalents, the three-rung share ladder, archive/practice via `?d=`. Missing: any way back to the reveal, and any keyboard path to help/stats. |
+| 8 | Aesthetic and minimalist design | 2 | The empty five-row board is the largest object on the first screen (166 px of grey lozenges against a 140 px photograph); `Make Model Year` is printed twice, 14 px apart; the stats distribution draws eight accent-blue stubs labelled `0`; the desktop layout is a 480 px column with ~800 px of empty white beside it. |
+| 9 | Help users recognize, diagnose and recover from errors | 2 | The messages themselves are exemplary — `Choose a make`, `Enter a year between 1885 and 2027`: plain, specific, actionable. They are **positioned over the wrong controls** (K2), which is worse than a vague message correctly placed. The load/catalog failure states capture `puzzleReason` / `catalogReason` in the store and show neither. |
+| 10 | Help and documentation | 3 | The 3×3 rules grid is the best-designed artifact in the app: one short cell per rule, the yellow bands explained in a player's words, auto-opened on first run. Held back by K3 (its dismiss is below the fold on a phone) and by nothing explaining the crop ladder or the archive anywhere. |
+| **Total** | | **25/40** | **Acceptable — significant improvements needed before players are happy.** |
+
+Read that number correctly: this is not a broken interface. It is a **well-engineered, undesigned**
+one. Almost every point lost is a presentation decision, which is exactly what this pass is allowed
+to change. The three that are not (K1, K2, K3) are cheap.
+
+##### 5.14.10.2 Design specificity verdict
+
+**LLM assessment: category-interchangeable.** Replace the photograph with an album cover, a film
+still, a flag or a car and *nothing else on the page would need to change*. The only two decisions in
+the entire interface that are specific to motorbikes are functional, not expressive: the three-column
+`Make / Model / Year` board, and the crop ladder. Everything drawn around them is default —
+`system-ui` at one weight, zinc grays, framework blue `#2563eb`, a 6/10/16 radius ladder, emoji as
+icons, a uniform 16 px gap between every section. The product's real position (per `PRODUCT.md`: the
+country/era yellow bands, and "every puzzle is a real, CC-licensed photograph of a real bike, credited
+in full") is stated nowhere in the visual language. This confirms and sharpens §5.14.1's **C2**.
+
+**Deterministic scan.** `node .claude/skills/impeccable/scripts/detect.mjs --json src index.html public/404.html`
+→ **12 findings, all `advisory`, all `design-system-*` drift** (exit 0): ten `design-system-font-size`
+(`GuessForm.svelte` 320/409/431 → `0.65rem`, `0.9rem`, `0.8rem`; `HelpModal.svelte` 91 → `0.9rem`;
+`ResultModal.svelte` 81 → `1.1rem`; `Scoreboard.svelte` 83 → `0.8rem`; `StatsModal.svelte` 98/138 →
+`1.4rem`, `0.8rem`; `Toast.svelte` 28 → `0.9rem`; `app.css` 200 → `0.9rem`), one
+`design-system-color` (`public/404.html:35` → `rgb(237,237,237)`), one `design-system-radius`
+(`public/404.html:28` → `0.5rem`). Zero `critical`, zero `warning`. This reproduces §5.14.1 exactly
+and adds one number worth having: a raw count of every `font-size` literal in the tree gives
+**twelve distinct values** — `0.65 / 0.7 / 0.75 / 0.8 / 0.85 / 0.9 / 1 / 1.1 / 1.25 / 1.4 / 1.5 rem`
+plus one `16px`. An app with roughly six type roles is carrying an eleven-step ramp. The detector's
+finding is real regardless of which `DESIGN.md` it is measured against.
+
+The detector caught nothing the design review missed, and the design review caught the majority of
+what follows, because every K-finding below is about composition, state and moment — categories a
+static scanner cannot see. **No false positives.** The rendered/URL pass (computed contrast, real
+spacing rhythm) still cannot run: it needs `puppeteer`, absent and unfetchable offline.
+
+**Visual overlays: not available.** No browser automation with script injection was used in this run,
+so **no user-visible overlay exists** in any browser tab. The fallback signal is the CLI scan above
+plus the screenshot matrix.
+
+##### 5.14.10.3 Cognitive load
+
+Eight-item checklist, judged at 360×640 mid-game (`06-play-l3`):
+
+| Item | Verdict |
+|---|---|
+| Single focus | **Fail** — the squint test finds no primary element. The loudest object on the play screen is the crop scrub (five 44 px buttons, one filled accent-blue); the quietest is the photograph. |
+| Chunking | Pass |
+| Grouping | **Fail** — one 16 px gap (8 px under 1000 px height) separates *every* section, so header, stage, board and form are four equal slabs with nothing binding any of them. |
+| Visual hierarchy | **Fail** — the hero is the smallest element on the page (140 px tall) and the empty state of the scoring surface is the largest (166 px). |
+| One thing at a time | Pass |
+| Minimal choices | Pass at the actual decision point (make, model, year, submit = 4). Noted below at the header (5 icon buttons, two of which are settings, not actions). |
+| Working memory | **Fail** — the reveal modal covers the board at the exact moment the player is asked to `Share` the grid it draws, so the result and the grid it summarizes are never on screen together. |
+| Progressive disclosure | Pass |
+
+**4 failures → high cognitive load.** Three of the four (single focus, grouping, visual hierarchy) are
+one root cause — the uniform rhythm named in **C5** — which means §5.14.5's rhythm work clears three
+boxes with one change. That is the single highest-leverage item in the whole brief.
+
+##### 5.14.10.4 What is working (do not "improve" these)
+
+1. **The guess form is the most carefully-reasoned surface in the app.** The single two-column grid
+   at every width, the label line that exists in *every* state so an error costs zero layout, the
+   deliberate visual split between LOCKED (the player's own settled answer, full-strength ink) and
+   DISABLED (dead control, muted) — with the explicit refusal to use `opacity` for either — and the
+   soft-disabled submit that stays clickable so it can explain itself. This is better than most
+   shipping product forms. §5.14.7 item 7 is right to restyle and not restructure it.
+2. **The help modal's rules grid.** Three categories × three colors as a table of one-phrase cells,
+   with the country example spelled out in the player's own words. It teaches the game's actual
+   differentiator (the yellow bands) in about eight seconds. Make the rest of the app as clear as
+   this table.
+3. **The accessibility scaffolding is real, not performative.** Per-cell visually-hidden sentences,
+   a dedicated polite live region for the newest row (with a comment explaining why it is *not*
+   `role="status"`), glyphs that are markup rather than CSS `content` so they stay in the
+   accessibility tree, one focus ring for everything, 44 px targets, a 16 px input floor, `svh` over
+   `dvh`, pinch-zoom never suppressed, and reduced motion honored. Every restyle below must survive
+   with all of it intact.
+
+##### 5.14.10.5 Priority findings and decisions
+
+Ranked by impact. Each carries the **decision the implementer executes**. Findings marked
+**[operator-gated]** add behavior or a new visible string and must not be built without the
+operator's word; everything else is presentation and is in scope now.
+
+---
+
+**K1 · [P1] After the game ends, the screen is a corpse — and the reveal cannot be reopened.**
+*New; §5.14 does not address the post-game state at all.*
+
+When today's game is over, the largest object on the page is a dead form: locked `<select>`s, a
+disabled button still reading `Guess 3 of 5`, and no give-up row. There is no Share, no score, no
+streak, no countdown, no path back to the answer photograph. `openResult()` exists at
+`src/state/game.svelte.ts:352` and **nothing in `src/` calls it** — verified by grep. So the reveal is
+a one-shot: close it and the answer, the attribution and the score are gone until a page reload, at
+which point `applyPuzzleResult()` (`:225`) shoves the modal back in the returning player's face
+unbidden. Both directions are wrong. For a product whose entire value is the *return visit*, the
+screen a returning player actually lands on offers them nothing, and the two things that bring them
+back — the streak and the countdown — are buried behind an unlabelled bar-chart emoji.
+
+*Evidence:* `09-after-win-board__360x640__{light,dark,cb}`, `src/state/game.svelte.ts:225,352`.
+
+**Decision.** Two rungs; ship rung 1 in this pass.
+
+- **Rung 1 (in scope, presentation + one existing store method).** When `today.status !== 'in_progress'`,
+  the submit button's grid cell renders a control that calls the existing `game.openResult()` instead
+  of a dead disabled submit. Wire it, do not invent state.
+  **The submit button itself must still exist** with its `Guess {n} of 5` accessible name and its
+  `button[type="submit"]` selector intact (`App.test.ts:104`, `e2e/mobile-layout.spec.ts`,
+  `e2e/blocked-submit.spec.ts` all address it) — so add the reopen control as a **sibling in the
+  `guess-form__secondary` row**, which is empty in the game-over state today (`{#if !gameOver}`),
+  rather than replacing the submit. That row already has the hairline and the centered layout, and
+  it costs no layout above the hairline, so `mobile-layout.spec.ts`'s "submit does not move"
+  assertion is untouched. The new string is **[operator-gated]** — propose `See the answer`,
+  matching the existing accessible-name vocabulary (`How to play`, `Photo credits`).
+- **Rung 2 [operator-gated].** The end-of-day screen becomes a small result summary panel (score
+  plates + `Next Motodle` countdown + Share) in place of the dead form. Records the intent; do not
+  build it without a decision.
+
+---
+
+**K2 · [P1] Validation messages point at the wrong field.**
+*New; §5.14.7 item 7 notices only the `LOCKED` chip's collision, not the errors'.*
+
+`.guess-form__label-row` is `justify-content: space-between`, so the make column's error renders
+flush against the **right** edge of that column — directly abutting the word `Model`. At 360×640 the
+line reads `Make        Choose a make | Model`, and the message describing the *make* field sits
+optically closer to the *model* select than to the one it belongs to. Same class of failure on the
+year row, where `Enter a year between 1885 and 2027` spans across and terminates above the **submit
+button**, not above the year field. This is a clarity defect in the one place the app talks to a
+player who has already made a mistake — the moment where a first-timer decides whether the game is
+worth the trouble.
+
+*Evidence:* `03-validation__360x640__light` (and both other themes), `GuessForm.svelte`
+`.guess-form__label-row`.
+
+**Decision.** Change `.guess-form__label-row` from `justify-content: space-between` to
+`justify-content: flex-start` with `gap: var(--space-2)`, so the error sits **immediately after its
+own label**, and let the `LOCKED` chip take `margin-left: auto` to keep its end-of-line position (a
+chip cannot be misread as belonging to the neighbouring field the way a sentence can). Drop
+`text-align: right` from `.field-error`; keep `white-space: nowrap` + `text-overflow: ellipsis` **only
+for the two short messages**, and keep `min-height: 1.05rem` / `line-height: 1.05rem` on the row so
+the zero-layout-cost guarantee (§5.11.4 U6) and `mobile-layout.spec.ts`'s
+`bottomAfter === bottomBefore` assertion both hold exactly as today. Add a 12 px inline warning SVG
+(`aria-hidden`, `--color-danger`, same 1.75-stroke family as the header icons) before the message so
+an error is legible as an error without relying on the red alone.
+
+---
+
+**K3 · [P1] The mandatory first-run modal hides its own exit below an un-hinted scroll.**
+*New; §5.14.7 item 9 restyles the help modal but does not touch its scroll behavior.*
+
+`prefs.seenHelp` is false on a first visit, so a first-timer's very first sight of Motodle is a
+full-screen dialog. At 360×640 `.modal-dialog`'s `max-height: 90vh` (576 px) clips the content
+mid-sentence — the screenshot ends on *"…so the"* — with no scroll shadow, no fade, no indicator of
+any kind, and the `Got it` button roughly 250 px further down inside the scroll container. A
+first-timer who does not think to scroll *inside* a dialog is looking at a wall of rules with no
+visible way out, on the first screen of the product. That is the worst possible first five seconds,
+and it is the "Confused First-Timer" persona's exact abandonment point.
+
+*Evidence:* `01-help__360x640__{light,dark,cb}`, `Modal.svelte` `.modal-dialog`, `game.svelte.ts:224`.
+
+**Decision.** In `Modal.svelte`, make the dialog a flex column with its own scrolling body, and let a
+consumer opt a trailing element into a sticky footer: `.modal-dialog > :last-child` that is a
+`.button--primary` gets `position: sticky; bottom: calc(var(--space-5) * -1)`, a
+`background: var(--color-bg-elevated)`, a `border-top: 1px solid var(--color-border)` and matching
+negative side margins, so `Got it` / `Share` is **always** on screen regardless of content length.
+Add a bottom scroll-shadow on the dialog
+(`background-attachment: local, local, scroll, scroll` gradient technique, or a single
+`mask-image` fade) so a clipped dialog *looks* clipped. This also improves the credits modal, which
+is the app's longest scroller. Keep the focus trap, Esc, backdrop `pointerdown` close, opener refocus
+and `overscroll-behavior: contain` byte-for-byte.
+
+---
+
+**K4 · [P1] The empty board out-weighs the photograph — the "Photograph First Rule" loses to its own
+scoreboard.** *Extends C5 and the Photograph First Rule with the measurement that makes it concrete.*
+
+At 360×640 before the first guess, the measured stack is: photo frame **140 px**, empty board
+**166 px** (`metrics-360x640.json`). The *empty state of the scoring surface* is 19 % larger than the
+hero. Fifteen grey lozenges, each carrying both a fill **and** a 1 px border, form a solid block that
+reads as content when it contains nothing. §5.14.7 item 6 makes this **worse**, not better: it gives
+empty tiles `background: var(--color-surface)` *and* `border: 1px solid var(--color-border)` — i.e.
+keeps both weights — and describes them as "slightly inset". Meanwhile §5.14.7 item 4 raises the stage
+to only ~170 px at this viewport, so even after the pass the photo barely draws level with the empty
+board.
+
+*Evidence:* `02-play-l1__360x640__*`, `metrics-360x640.json`, `Scoreboard.svelte` `.tile`.
+
+**Decision (this overrides §5.14.7 item 6 — see A2).** An empty tile carries **exactly one** visual
+weight, not two: `background: transparent; border: 1px solid var(--color-border);` in light, and
+`background: var(--color-surface); border-color: transparent;` in dark (where a hairline grid on a
+near-black ground is the noisier of the two). A **filled** tile keeps its fill, matching border-color
+and — per A5 — the plate treatment. The board then reads as a faint staff that fills in with play,
+which is both the correct hierarchy and the correct metaphor for the "pit board" direction. Keep
+`min-height: 2rem` / `1.6 rem`, `role="table"`, the per-cell hidden sentences, the live region and the
+colorblind glyph markup exactly as they are.
+
+---
+
+**K5 · [P1] In colorblind mode the interface speaks one color for two meanings — and the brief's own
+fix creates a second collision.** *Extends C3 with the downstream consequence C3 does not name.*
+
+C3 is correct and the screenshot proves it: at `06-play-l3__360x640__cb` the two "close" tiles, the
+active crop segment and the submit button are all the same blue, so a hint state and an action are
+indistinguishable. §5.14.4 fixes it by pointing `--color-accent` at **ink** in colorblind mode. That
+is the right call, and it introduces a second problem the brief does not follow through on: in
+colorblind mode `--color-accent`, `--color-fg`, the ink-filled active crop segment, the ink `LOCKED`
+chip and the focus ring all become **one value**. The focus ring then stops reading as a ring and
+starts reading as a border — precisely for the keyboard-and-low-vision users colorblind mode exists to
+serve. Separately, in colorblind **light** the "wrong" fill `#17171a` measures 16.5:1 against the new
+`#f4f6f7` ground — dead level with the body ink itself (`#15181d`, 16.4:1) — so the tiles a player got
+*wrong* are drawn at the same weight as the page's own strongest text, and louder than the tiles they
+got *right* (orange, 5.2:1 against white).
+
+*Evidence:* `06-play-l3__360x640__cb`, `09-after-win-board__360x640__cb`, §5.14.4's colorblind table,
+`app.css`'s `:focus-visible` rule.
+
+**Decision.**
+1. Keep §5.14.4's accent→ink move in colorblind mode.
+2. Replace the single-ring focus style with one that is visible on **any** fill in **any** theme, and
+   define it once in `app.css`:
+   `:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; box-shadow: 0 0 0 4px var(--color-bg); }`
+   — an ink ring separated from the element by 2 px of page ground and haloed by 2 px more. Drop the
+   `.button--primary:focus-visible { outline-color: var(--color-fg) }` special case; the halo makes
+   it unnecessary in all three themes. Verify against the accent-filled submit, the ink-filled active
+   crop segment, an ink `LOCKED` chip and a filled tile.
+3. The colorblind "wrong" plate must **not** be the loudest object on the light screen: use
+   `#2a2d33` rather than `#17171a` in colorblind light — 13.8:1 with its white label, 12.7:1 against
+   the ground: still unmistakably the darkest of the three states, but now a step below the body ink
+   instead of level with it. §5.14.4's dark-mode inversion to bone (`#e9ecef` / `#15181d`, fixing C4) stands as
+   written — it is correct and it matches `share.ts`'s `⬜`.
+4. `--tile-green-bg: #3b7d22` and the colorblind `#c2410c` stay **verbatim**:
+   `e2e/colorblind.spec.ts:8-9` asserts both hex strings in light and dark and that file is not
+   writable in this pass.
+
+---
+
+**K6 · [P2] Win and loss are the same object.** *Extends C7 with what C7's fix must additionally do.*
+
+`08-win-result` and `13-loss-result` are structurally identical: same headline slot, same answer line,
+same photo, same grey credit wall, same score sentence, same `Share` + `Photo credits` pair. Only two
+text strings differ. The peak-end rule says the *end* is half of what a player remembers about a daily
+game — and here the end of a perfect run and the end of a total failure look the same. Worse, `Better
+luck tomorrow` promises a tomorrow the modal never delivers: the countdown exists in `StatsModal`
+(computed by `msUntilNextLocalMidnight()`, `src/lib/date.ts`) and is absent from the one screen where
+"tomorrow" is the message.
+
+**Decision.** §5.14.7 item 11's composition stands. Add three differentiators, none of which touches
+game logic:
+- The **verdict line** takes state ink: `--tile-green-bg` for a win, `--color-muted` for a loss.
+  Never `--color-danger` — red means "wrong tile" and the One Signal Rule holds here too.
+- The **score plates** (per A4 below) draw the total plate filled on a win and outlined on a loss.
+- **[operator-gated]** A `Next Motodle` countdown row at the foot of the modal, reusing
+  `msUntilNextLocalMidnight()` and `StatsModal`'s existing `formatHMS` + 1 s interval verbatim. If
+  the operator does not want a timer here, the static fallback is a single `meta`-role line and no
+  interval. This is the same gate as C13's no-puzzle countdown; decide both together.
+
+---
+
+**K7 · [P2] Nothing on the page identifies the day, the puzzle, or the streak at stake.**
+*New.*
+
+`Motodle #N` appears in the archive modal, the credits modal and the share text — never on the game
+screen. A daily game's masthead is `Motodle · #2`; ours is `Motodle` plus five unlabelled icons. The
+streak, which is the entire retention mechanic, is two taps away behind a color emoji. `PRODUCT.md`
+names "come back the next day for the streak" as the success condition; the interface never mentions
+it.
+
+**Decision [operator-gated — adds visible text].** Give the header a second line under the wordmark in
+the `data-sm` role (`--font-numeric`, muted): `#{game.puzzle.number}` when a puzzle is loaded, and
+nothing at all otherwise. It costs ~14 px, it comes from data already in the store, and it is what
+turns a masthead into a *daily* masthead. This also resolves A3's wordmark-authority problem more
+cheaply than making the wordmark bigger. If the operator declines the text, the wordmark keeps its
+single line and A3 still applies.
+
+---
+
+**K8 · [P2] Five top-level header controls, two of which are settings, not actions.**
+*New; §5.14.7 item 3 restyles the icons but keeps the flat row of five.*
+
+`?`, stats, archive, theme, colorblind sit in one undifferentiated row at equal weight. Two of them
+change what the player *does*, three change how the app *looks or reports*. At the working-memory
+boundary (Cowan's ≤ 4) with zero grouping, and the last two are the pair that look identical.
+
+**Decision.** No menu — a menu adds behavior and would break the frozen accessible names' direct
+reachability. Group visually instead, from the global sheet: `.app-header__actions` gets a
+`gap: var(--space-2)` between the first three and a wider `--space-3` plus a `1px --color-border`
+vertical divider before the theme/colorblind pair, with that pair drawn one step quieter (muted
+stroke at rest, `--color-fg` on hover/focus, no border at rest). Five buttons, two groups, one glance.
+Keep the `max-width: 380px` 2 px-gap escape hatch and re-verify the five 44 px buttons plus the
+wordmark under DejaVu Sans (the CI runner's fallback). All `aria-label`s, `title`s and the
+`aria-pressed` on the colorblind toggle stay verbatim.
+
+---
+
+**K9 · [P2] The crop ladder reads as pagination, not as progress.** *Extends C5 / §5.14.7 item 5.*
+
+Five 44 × 44 numbered buttons with one accent-filled cell is the universal visual signature of a
+pager or a stepper form. Nothing labels it, nothing says "this is how much of the bike you have
+earned", and locked segments (which are `disabled` today) are drawn nearly identically to unlocked
+ones — so the difference between *available* and *not yet earned* is smaller than the difference
+between *viewing* and *available*. That is exactly backwards for a progress indicator. §5.14.7 item 5
+correctly moves the current segment to ink; it does not fix the ranking.
+
+**Decision.** The visual distance between **locked** and **unlocked** must be larger than the distance
+between **viewing** and **unlocked**. Concretely: *viewing* = ink fill, `--color-bg` digit;
+*unlocked* = `--color-bg-elevated`, 1 px `--color-border`, `--color-fg` digit; *locked* = no fill, no
+border, `--color-muted` digit at reduced weight. Digits take `--font-numeric` + `tabular-nums`.
+**All five segments keep `min 44 × 44` — `e2e/mobile-layout.spec.ts` measures every one of them, width
+and height** — and `.scrub__seg`, the `role="group"`, the roving arrow-key handler and every
+`Crop level N of 5` label stay verbatim.
+
+---
+
+**K10 · [P2] The reveal shows a photograph the dialog is too small to honor, and the letterbox reads
+as a rendering bug.** *Extends C7.*
+
+The one moment the product is allowed to be about the photograph, the photograph is 432 px wide inside
+a 30 rem dialog on a 1280 px screen, letterboxed inside a fixed `aspect-ratio: 4 / 3` box with
+`object-fit: contain` — so a typical 3:2 Commons photo paints grey `--color-surface` bars above and
+below itself. Grey bars on grey chrome look like a bug, not a mount.
+
+**Decision.** `.result-image img`'s `aspect-ratio: 4 / 3` + `object-fit: contain` **stay** —
+`ResultModal.test.ts:113` reads that exact selector and asserts the letterboxing. Change the two
+things that are free: (1) the `.result-image` container's ground becomes a deliberate mount — ink at
+low alpha in light, `--color-bg` in dark — so the bars read as a mat board rather than as empty
+chrome; (2) at `@media (min-width: 900px)` the modal `max-width` goes to `36rem` so the reveal is the
+one dialog that gets bigger on a large screen, and the photo bleeds to the dialog edges as §5.14.7
+item 11 specifies. Combined with the two-column game layout (§5.14.7 item 4) this makes the desktop
+experience coherent rather than a phone screenshot in a desert (C6).
+
+---
+
+**K11 · [P3] Stats: the empty state is eight blue zeros, and one caption breaks the grid.**
+*Confirms C11; adds the day-one case.*
+
+C11 is right about the zero-count stubs. It misses the day-one case: with `played === 0` the modal is
+`0 / 0% / 0 / 0` over eight blue `0` bars — a first-time player who opens stats sees a chart of
+nothing. **Constraint the fix must respect:** `StatsModal.test.ts:20` asserts *"always shows all 8
+distribution buckets, zeros included"* and reads `.distribution__label` for all eight, and
+`:41-42` asserts `getByText('4')` / `getByText('75')` as **exact** strings — so the eight rows must
+keep rendering, and the element that carries a bucket's count must not move to a place where a count
+could newly collide with a summary value.
+
+**Decision.** Keep all eight rows and keep the count inside `.distribution__bar` exactly as today;
+only the **fill** changes: zero → no fill (the `0` sits in `--color-muted` at the track's left edge,
+the track still drawn in `--color-surface`); non-zero → `--color-fg` at 12 % with ink label; today's
+bucket → `--tile-green-bg` / `--tile-green-fg`, the one sanctioned state-color exception.
+`.distribution__label` and `.distribution__bar--highlight` keep their class names. For the caption
+wrap, take §5.14.7 item 10's second option — `grid-template-columns: repeat(2, 1fr)` under 380 px —
+rather than the first: shortening `Current streak` to `Streak` is a copy change and copy is frozen.
+
+---
+
+**K12 · [P3] The attribution at the peak moment is a raw database field.** *Extends C7.*
+
+`Photo by uploader was User:HellbillyD at en.wikipedia · Public domain · cropped, resized, re-encoded
+to WebP · Source on Commons` — four lines of muted grey directly beneath the reveal photo and directly
+*above* the score. `PRODUCT.md` treats full credit as a brand commitment, and it should be; but a
+Commons `author` string passed through verbatim reads as an unhandled edge case, and placing it above
+the score buries the emotional payload under legal metadata.
+
+**Decision.** Presentation only — **do not touch the strings, the fields or the links**
+(`ResultModal.test.ts:79-99` asserts author text, both link names and hrefs, `credit.modified` and
+`creditNote`; §5.10.3 fixes the composition). Move the whole block **below** the score row, set it in
+the `meta` role at 0.75 rem above a hairline, and let it be a caption. Rewriting or truncating
+`credit.author` is a **content-pipeline** decision for `tools/`, out of scope here — record it in §11
+as a follow-up, not as a UI change.
+
+---
+
+**K13 · [P3] Eleven type sizes, and the brief adds a twelfth.** *Confirms the detector; amends A1.*
+
+Twelve distinct `font-size` literals ship today. §5.14.3's ten-role ramp is the right answer and will
+silence all ten `design-system-font-size` advisories — except that it introduces `0.8125rem` (13 px)
+as a *new* step, giving three separate sizes inside the 12–14 px band (`0.75`, `0.8125`, `0.875`).
+
+**Decision.** Collapse `section` from `0.8125rem` to `0.75rem` and let weight (700) and tracking
+(`0.08em`) plus the uppercase transform carry the distinction. The sub-1 rem ramp is then exactly two
+steps — `0.75` and `0.875` — which is what makes the detector go quiet and the page feel systematic.
+
+##### 5.14.10.6 Amendments — where this critique overrides the init brief
+
+These win over §5.14.2–§5.14.7 as written.
+
+- **A1 — `section` role drops to 0.75 rem** (K13). Replaces §5.14.3's `0.8125 rem`.
+- **A2 — Empty tiles lose one of their two weights** (K4). Replaces §5.14.7 item 6's "background
+  surface *and* 1 px border". Empty is the ground; filled is the figure.
+- **A3 — At most two uppercase-tracked roles ship, and they are `wordmark` and `section`.**
+  §5.14.3 currently sets four surfaces in uppercase-and-tracked (wordmark, section, label, the
+  `LOCKED` chip). Four is how a game turns into a monitoring dashboard — which is the standing risk
+  of pairing a mono numeric voice with a petrol accent and no display face. The `label` role
+  (`Make` / `Model` / `Year`) and the `LOCKED` chip stay **sentence case**, 0.75 rem, weight 600,
+  muted. This also fixes a defect §5.14 did not notice: the scoreboard column heads and the form
+  field labels print the same three words 14 px apart, and the brief as written gives them two
+  near-identical uppercase-tracked treatments. One of them must be uppercase-tracked and the other
+  must not; the board heads win it, because they are the static legend and the form labels are the
+  interactive layer.
+- **A4 — The score row stays one element.** §5.14.7 item 11 says to render the score "as three
+  ink-on-surface plates in a row … not as a sentence." **`ResultModal.test.ts:124` asserts
+  `screen.getByText(/3 × 3/)`** — a regex over a single element's text content, including the spaces
+  around the `×`. Splitting the score across three sibling plates breaks that test, and
+  `src/components/ResultModal.test.ts` is not in this pass's writable set. **Do this instead:** keep
+  the single `<p class="result-score">` with its literal `" × "` and `" = "` text nodes intact, and
+  wrap only the numerals in `--font-numeric` spans styled as inline plates
+  (`background: var(--color-surface); border-radius: var(--radius-sm); padding: 0 var(--space-2)`).
+  The element's `textContent` stays `3 × 3 = 9 / 15`; the composition still reads as plates. Verify
+  with `npx vitest run --maxWorkers=1 src/components/ResultModal.test.ts` before going further.
+- **A5 — `--shadow-plate` is defined in both themes and applied to the photo frame only.**
+  §5.14.5/§5.14.7 item 6 put a 6 %-alpha 1 px shadow on filled tiles in light mode only. At tile
+  scale it is invisible, it costs bytes, and "light only" makes the board a different object in dark
+  mode. One element lifts: the photo frame. Define the token in both palettes.
+- **A6 — The focus ring gets a halo and loses its `.button--primary` special case** (K5.2).
+  Replaces `app.css`'s current two-rule focus treatment.
+- **A7 — The tiebreaker, when two brief items conflict: the photograph wins.** The direction's
+  personality must be carried by the image and the composition, not by the typography. If a choice
+  makes the type more expressive and the photo smaller, take the photo. This is §5.14.2's Photograph
+  First Rule promoted from a token rule to the arbitration rule.
+
+##### 5.14.10.7 Persona red flags
+
+**Jordan (Confused First-Timer).** Lands on a full-screen rules dialog whose `Got it` is invisible
+below an unmarked scroll (**K3**) — abandonment point #1. If they get past it: five unlabelled icon
+buttons, two of which are the same circle (**K8**); a row of five numbered buttons that look like a
+form stepper (**K9**); and on their first failed submit, an error that points at the field next door
+(**K2**). Nothing on screen tells them the crop opens up when they guess wrong — the mechanic that
+makes the game *fun* is explained only inside the dialog they just escaped.
+
+**Sam (Accessibility-Dependent).** Genuinely well served on the mechanics: per-cell hidden sentences,
+a polite live region, glyphs in markup, 44 px targets, a 16 px input floor, one focus ring, reduced
+motion honored, pinch-zoom never suppressed. Three real flags: in colorblind mode every ink surface —
+accent, focus ring, active crop segment, `LOCKED` chip — collapses to one value, so the focus ring
+stops reading as a ring (**K5**); the theme control never changes appearance across its three states,
+so its only state indicator is a `title` tooltip that does not exist on touch; and the eleven-size
+type ramp bottoms out at 10.4 px (**C9**), under the functional-text floor, on the `LOCKED` chip that
+communicates a scoring state.
+
+**Ray, 58, rides a Bonneville, plays at 6 am on a phone without reading glasses** *(project persona,
+from `PRODUCT.md`'s "enthusiasts of all ages … mostly on phones … one-handed, often in the morning")*.
+The bike photo — the only reason he opened the app — is 140 px tall, smaller than the empty score grid
+below it (**K4**), and the licence line beside it is 11 px. The tile labels that carry his answer are
+0.85 rem and ellipsized. He can complete the task; he never gets the pleasure of *looking at the
+bike*, which is the product.
+
+**Priya, streak-keeper, shares to a WhatsApp riding group** *(project persona, from `PRODUCT.md`'s
+"share a spoiler-free emoji grid, and come back the next day for the streak")*. Her streak is behind
+an unlabelled color emoji. When she finishes, the modal she shares from covers the grid she is
+sharing (**cognitive-load: working memory**). If she closes it to look at her board and then wants the
+photo again, there is no way back (**K1**). Nothing tells her when the next one lands (**K6**).
+
+##### 5.14.10.8 Minor observations
+
+- **The toast lands on the give-up row.** `Toast` is fixed at `bottom: max(1rem, safe-area)`; the
+  give-up row's bottom edge measures 632.5 px at 360×640. `Copied to clipboard` covers it. Lift the
+  toast to `bottom: max(4.5rem, …)` on short viewports, or let it sit above the footer.
+- **The modal close button is the heaviest control in every dialog** — a bordered 44 px box that
+  out-weighs `Got it` and `Share` and sits optically above the headline. §5.14.7 item 8 fixes the
+  overlap with `padding-top`; also drop its border at rest and give it `--color-surface` on
+  hover/focus, so it stops competing with the dialog's own primary. Keep the 44 px hit area and the
+  `aria-label="Close"`.
+- **`--color-bg` and `--color-bg-elevated` are both `#ffffff`** (C10), which is why the `.state-message`
+  card, the practice bar and every modal are separated from the page by a 1.41:1 hairline and nothing
+  else. §5.14.4's `#f4f6f7` / `#ffffff` split fixes all three at once.
+- **The archive shows ISO dates** (`Motodle #1  2026-09-02`). A human date is a copy change and
+  therefore operator-gated; the free half is setting them in `--font-numeric` + `tabular-nums` so the
+  column aligns.
+- **`index.html`'s favicon uses `#3b7d22`** — the *tile* green, which the One Signal Rule reserves for
+  "right". §5.14.7 item 17 already calls this; note that the same hex is also hard-coded as the button
+  fill in `public/404.html`, so C12 and item 17 are one edit in two files.
+- **`--font-numeric` is a system **mono** stack**, and mono at 0.875 rem inside a 1 fr tile column will
+  be wider than the sans it replaces. Check the year tiles and the `Guess n of 5` button label for
+  new ellipsis at 320 px before calling the type work done.
+- **`puzzleReason` / `catalogReason` are captured in the store and never rendered.** Not a design
+  defect today (the copy is frozen and `Retry` is the right action), but worth recording: the app
+  knows *why* a load failed and never says.
+
+##### 5.14.10.9 Open questions for the operator
+
+`critique.md` closes by putting targeted questions to the user. **Questions could not be asked: this
+session exposes no `AskUserQuestion` tool and no decision-page channel (probed; no match).** They are
+recorded here instead, each tied to a specific finding, so the operator can answer them in one pass.
+They are the gates on the four **[operator-gated]** items above.
+
+1. **Post-game screen (K1).** Ship rung 1 now — a `See the answer` control in the existing give-up
+   row that calls `openResult()` — or leave the end-of-day screen as it is and record rung 2 for a
+   later revision? *(Rung 1 is ~10 lines and one new string; it is the highest-value item in this
+   critique.)*
+2. **Countdowns (K6 + C13).** Both the result modal and the no-puzzle screen are missing a
+   `Next Motodle` countdown that §5.1 already specifies and `StatsModal` already computes. Add both,
+   add neither, or add a static line with no timer?
+3. **The masthead (K7).** May the header carry `#{puzzle.number}` under the wordmark? It is the one
+   thing that makes the app read as *daily*, and it is new visible text.
+4. **Priority.** If the pass has to be cut short, this critique's order is: the rhythm work
+   (§5.14.5 — it clears three cognitive-load failures at once), then K1–K3 (the three cheap
+   correctness-of-experience defects), then K4/K5 (hierarchy and colorblind integrity), then the
+   expressive layer (icons, wordmark, motion, reveal). Confirm or reorder.
+
+##### 5.14.10.10 Gate additions
+
+Add to §5.14.9's list:
+
+8. `npx vitest run --maxWorkers=1 src/components/ResultModal.test.ts src/components/StatsModal.test.ts src/App.test.ts`
+   **specifically**, before the full suite — these three hold the assertions most likely to be broken
+   by this pass (A4's `/3 × 3/`, K11's eight-bucket and exact-string assertions, the level-1 heading
+   name `Motodle` and the `Make` / `Model` combobox names).
+9. Re-check the **focus ring** (A6) on: the accent-filled submit, the ink active crop segment, a
+   filled tile, the `LOCKED` chip and a modal close button — in light, dark, colorblind-light and
+   colorblind-dark. Eight of those sixteen combinations are new as of this pass.
+10. Re-run this critique's own two measurements at 360×640: photo-frame height **vs** scoreboard
+    height (K4 — the photo must no longer be the smaller of the two), and `Toast` bottom edge **vs**
+    the give-up row.
+
+#### 5.14.11 Fixer pass — blockers resolved (2026-09-03)
+
+Four rendered-result blockers, filed against the 5.14.10 critique's own build, fixed and
+re-measured against a fresh `npm run build` + `vite preview`. All four verified with the same
+measurement scripts the findings cited (`wordmark.mjs`, `cta.mjs`, `measure.mjs`, `contrast.mjs`).
+
+| # | Defect | Fix | Verified |
+|---|---|---|---|
+| B1 | Wordmark hard-clipped, no ellipsis, at 320px and 381-479px (the entire 390/393/412/430 modern-phone band) | `app.css`'s `.app-header h1` breakpoint moved from `max-width:380px` to `max-width:479px`; the clipped text moved into a non-flex `.app-header__text` span so `text-overflow:ellipsis` actually applies (a flex container never applies it to its own box) as a last-resort fallback; one merged compact tier (0.6875rem, 0 tracking, 0 header gap) rather than a second breakpoint, after a two-tier attempt clipped two narrow bands (341-347px, 381-383px) that `wordmark.mjs`'s own outer-`<h1>` check couldn't see (the clip was absorbed inside the new span's `overflow:hidden`) | Zero clipped widths in a per-pixel scan of the full 320-1920px range, ≥9px genuine headroom at the tightest point (320px, computed from actions-row/header geometry directly, not from the post-shrink box) |
+| B2 | Sticky modal CTA not full-bleed at any width; a stray square-cornered pill above 599px | `Modal.svelte`'s `.modal-dialog > .button--primary:last-child` gets `display:flex` and `width: calc(100% + var(--space-5) * 2)` (not `width:auto` — empirically, a `<button>`'s UA widget keeps its own fit-content sizing under `width:auto` even once display is block-level; an equivalent `<div>` does not) plus bottom corner radii matching the dialog's; the now-redundant `@media (max-width:599px){width:100%}` rules in `HelpModal.svelte`/`StatsModal.svelte` removed | CTA left/right edges equal the dialog's exactly at 360/599/600/768/1024/1280 |
+| B3 | 320×568 fold regressed to 590.5/568 (−22.5px) | New `@media (max-height:700px)` rules (matching GuessForm's existing short-viewport breakpoint) drop `ImageStage.svelte`'s `--stage-max-h` floor from 140px back to its pre-pass 120px and `app.css`'s `.app-header` padding-bottom to `--space-1`; `Scoreboard.svelte`'s `.scoreboard__head` padding-bottom zeroed in the same block for extra buffer. Scoped to `(max-width:899px)` alongside the height query so it can never fight the ≥900px two-column hero layout at heights that satisfy both | 320×568 → 562.6/568 (+5.4px slack); all other six contract viewports unaffected or improved (360×640 +28.5, was +20.5); zero horizontal overflow; frame heights unchanged or larger everywhere |
+| B4 | Colorblind mode: `--color-accent` and `--tile-red-bg` were the same achromatic plate (1.29:1 light, 1.05:1 dark) | `tokens.css`: `--tile-red-bg` set to `#606773`, one mid-neutral value used in **both** colorblind themes (deletes the light/dark inversion special-case for this token only — `--color-accent`'s own dark-mode inversion stays, unrelated) | Tile-red vs its white text 5.70:1 (both themes, ≥4.5 required); accent vs tile-red-bg 3.12:1 light / 5.03:1 dark (≥3 required); `--tile-green-bg` untouched, still byte-identical to `e2e/colorblind.spec.ts`'s pinned value |
+
+Also applied, all cheap and zero new copy: **#3** stats distribution empty state (`.distribution__track` background replaced with a 1px baseline — a day-one player no longer sees eight full grey plates); **#4** the `LOCKED` chip's `margin-left:auto` dropped so it sits next to its own label instead of flush against the next field's, at 360px; **#6** `.button{text-decoration:none}` (an `<a class="button">` was underlined); **#7** the disabled give-up button's `opacity:0.55` deleted (contradicted the system's own no-opacity-for-disabled rule; the rule beneath it already colors it `--color-muted` regardless of `:disabled`, so nothing is lost).
+
+Full gate (§5.14.9) re-run after all of the above: `npm run check` 427 files/0 errors; `npx vitest run --maxWorkers=1` 916/916; `npm run build` CSS 5.79 KB / 20, JS 30.53 KB / 60, all 9 payload budgets green; `npx playwright test --workers=1` 10/10; `detect.mjs` unchanged at 7 advisory findings, 0 non-advisory. Gate items 4 (7's advisory list needs a reason each — carried in the 5.14 critique) and 7 (`/impeccable document` regenerating `DESIGN.md`, recorded in §11) remain outstanding — both outside this pass's writable set, same as the critique that filed them.
+
+---
+
 ## 6. Content pipeline
 
 All under `tools/`, TypeScript, run with `tsx`. Never imported by `src/`.
@@ -3882,6 +5018,38 @@ rule, gives `r = 1.677`, and lands `MIN_SOURCE_WIDTH` on exactly **2000** — th
 band. It was not chosen because 0.11 cleared the legibility bar with margin.
 
 ---
+
+---
+
+### 11.15 Revision 10 — the Impeccable design pass 2026-09-03
+
+Operator ask: *"add impeccable style to the project."* Applied Impeccable v4.1.3
+(`.claude/skills/impeccable`) in its recommended order for an existing project — `init` → `document`
+→ critique → polish/typeset/layout/colorize → audit. This entry records the **init + document** phase
+and the brief it produced; the implementation lands against §5.14.
+
+**No game rule, no score, no lock, no share text, no storage schema, no DOM contract, no copy, no
+CSP, no `infra/**`, no `.github/**`, no `tools/**`, no `public/puzzles/**` and no budget value
+changes.** This is a presentation-layer revision.
+
+| # | Change | Sections |
+|---|---|---|
+| R10-1 | **`PRODUCT.md` (new, repo root)** — durable product truth: users, purpose, positioning, operating context, capabilities and constraints, brand commitments, evidence on hand, five product principles, accessibility. Impeccable's interview could not run (no question tool, no decision-page channel in this session), so every fact is inferred from the operator's brief and the repo, and the inferred ones are marked **[assumed]** for correction. | new file; §5.14.0 |
+| R10-2 | **`DESIGN.md` (new, repo root)** — a Google-Stitch-format scan of the visual system **as built on 2026-09-03**: YAML token frontmatter plus Overview / Colors / Typography / Layout / Elevation & Depth / Shapes / Components / Do's and Don'ts. It documents the baseline, not the target, and must be regenerated once §5.14 is implemented. The `.impeccable/design.json` sidecar was **not** written (out of this pass's writable file set). | new file; §5.14.0 |
+| R10-3 | **§5.14 (new) — the design brief**: direction, type system, color system with computed contrast, space/shape/elevation, motion, a component-by-component change list, the explicit do-not-change list, and the verification gate. | §5.14 |
+| R10-4 | **Baseline evidence captured**: `npm run build` (CSS **3.92 KB** gz of 20, JS **29.54 KB** gz of 60), 90 screenshots (15 states × 2 viewports × 3 themes), measured fold slack at 360×640 (**64.5 px**), and measured photo-frame sizes at five viewports (140 / 274.5 / 360 / 288 / 360 px tall) which become the floor no later change may regress. Screenshots: `…/852d5747-63d4-4155-bc73-5cf062e93be6/scratchpad/shots/`. | §5.14.1 |
+| R10-5 | **Detector baseline**: the static pass (`detect.mjs src index.html public/404.html`) returned **zero findings** before `DESIGN.md` existed, and **12 advisory design-system-drift findings** after it (eleven off-ramp `font-size` literals — `0.65`/`0.8`/`0.9`/`1.1`/`1.4 rem` — plus one color and one radius in `public/404.html`); exit code is still 0, since advisories never fail. The rendered/URL pass could not run — it requires `puppeteer`, absent and unfetchable offline — so the render was critiqued by eye against the same rule list (findings C1–C14). | §5.14.1, §5.14.9 |
+| R10-6 | **Two accessibility defects found in the current theme tokens**, both fixed by §5.14.4: the app accent `#2563eb` is **1.3:1** against the colorblind "close" fill `#1d4ed8` (action and state are the same blue in colorblind mode), and the colorblind "wrong" fill `#17171a` is **1.04:1** against the dark ground `#121214` (the plate is invisible in dark + colorblind; only its glyph and label show). | §5.7, §5.14.1 C3/C4, §5.14.4 |
+| R10-7 | **One copy-truncation defect**: at 360×640 the give-up confirmation renders `Give up? This count…` because §5.11.4's `max-height: 700px` block sets `white-space: nowrap` + ellipsis on it. §5.14.7 item 7 lets it wrap instead; the submit button's position — the only contractual one — is unaffected. | §5.11.4, §5.14.1 C8 |
+| R10-8 | **`e2e/colorblind.spec.ts` pins two hex values verbatim** (`#3b7d22` base green, `#c2410c` colorblind green, asserted in light *and* dark). §5.14.4 therefore freezes those two fills and moves only the other four. Any future palette work that wants them must edit that spec deliberately. | §7.4, §5.14.4 |
+| R10-9 | **Recorded, not coded — a spec/implementation gap**: §5.1 specifies a next-midnight countdown on the "No puzzle today" screen and the implementation does not render one. It adds behavior, so §5.14 leaves it **operator-gated** rather than folding it into a presentation pass. | §5.1, §5.14.1 C13 |
+| R10-10 | **No webfont, stated loudly.** `CONTENT_SECURITY_POLICY` already contains `font-src 'self'`, so a self-hosted subset would need **no** `schema/constants.ts` and **no** `infra/variables.tf` edit; what blocks it is that this session had no network and the repo has no `.woff2` to subset. The design is built to look deliberate on the system stack, with `--font-numeric` (a system mono stack) added as a data voice. A webfont stays a later, optional revision under the operator's ≤ 60 KB / `font-display: swap` / preload rules. | §5.8, §5.14.3 |
+
+**Follow-ups this revision deliberately leaves open:** regenerate `DESIGN.md` + write
+`.impeccable/design.json` after implementation; update §10.5's head snippet if `index.html`'s
+`theme-color` / favicon change (§5.14.7 item 17); decide the operator-gated countdown (R10-9); and
+decide whether the wide-viewport two-column composition (§5.14.7 item 4, P2) ships or the pass keeps
+the single column with a larger photo.
 
 ---
 

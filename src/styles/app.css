@@ -20,8 +20,22 @@ body {
   color: var(--color-fg);
   font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.4;
+  line-height: 1.5;
   -webkit-text-size-adjust: 100%;
+}
+
+/* Browser surfaces (§5.14.1 C14 / craft-floor): the parts nobody drew still carry the design —
+   this is the cheapest signal that a page was built rather than assembled. */
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 22%, transparent);
+  color: var(--color-fg);
+}
+
+:root {
+  accent-color: var(--color-accent);
+  caret-color: var(--color-accent);
+  scrollbar-color: var(--color-border) transparent;
+  scrollbar-width: thin;
 }
 
 #app {
@@ -47,6 +61,8 @@ button:disabled {
 
 a {
   color: var(--color-accent);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
 }
 
 .visually-hidden {
@@ -80,11 +96,14 @@ a {
   flex: 1 1 auto;
 }
 
-/* The <main> landmark wraps the screen (image, board, form); same rhythm as its parent column. */
+/* The <main> landmark wraps the screen (image, board, form). Rhythm replaces uniformity
+   (§5.14.1 C5 / §5.14.5): 24px between top-level groups on tall viewports, tightened to 8px
+   under max-height:1000px below (unchanged from before this pass — only the tall-viewport value
+   moved from 16px to 24px, which is what gives header/stage/board/form distinct weight). */
 .app-main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .app-header {
@@ -92,20 +111,70 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
 }
 
 .app-header h1 {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   margin: 0;
   min-width: 0; /* let the title shrink before the icon row overflows under wide fallback fonts */
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.app-header__mark {
+  flex: 0 0 auto;
+  color: var(--color-accent);
+}
+
+/* text-overflow has no effect on the flex h1 itself (review B1) — a flex container never applies
+   it to its own box, so the wordmark hard-clipped mid-glyph with no ellipsis at any width this
+   rule didn't already fit. A plain, non-flex inner span can actually ellipsize as a last-resort
+   fallback if a future fallback font ever runs wider than the two breakpoints below account for. */
+.app-header__text {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 479px) {
+  /* 479px, not 380px (review B1): 380 stopped one pixel below the entire modern-phone band
+     (390/393/412/430 — iPhone 12-16, Pixel), which clipped "MOTODLE" mid-glyph with the
+     ellipsis inert (a flex child ignores text-overflow). 480px is the first width where the
+     full-size 22px mark + wordmark actually fit, so the compact style now covers every width
+     below that instead of leaving a clipped gap.
+     One tier, not a size that steps down again partway through this range: a second breakpoint
+     was tried and tuned to fit 320px, but the space available for the title is NOT a smooth
+     function of viewport width here — the App.svelte gap:2px/divider overrides below 380px, and
+     this rule's own change of font size, both create step discontinuities in how much of the
+     five-icon row's own footprint is "left over". A second tier's own edges landed inside those
+     steps and clipped a few px on either side of them (341-347px and 381-383px, caught only by
+     checking .app-header__text's own scrollWidth vs clientWidth directly — wordmark.mjs checks
+     the outer h1 box, and .app-header__text's overflow:hidden was silently absorbing the clip
+     there without the h1 itself ever overflowing). One size sized to the single tightest point in
+     the whole 320-479px range (320px itself, 63px available for a 54px-wide "Motodle" — the other
+     widths in range only get slacker from there, up to 186px available at 479) has no edges left
+     to land on.
+     The wordmark's own size + tracking + mark icon cost real width the five 44px header buttons
+     also need at this breakpoint (measured truncating to "MOTO" under DejaVu Sans, the CI
+     runner's fallback, before this rule existed) — drop back toward the pre-pass size and let
+     go of the accent mark first; textContent and the accessible name never change either way. */
   .app-header {
-    gap: var(--space-2);
+    gap: 0;
+  }
+  .app-header h1 {
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    gap: 0;
+  }
+  .app-header__mark {
+    display: none;
   }
 }
 
@@ -116,13 +185,27 @@ a {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-elevated);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-muted);
   touch-action: manipulation;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out,
+    border-color 120ms ease-out;
 }
 
-.icon-button:hover {
+.icon-button:hover,
+.icon-button:focus-visible {
   background: var(--color-surface);
+  color: var(--color-fg);
+}
+
+/* The colorblind toggle's "on" state needs a signal that isn't the shared glyph alone — an ink
+   fill reads as "on" without relying on colour (§5.14.7 item 3). */
+.icon-button[aria-pressed='true'] {
+  background: var(--color-fg);
+  color: var(--color-bg);
 }
 
 .button {
@@ -138,31 +221,41 @@ a {
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-bg-elevated);
+  color: var(--color-fg);
   font-size: 1rem;
+  font-weight: 500;
   touch-action: manipulation;
+  /* review improvement #6: the global `a { text-decoration: underline }` above still applied to
+     an <a class="button"> (the practice bar's "Back to today"), underlining text inside what
+     reads as a button, not a link. */
+  text-decoration: none;
+  transition:
+    background-color 120ms ease-out,
+    border-color 120ms ease-out,
+    color 120ms ease-out;
 }
 
 .button--primary {
   background: var(--color-accent);
   color: var(--color-accent-fg);
   border-color: var(--color-accent);
+  font-weight: 600;
 }
 
 .button--danger {
   color: var(--color-danger);
 }
 
-/* One focus ring for every interactive element (§5.11.4 U10 — nothing defined :focus-visible
-   before, so each control fell back to a different UA default and the <select>'s was nearly
-   invisible on the dark surface). --color-accent is theme-aware, so light, dark and colorblind
-   are all covered by one rule. */
+/* The halo focus ring (§5.14.10 K5.2): visible on ANY fill in ANY theme, including colorblind
+   mode, where accent/fg/the active crop segment/the LOCKED chip all collapse to one ink value —
+   a plain ring there stopped reading as a ring and started reading as a border. An ink ring,
+   separated from the element by 2px of page ground and haloed by 2px more, reads everywhere.
+   Replaces the old single accent ring + its .button--primary special case (no longer needed:
+   the halo already survives an accent-filled or ink-filled surface alike). */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-fg);
   outline-offset: 2px;
-}
-/* An accent ring on an accent fill is invisible — flip it to the foreground there. */
-.button--primary:focus-visible {
-  outline-color: var(--color-fg);
+  box-shadow: 0 0 0 4px var(--color-bg);
 }
 
 /* Replaces `opacity: 0.5` (§5.11.4 U5 root cause): opacity fades text and border together and
@@ -197,9 +290,14 @@ a {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-2) var(--space-3);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
+/* Ink, not accent fill (§5.14.7 item 15): the banner can be on screen at the same time as the
+   submit button's own accent fill (rollover.spec.ts proves it — a mid-guess board stays visible
+   underneath), and the Rare Accent Rule allows exactly one accent-filled element on the game
+   screen at a time. The accent lives on as an underline, which still marks this as the thing to
+   act on. */
 .stale-banner {
   position: sticky;
   top: 0;
@@ -209,10 +307,46 @@ a {
   justify-content: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
+  background: var(--color-bg-elevated);
+  color: var(--color-fg);
+  border: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--color-accent);
   border-radius: var(--radius-md);
   text-align: center;
+}
+
+/* Wide viewports (§5.14.7 item 4, P2): the photo grows into a real hero instead of a phone
+   screenshot centered in a desert (§5.14.1 C6). Written here, not in App.svelte's own scoped
+   style — Svelte scopes a component's styles to elements ITS OWN template renders, and
+   .image-stage/.scoreboard/.guess-form are each rendered by a CHILD component, so a selector
+   that positions them only matches from this global sheet. DOM order is untouched: this is a
+   grid-area re-flow, not a DOM reorder, so focus/reading order still matches the phone layout. */
+@media (min-width: 900px) and (min-height: 620px) {
+  .app-column {
+    max-width: var(--content-max-width-wide);
+  }
+
+  .app-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(21rem, 0.9fr);
+    grid-template-areas: 'stage board' 'stage form';
+    align-content: start;
+    column-gap: var(--space-6);
+    row-gap: var(--space-4);
+  }
+
+  .app-main > .image-stage {
+    grid-area: stage;
+  }
+  .app-main > .scoreboard {
+    grid-area: board;
+  }
+  .app-main > .guess-form {
+    grid-area: form;
+  }
+  .app-main > .state-message {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-height: 1000px) {
@@ -223,6 +357,16 @@ a {
   .app-column,
   .app-main {
     gap: var(--space-2);
+  }
+}
+
+/* 320x568 fold regression (review B3): the header's own padding-bottom:var(--space-2) plus the
+   image-stage floor (see ImageStage.svelte's matching 700px rule) were the last ~4px the shortest
+   supported viewport was short by. 700px, matching GuessForm's existing short-viewport breakpoint
+   (§5.11.5) — 360x640 keeps the roomier var(--space-2) padding. */
+@media (max-height: 700px) {
+  .app-header {
+    padding-bottom: var(--space-1);
   }
 }
 

@@ -127,13 +127,31 @@
   <div class="guess-form__grid">
     <div class="guess-form__label-row" data-area="make-label">
       <label for="mtd-make">Make</label>
-      {#if makeInvalid}<p id="mtd-make-error" class="field-error">Choose a make</p>{/if}
-      {#if makeLocked}<span class="lock-chip">Locked</span>{/if}
+      {#if makeInvalid}
+        <p id="mtd-make-error" class="field-error">
+          <svg class="field-error__icon" width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M10 3 L18 17 L2 17 Z" />
+            <path d="M10 8.5v3.5" />
+            <circle cx="10" cy="14.5" r="0.1" fill="currentColor" stroke="none" />
+          </svg>
+          Choose a make
+        </p>
+      {/if}
+      {#if makeLocked}<span class="lock-chip"><svg class="lock-chip__icon" width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="9" width="10" height="8" rx="1.5" /><path d="M7.5 9V6.5a2.5 2.5 0 0 1 5 0V9" /></svg>Locked</span>{/if}
     </div>
     <div class="guess-form__label-row" data-area="model-label">
       <label for="mtd-model">Model</label>
-      {#if modelInvalid}<p id="mtd-model-error" class="field-error">Choose a model</p>{/if}
-      {#if modelLocked}<span class="lock-chip">Locked</span>{/if}
+      {#if modelInvalid}
+        <p id="mtd-model-error" class="field-error">
+          <svg class="field-error__icon" width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M10 3 L18 17 L2 17 Z" />
+            <path d="M10 8.5v3.5" />
+            <circle cx="10" cy="14.5" r="0.1" fill="currentColor" stroke="none" />
+          </svg>
+          Choose a model
+        </p>
+      {/if}
+      {#if modelLocked}<span class="lock-chip"><svg class="lock-chip__icon" width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="9" width="10" height="8" rx="1.5" /><path d="M7.5 9V6.5a2.5 2.5 0 0 1 5 0V9" /></svg>Locked</span>{/if}
     </div>
 
     <div class="guess-form__cell" data-area="make" data-locked={makeLocked}>
@@ -178,7 +196,14 @@
     <div class="guess-form__label-row" data-area="year-label">
       <label for="mtd-year">Year</label>
       {#if yearInvalid}
-        <p id="mtd-year-error" class="field-error">Enter a year between 1885 and {MAX_YEAR}</p>
+        <p id="mtd-year-error" class="field-error">
+          <svg class="field-error__icon" width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M10 3 L18 17 L2 17 Z" />
+            <path d="M10 8.5v3.5" />
+            <circle cx="10" cy="14.5" r="0.1" fill="currentColor" stroke="none" />
+          </svg>
+          Enter a year between 1885 and {MAX_YEAR}
+        </p>
       {/if}
     </div>
     <div class="guess-form__cell" data-area="year" data-locked={today.locks.year !== null}>
@@ -263,21 +288,24 @@
   }
   /* The one place the rhythm opens up: 4px row-gap + 8px = 12px between the two control blocks,
      so "label sticks to its control, blocks breathe" is a single rule, not four ad-hoc gaps (U11).
-     justify-content: flex-start (not the .guess-form__label-row default of space-between) because
-     this row spans both columns — space-between would push the error to the far right, over the
-     submit column instead of the year field it describes. Sit it right next to the label instead. */
+     This row spans both columns; the shared .guess-form__label-row rule below now starts every
+     label row at flex-start, so no override is needed here any more (§5.14.10 K2). */
   [data-area='year-label'] {
     grid-area: year-label;
     margin-top: var(--space-2);
-    justify-content: flex-start;
   }
 
   /* The label line exists in EVERY state — that is what makes an error cost zero layout (U6).
-     Label at the start; the field's error OR its Locked chip at the end of the same line. */
+     §5.14.10 K2: flex-start, not space-between — an error message now sits immediately after ITS
+     OWN label instead of flush against the neighbouring field's label, which is what made "Choose
+     a make" read as though it belonged to Model. The Locked chip (review improvement #4) now sits
+     right after its own label the same way, instead of taking margin-left: auto to park flush
+     against the row's end — at 360px that put it hard against the NEXT field's label ("Make
+     [Locked]Model"), reproducing the exact ambiguity this rule was written to fix. */
   .guess-form__label-row {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: var(--space-2);
     min-width: 0;
     min-height: 1.05rem;
@@ -286,41 +314,57 @@
 
   .guess-form__label-row label {
     font-size: 0.75rem;
+    font-weight: 600;
     color: var(--color-muted);
     white-space: nowrap;
   }
 
+  /* align-self: center (not the row's own align-items: baseline): .field-error is itself a flex
+     container now that it carries an icon, and a nested flex container's contribution to an
+     outer baseline-aligned row falls back to its margin edge rather than its text baseline —
+     that mismatch against the plain-text <label> silently grew the row a few px past its
+     min-height (caught by e2e/mobile-layout.spec.ts's bottomAfter===bottomBefore assertion, not
+     by inspection). Opting out of baseline alignment for this one item removes the mismatch. */
   .field-error {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    gap: 0.2em;
     margin: 0;
     min-width: 0;
+    height: 1.05rem;
     padding-right: var(--space-1); /* keeps a long message off the neighbouring label at narrow widths */
     font-size: 0.75rem;
     line-height: 1.05rem;
     color: var(--color-danger);
-    text-align: right;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis; /* a longer future message truncates; it never wraps and never shifts */
   }
 
-  [data-area='year-label'] .field-error {
-    text-align: left;
-    padding-right: 0;
+  .field-error__icon {
+    flex: 0 0 auto;
   }
 
   .lock-chip {
     display: inline-flex;
     align-items: center;
+    align-self: center;
+    gap: 0.2em;
     height: 1.05rem;
     padding: 0 var(--space-2);
     border: 1px solid var(--color-border);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-surface);
-    color: var(--color-muted);
-    font-size: 0.65rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase; /* presentational only — textContent stays "Locked" (§5.11.3) */
+    color: var(--color-fg);
+    font-size: 0.75rem;
+    font-weight: 600;
     white-space: nowrap;
+  }
+
+  .lock-chip__icon {
+    flex: 0 0 auto;
+    color: var(--color-muted);
   }
 
   .guess-form__cell {
@@ -345,6 +389,7 @@
     padding: 0 var(--space-3);
     background: var(--color-bg-elevated);
     color: inherit;
+    font-weight: 500;
     text-overflow: ellipsis;
     touch-action: manipulation;
   }
@@ -398,7 +443,7 @@
     justify-content: center;
     gap: var(--space-2);
     border-top: 1px solid var(--color-border);
-    padding-top: var(--space-1);
+    padding-top: var(--space-3);
   }
 
   .guess-form__secondary .button--danger {
@@ -406,14 +451,15 @@
     border-color: transparent;
     color: var(--color-muted);
     padding: 0 var(--space-3);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
   }
   .guess-form__secondary .button--danger:hover {
     color: var(--color-danger);
   }
-  .guess-form__secondary .button--danger:disabled {
-    opacity: 0.55;
-  }
+  /* review improvement #7: opacity on a disabled control contradicts the system's own
+     "don't use opacity for disabled" rule and dropped this label under 3:1. The rule above
+     already colors it var(--color-muted) on transparent regardless of :disabled (~6:1 against the
+     page ground either way), so dropping the multiply-through-opacity override loses nothing. */
 
   /* Cancel and Confirm read as a matched pair, not a near-miss — same minimum width regardless
      of label length. */
@@ -428,18 +474,20 @@
     flex: 1 1 100%;
     margin: 0;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--color-muted);
   }
   .guess-form__secondary .button--danger.is-confirm {
     color: var(--color-danger);
-    border-color: var(--color-border);
+    border-color: var(--color-danger);
   }
 
   /* The height-keyed rules that survive: gap tightening, plus — on the confirm row only — one
      line instead of two, which is what keeps Cancel/Confirm on-screen at 360x640 (review
      improvement #1). 700px, not 1000px: 360x640 and 320x568 need the 8px, and nothing taller
-     does (§5.11.5). */
+     does (§5.11.5). §5.14.10 C8/item 7 fix: the confirm sentence used to truncate here
+     ("Give up? This count…") — the nowrap/ellipsis is gone, so it wraps onto two lines instead;
+     only the submit button above the hairline is contractual, and this row is free to grow. */
   @media (max-height: 700px) {
     .guess-form {
       gap: var(--space-2);
@@ -447,16 +495,8 @@
     [data-area='year-label'] {
       margin-top: var(--space-1);
     }
-    .guess-form__secondary {
-      flex-wrap: nowrap;
-    }
     .guess-form__confirm-text {
-      flex: 1 1 auto;
-      min-width: 0;
-      text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      flex: 1 1 100%;
     }
   }
 </style>

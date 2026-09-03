@@ -43,7 +43,7 @@
     <span role="columnheader">Year</span>
   </div>
   {#each rows as g, i (i)}
-    <div class="scoreboard__row" role="row">
+    <div class="scoreboard__row" role="row" class:is-new={g !== null && i === guesses.length - 1}>
       {#if g}
         <span class="tile" role="cell" data-color={g.result.make}>
           {#if colorblind}<span class="tile__glyph" aria-hidden="true">{GLYPHS[g.result.make]}</span>{/if}
@@ -55,7 +55,7 @@
           <span class="tile__label">{g.model}</span>
           <span class="visually-hidden">Model: {g.model}, {LABELS[g.result.model]}</span>
         </span>
-        <span class="tile" role="cell" data-color={g.result.year}>
+        <span class="tile tile--numeric" role="cell" data-color={g.result.year}>
           {#if colorblind}<span class="tile__glyph" aria-hidden="true">{GLYPHS[g.result.year]}</span>{/if}
           <span class="tile__label">{g.year}</span>
           <span class="visually-hidden">Year: {g.year}, {LABELS[g.result.year]}</span>
@@ -80,7 +80,12 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-2);
-    font-size: 0.8rem;
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--color-muted);
     text-align: center;
   }
@@ -101,12 +106,19 @@
     justify-content: center;
     gap: var(--space-1);
     border-radius: var(--radius-sm);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
     text-align: center;
     padding: var(--space-1) var(--space-2);
     border: 1px solid var(--tile-empty-border);
     background: var(--tile-empty-bg);
     color: var(--tile-empty-fg);
+  }
+
+  .tile--numeric .tile__label {
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
   }
 
   .tile[data-color='green'] {
@@ -137,6 +149,33 @@
     white-space: nowrap;
   }
 
+  /* The stamp (§5.14.6, signature motion): only the newest row animates in, staggered per
+     column so make -> model -> year read as a sequence, not a flash. Pure CSS @keyframes, same
+     reason as ImageStage's cross-fade — no Svelte transition:, no Web Animations API, jsdom-safe. */
+  .scoreboard__row.is-new .tile {
+    animation: motodle-stamp 150ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .scoreboard__row.is-new .tile:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  .scoreboard__row.is-new .tile:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  .scoreboard__row.is-new .tile:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  @keyframes motodle-stamp {
+    from {
+      opacity: 0;
+      transform: translateY(3px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
   /* Short viewports (e.g. 360x640, §5.8): the 5-row grid is the single biggest fixed cost on the
      page, so tighten its row gap and tile padding further where vertical space is actually scarce
      (review B3's numeric target — 2rem alone was not enough to clear the fold). */
@@ -148,6 +187,14 @@
     .tile {
       min-height: 1.6rem;
       padding: 0 var(--space-1);
+    }
+  }
+
+  /* 320x568 fold regression (review B3, optional buffer): a few more px of slack on the same
+     shortest-viewport budget as GuessForm's and ImageStage's 700px rules. */
+  @media (max-height: 700px) {
+    .scoreboard__head {
+      padding-bottom: 0;
     }
   }
 </style>

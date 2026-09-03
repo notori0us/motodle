@@ -42,8 +42,13 @@
     <ul id="mtd-credits" class="credits-list">
       {#each rows as row (row.id)}
         <li data-mtd-credit-row data-date={row.date} class="credits-row">
-          <p class="credits-row__line">
-            Motodle #{row.number} · {row.date} · {row.year} {row.make} {row.model} — photo by {row.credit.author}
+          <p class="credits-row__line1">
+            <span class="credits-row__num">Motodle #{row.number}</span>
+            <span class="credits-row__date">{row.date}</span>
+            <span class="credits-row__bike">{row.year} {row.make} {row.model}</span>
+          </p>
+          <p class="credits-row__line2">
+            photo by {row.credit.author}
             ·
             <a href={row.credit.license.url} target="_blank" rel="noopener noreferrer">{row.credit.license.name}</a>
             ·
@@ -60,7 +65,7 @@
       <button
         type="button"
         id="mtd-credits-more"
-        class="button"
+        class="button credits-more"
         disabled={loadingMore}
         onclick={onmore}
       >{loadingMore ? 'Loading…' : `Show more (${remaining} remaining)`}</button>
@@ -69,6 +74,10 @@
 </Modal>
 
 <style>
+  .credits-more {
+    width: 100%;
+  }
+
   .credits-intro {
     color: var(--color-muted);
     margin-bottom: var(--space-4);
@@ -94,14 +103,42 @@
     border-bottom: none;
   }
 
-  .credits-row__line {
+  .credits-row__line1 {
+    margin: 0 0 0.2em;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-1);
+  }
+
+  .credits-row__num,
+  .credits-row__date {
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .credits-row__date {
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+
+  .credits-row__date::after {
+    content: '·';
+    margin-left: var(--space-1);
+    color: var(--color-border);
+    font-weight: 400;
+  }
+
+  .credits-row__line2 {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    color: var(--color-muted);
   }
 
   .credits-row__note {
     margin: var(--space-1) 0 0;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-style: italic;
     color: var(--color-muted);
   }

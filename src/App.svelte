@@ -76,29 +76,65 @@
 
   <div class="app-column">
     <header class="app-header">
-      <h1>Motodle</h1>
+      <h1>
+        <svg
+          class="app-header__mark"
+          width="18"
+          height="18"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M3 15 L8 8 L12 12 L17 4" />
+        </svg>
+        <span class="app-header__text">Motodle</span>
+      </h1>
       <div class="app-header__actions">
         <button type="button" class="icon-button" aria-label="How to play" title="How to play" onclick={() => game.openHelp()}>
-          ?
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="10" cy="10" r="7.25" />
+            <path d="M7.6 7.9c0-1.3 1.1-2.35 2.4-2.35s2.4.9 2.4 2.1c0 1.55-2.4 1.55-2.4 3.35" />
+            <circle cx="10" cy="14.1" r="0.15" fill="currentColor" stroke="none" />
+          </svg>
         </button>
         <button type="button" class="icon-button" aria-label="Statistics" title="Statistics" onclick={() => game.openStats()}>
-          &#128202;
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M4 16.5V11" />
+            <path d="M10 16.5V5.5" />
+            <path d="M16 16.5V8.5" />
+          </svg>
         </button>
         <button type="button" class="icon-button" aria-label="Archive" title="Archive" onclick={() => game.openArchive()}>
-          &#128197;
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <rect x="3.5" y="4.5" width="13" height="12" rx="1.5" />
+            <path d="M3.5 8.25h13" />
+            <path d="M6.75 3v3M13.25 3v3" />
+          </svg>
         </button>
-        <button type="button" class="icon-button" aria-label="Change theme" title={themeTitle} onclick={cycleTheme}>
-          &#9680;
+        <span class="app-header__divider" aria-hidden="true"></span>
+        <button type="button" class="icon-button icon-button--quiet" aria-label="Change theme" title={themeTitle} onclick={cycleTheme}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="10" cy="10" r="7.25" />
+            <path d="M10 2.75a7.25 7.25 0 0 1 0 14.5Z" fill="currentColor" stroke="none" />
+          </svg>
         </button>
         <button
           type="button"
-          class="icon-button"
+          class="icon-button icon-button--quiet"
           aria-pressed={game.prefs.colorblind}
           aria-label="Toggle colorblind mode"
           title="Toggle colorblind mode"
           onclick={() => game.toggleColorblind()}
         >
-          &#9681;
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="10" cy="10" r="7.25" />
+            <path d="M4.5 4.5 15.5 15.5" />
+          </svg>
         </button>
       </div>
     </header>
@@ -215,22 +251,58 @@
 <Toast message={game.toast} />
 
 <style>
+  /* K8: five controls read as one undifferentiated row at equal weight, though only three are
+     actions (help/stats/archive) and two are settings (theme/colorblind) that change how the app
+     looks, not what the player does. A gap + a hairline divider group them without a menu — a
+     menu would bury the frozen accessible names behind an extra tap. */
   .app-header__actions {
     display: flex;
+    align-items: center;
     flex: 0 0 auto;
     gap: var(--space-2);
+  }
+
+  .app-header__divider {
+    width: 1px;
+    align-self: stretch;
+    margin: var(--space-1) var(--space-1);
+    background: var(--color-border);
+  }
+
+  .icon-button--quiet {
+    color: var(--color-muted);
   }
 
   @media (max-width: 380px) {
     .app-header__actions {
       gap: 2px; /* 5 x 44px buttons must fit beside the title at 360px under DejaVu Sans (CI runner) */
     }
+    .app-header__divider {
+      margin: var(--space-1) 1px;
+    }
   }
 
   .skeleton {
     width: 100%;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     background: var(--color-surface);
+    background-image: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in oklab, var(--color-fg) 6%, transparent) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: motodle-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @keyframes motodle-shimmer {
+    from {
+      background-position: 150% 0;
+    }
+    to {
+      background-position: -50% 0;
+    }
   }
 
   .state-message {
@@ -238,9 +310,17 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-3);
-    padding: var(--space-4);
+    padding: var(--space-5);
+    background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
+  }
+
+  @media (min-width: 900px) and (min-height: 620px) {
+    .state-message {
+      align-items: center;
+      text-align: center;
+    }
   }
 
   .manual-share-text {
@@ -258,7 +338,8 @@
 
   .app-footer {
     margin-top: auto;
-    padding-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
     font-size: 0.75rem;
     text-align: center;
     color: var(--color-muted);

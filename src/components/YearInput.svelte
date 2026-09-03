@@ -148,8 +148,10 @@
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-bg-elevated);
+    color: var(--color-fg);
     width: 100%;
     touch-action: manipulation;
+    transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
   }
 
   .year-input__step {
@@ -158,7 +160,10 @@
   }
 
   .year-input__field {
-    font-size: 1rem; /* 16px floor — iOS focus auto-zoom (§5.3.5) */
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 1rem; /* 16px floor — iOS focus auto-zoom (§5.3.5), contractual regardless of face */
     padding: 0 var(--space-1);
     text-align: center;
     /* Kill the native spinner: it is a second, ~12px-wide stepper sitting beside our own two. */
