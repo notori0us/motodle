@@ -49,6 +49,24 @@ test.describe('win playthrough', () => {
     const modelSelect = page.locator('#mtd-model');
     const year = page.getByRole('spinbutton');
 
+    // ---- 13. The in-play licence chip, before any guess (§5.10.1). -----------------------------
+    // Fixture #1's credit: author "Pawlex", license.name "Public domain", fileTitle
+    // "File:2004 Suzuki GSXR-750 Left SIde.jpg" (note the unhyphenated "GSXR" — the catalog's
+    // model label is "GSX-R750", so a populated #mtd-model dropdown can't false-fail this).
+    const licenceChip = page.locator('#mtd-photo-licence');
+    await expect(licenceChip).toBeVisible();
+    await expect(licenceChip).toHaveText('Photo: Public domain');
+    await expect(licenceChip).toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/Template:PD-user');
+
+    async function assertNoSpoilers(): Promise<void> {
+      const html = await page.content();
+      expect(html).not.toContain('Pawlex');
+      expect(html).not.toContain('File:');
+      expect(html).not.toContain('GSXR');
+      expect(html).not.toContain('commons.wikimedia.org/wiki/File:');
+    }
+    await assertNoSpoilers();
+
     // ---- 3. Guess 1: red/red/red; image advances to level 2; scrub back/forward. --------------
     // Before any make is chosen, #mtd-model is disabled with the "Choose a make first" placeholder
     // (§5.3.2).
@@ -76,6 +94,10 @@ test.describe('win playthrough', () => {
     await expect(page.getByRole('button', { name: 'Crop level 1 of 5' })).toHaveAttribute('aria-current', 'true');
     await page.getByRole('button', { name: 'Crop level 2 of 5' }).click();
     await expect(page.getByRole('button', { name: 'Crop level 2 of 5' })).toHaveAttribute('aria-current', 'true');
+
+    // ---- 13 (cont'd). Still there, and the page is still clean, after guess 1. -----------------
+    await expect(licenceChip).toBeVisible();
+    await assertNoSpoilers();
 
     // ---- 4. Guess 2: correct make, wrong (off-sale) model, year 5 off -> green/red/yellow. -----
     await expect(submit).toHaveText('Guess 2 of 5');
@@ -157,7 +179,39 @@ test.describe('win playthrough', () => {
     // ---- 9. Reload -> the finished state is restored, not replayed. ---------------------------
     await page.reload();
     await expect(page.getByRole('heading', { name: 'You got it!' })).toBeVisible(); // resultOpen restored
-    await page.getByRole('button', { name: 'Close' }).click();
+
+    // ---- 14. The credits view (§5.10.4). --------------------------------------------------------
+    await page.locator('#mtd-credits-link-result').click(); // closes ResultModal, opens CreditsModal
+    await expect(page.getByRole('heading', { name: 'Photo credits' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'You got it!' })).not.toBeVisible(); // never two dialogs at once
+
+    const creditRows = page.locator('[data-mtd-credit-row]');
+    await expect(creditRows).toHaveCount(1); // exactly one -- today's own, just finished
+    await expect(creditRows.first()).toHaveAttribute('data-date', '2026-09-02');
+    await expect(creditRows.first()).toContainText('Motodle #1');
+    await expect(creditRows.first()).toContainText('2004 Suzuki GSX-R750');
+    await expect(creditRows.first()).toContainText('Pawlex');
+    await expect(creditRows.first().getByRole('link', { name: 'Public domain' })).toHaveAttribute(
+      'href',
+      'https://commons.wikimedia.org/wiki/Template:PD-user',
+    );
+    await expect(creditRows.first().getByRole('link', { name: 'Source on Commons' })).toHaveAttribute(
+      'href',
+      'https://commons.wikimedia.org/wiki/File:2004_Suzuki_GSXR-750_Left_SIde.jpg',
+    );
+    // The spoiler assertion that matters: no row for 2026-09-03 or 2026-09-04, even though both
+    // are future days AND both puzzle files are published (§13.8) -- and nothing left to load.
+    await expect(page.locator('[data-mtd-credit-row][data-date="2026-09-03"]')).toHaveCount(0);
+    await expect(page.locator('[data-mtd-credit-row][data-date="2026-09-04"]')).toHaveCount(0);
+    await expect(page.locator('#mtd-credits-more')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Close' }).click(); // close CreditsModal
+    await page.locator('#mtd-credits-link').click(); // re-open from the OTHER entry point (footer)
+    await expect(page.getByRole('heading', { name: 'Photo credits' })).toBeVisible();
+    await expect(creditRows).toHaveCount(1); // the two entry points render the same one view
+    await expect(creditRows.first()).toHaveAttribute('data-date', '2026-09-02');
+    await page.getByRole('button', { name: 'Close' }).click(); // close CreditsModal
+
     await expect(page.locator('.scoreboard__row').nth(2).locator('[data-color]').first()).toHaveAttribute(
       'data-color',
       'green',

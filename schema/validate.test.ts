@@ -63,7 +63,7 @@ describe('the five JSON Schemas validate their example payloads', () => {
       schema: 1,
       batch: '2026-09-02-batch01',
       generatedAt: '2026-09-02',
-      userAgent: 'motodle/0.1 (https://github.com/reenchree/motodle; homelab hobby project)',
+      userAgent: 'motodle/0.1 (https://playmotodle.com; homelab hobby project)',
       candidates: [
         {
           candidateId: 'M12193306',

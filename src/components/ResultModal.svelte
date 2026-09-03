@@ -17,13 +17,21 @@
     isPractice?: boolean;
     onclose: () => void;
     onshare: () => void;
+    /** §5.10.3: opens the credits view (§5.10.4). Both modals are `Modal.svelte`-based and trap
+     *  focus, so they must never be open at once — see `openCredits` below. */
+    oncredits: () => void;
   }
-  let { open, puzzle, today, isPractice = false, onclose, onshare }: Props = $props();
+  let { open, puzzle, today, isPractice = false, onclose, onshare, oncredits }: Props = $props();
 
   const won = $derived(today.status === 'won');
   const points = $derived(pointsFromLocks(today.locks));
   const mult = $derived(multiplier(won, today.endedAtGuess ?? 5));
   const fullSrc = $derived(resolveAssetUrl(puzzle.image.full.src));
+
+  function openCredits(): void {
+    onclose();
+    oncredits();
+  }
 </script>
 
 <Modal {open} titleId="result-title" {onclose}>
@@ -60,7 +68,12 @@
     {points} × {mult} = <strong>{today.score ?? 0}</strong> / 15
   </p>
 
-  <button type="button" class="button button--primary" onclick={onshare}>Share</button>
+  <div class="result-actions">
+    <button type="button" class="button button--primary" onclick={onshare}>Share</button>
+    <button type="button" id="mtd-credits-link-result" class="link-button" onclick={openCredits}
+      >Photo credits</button
+    >
+  </div>
 </Modal>
 
 <style>
@@ -106,5 +119,11 @@
   .result-score {
     font-size: 1rem;
     margin: var(--space-3) 0;
+  }
+
+  .result-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
   }
 </style>

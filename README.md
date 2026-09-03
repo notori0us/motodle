@@ -45,8 +45,9 @@ byte for byte — after editing the catalog (the source of truth), re-render it 
 `npm run catalog` and `npm run fetch` are the two scripts that talk to Wikimedia, and both require
 `MOTODLE_UA_CONTACT` — a contact URL sent as part of the Wikimedia API `User-Agent`
 (`motodle/0.1 (<contact>) node-fetch`, assembled in `tools/lib/wikimedia.ts`). It defaults to
-`https://github.com/reenchree/motodle; homelab hobby project`, which is fine for this repo as-is;
-override it for a fork:
+`https://playmotodle.com; homelab hobby project` — the live site, not this repo, since the repo is
+private and a Wikimedia operator following a repo URL here would just get a 404; override it for a
+fork:
 
 ```sh
 MOTODLE_UA_CONTACT="https://github.com/<you>/<fork>" npm run catalog
@@ -135,6 +136,8 @@ and its full reveal image (raw bytes, measured separately since it is fetched la
 from the day budget). It prints one row per measurement with its actual size and its limit.
 
 ## Image licensing
+
+Code is MIT, see LICENSE; photos keep their own licences, see docs/ATTRIBUTION.md.
 
 The images under `fixtures/images/` and `public/puzzles/img/` are **not** covered by this
 repository's code licence. Each is a cropped, resized, WebP-re-encoded derivative of a Wikimedia

@@ -96,3 +96,115 @@ describe('GameStore', () => {
     expect(store.today.viewLevel).toBe(5);
   });
 });
+
+describe('GameStore credits (§5.10.4)', () => {
+  const stores: GameStore[] = [];
+  const puzzle3 = JSON.parse(readFileSync(resolve(ROOT, 'public/puzzles/2026-09-03.json'), 'utf-8'));
+  const puzzle4 = JSON.parse(readFileSync(resolve(ROOT, 'public/puzzles/2026-09-04.json'), 'utf-8'));
+  // 2026-09-01 is listed in the manifest but was never shipped (404) — proves the "skipped
+  // silently, still counts toward loadedCount" rule (§5.10.4).
+  const manifest = {
+    schema: 1,
+    launchDate: '2026-09-02',
+    latest: { date: '2026-09-04', number: 3 },
+    puzzles: [
+      { date: '2026-09-01', number: 0, id: 'mtd-0000' },
+      { date: '2026-09-02', number: 1, id: 'mtd-0001' },
+      { date: '2026-09-03', number: 2, id: 'mtd-0002' },
+      { date: '2026-09-04', number: 3, id: 'mtd-0003' },
+    ],
+  };
+
+  let fetchCalls: string[] = [];
+
+  beforeEach(() => {
+    fetchCalls = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('catalog.json')) return jsonResponse(catalog);
+        if (url.includes('manifest.json')) return jsonResponse(manifest);
+        if (url.includes('2026-09-01.json')) {
+          fetchCalls.push(url);
+          return jsonResponse(null, 404);
+        }
+        if (url.includes('2026-09-02.json')) {
+          fetchCalls.push(url);
+          return jsonResponse(puzzle);
+        }
+        if (url.includes('2026-09-03.json')) {
+          fetchCalls.push(url);
+          return jsonResponse(puzzle3);
+        }
+        if (url.includes('2026-09-04.json')) {
+          fetchCalls.push(url);
+          return jsonResponse(puzzle4);
+        }
+        return jsonResponse(null, 404);
+      }),
+    );
+  });
+
+  afterEach(() => {
+    for (const s of stores.splice(0)) s.dispose();
+    vi.unstubAllGlobals();
+    window.history.pushState({}, '', '/');
+  });
+
+  it('openCredits() issues exactly min(20, eligible.length) requests; a 404 day contributes no row and no error; re-opening issues zero further requests', async () => {
+    window.history.pushState({}, '', '/?today=2026-09-05'); // past every fixture -> all 4 manifest days are eligible
+    const store = new GameStore(new MemoryBackend());
+    stores.push(store);
+    await store.init(); // no puzzle scheduled for 09-05, but that's irrelevant to the credits view
+
+    await store.openCredits();
+    expect(store.creditsStatus).toBe('ready');
+    // Newest first; 2026-09-01 (404) is skipped silently — no row, no error.
+    expect(store.credits.map((r) => r.date)).toEqual(['2026-09-04', '2026-09-03', '2026-09-02']);
+    expect(store.creditsHasMore).toBe(false);
+    expect(fetchCalls).toHaveLength(4); // min(20, eligible.length = 4)
+
+    fetchCalls.length = 0;
+    await store.openCredits(); // re-open: same 4 dates, every one now in the puzzleCache
+    expect(fetchCalls).toHaveLength(0);
+    expect(store.credits).toHaveLength(3);
+  });
+
+  it("today's own row unlocks only once the REAL game finishes — a practice win for an old date does not do it (§5.10.4)", async () => {
+    const backend = new MemoryBackend();
+    const ducatiWin: SubmitGuessInput = {
+      makeId: 'ducati',
+      modelId: 'ducati-916',
+      make: 'Ducati',
+      model: '916',
+      year: 1995,
+    };
+
+    // A practice tab plays an OLD date (2026-09-02) to a win while "today" is 2026-09-04.
+    window.history.pushState({}, '', '/?today=2026-09-04&d=2026-09-02');
+    const practiceTab = new GameStore(backend);
+    stores.push(practiceTab);
+    await practiceTab.init();
+    expect(practiceTab.isPractice).toBe(true);
+    practiceTab.submitGuess(WIN);
+    expect(practiceTab.today.status).toBe('won');
+
+    // The REAL tab for "today" (2026-09-04), still in progress.
+    window.history.pushState({}, '', '/?today=2026-09-04');
+    const realTab = new GameStore(backend);
+    stores.push(realTab);
+    await realTab.init();
+    expect(realTab.isPractice).toBe(false);
+    expect(realTab.today.status).toBe('in_progress');
+
+    await realTab.openCredits();
+    // The practice win (a different storage key entirely) must not unlock today's row.
+    expect(realTab.credits.map((r) => r.date)).not.toContain('2026-09-04');
+
+    realTab.submitGuess(ducatiWin); // finishes the REAL game for real
+    expect(realTab.today.status).toBe('won');
+
+    await realTab.openCredits();
+    expect(realTab.credits[0].date).toBe('2026-09-04'); // newest first, now unlocked
+  });
+});

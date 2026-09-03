@@ -79,7 +79,7 @@ function reviewFile(candidates: ReviewCandidate[]): ReviewFile {
     schema: 1,
     batch: '2026-09-05-batch01',
     generatedAt: '2026-09-05',
-    userAgent: 'motodle/0.1 (https://github.com/reenchree/motodle; homelab hobby project) node-fetch',
+    userAgent: 'motodle/0.1 (https://playmotodle.com; homelab hobby project) node-fetch',
     candidates,
   };
 }

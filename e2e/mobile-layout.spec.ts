@@ -39,4 +39,21 @@ test('360x640: submit button is above the fold unfocused, and pinch-zoom stays e
   });
   expect(m.bottom).toBeLessThanOrEqual(m.innerHeight);
   expect(m.scrollW).toBeLessThanOrEqual(m.clientW);
+
+  // §5.10.2/§5.10.1: the in-play licence chip shares the scrub row instead of costing its own —
+  // it must be visible without moving the submit button, and the scrub segments must still clear
+  // the 44px touch-target minimum (the licence line takes its width out of that same row, so a
+  // regression that squeezes the segments below 44px is the realistic way this design fails).
+  await expect(page.locator('#mtd-photo-licence')).toBeVisible();
+  const segBoxes = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('.scrub__seg')).map((el) => {
+      const r = el.getBoundingClientRect();
+      return { w: r.width, h: r.height };
+    }),
+  );
+  expect(segBoxes.length).toBe(5);
+  for (const box of segBoxes) {
+    expect(box.w).toBeGreaterThanOrEqual(44);
+    expect(box.h).toBeGreaterThanOrEqual(44);
+  }
 });

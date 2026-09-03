@@ -18,6 +18,7 @@ import type {
 } from '../../schema/types';
 import { todayOverride } from '../config';
 import { buildCatalogIndex, loadCatalog, type CatalogLoadResult } from '../lib/catalog';
+import { type CreditRow, eligibleCreditDates, nextCreditBatch } from '../lib/credits';
 import { dayIndex, puzzleNumber, todayKey } from '../lib/date';
 import { giveUp as libGiveUp, submitGuess as libSubmitGuess, type SubmitGuessInput } from '../lib/game';
 import { loadManifest, loadPuzzle, resolveAssetUrl, type PuzzleLoadResult } from '../lib/puzzle';
@@ -68,6 +69,18 @@ function freshToday(puzzle: Puzzle): TodayState {
 
 const defaultPrefs: PrefsState = { schemaVersion: 1, theme: 'system', colorblind: false, seenHelp: false };
 
+function toCreditRow(puzzle: Puzzle): CreditRow {
+  return {
+    number: puzzle.number,
+    date: puzzle.date,
+    id: puzzle.id,
+    year: puzzle.answer.year,
+    make: puzzle.answer.make,
+    model: puzzle.answer.model,
+    credit: puzzle.credit,
+  };
+}
+
 export class GameStore {
   screen = $state<Screen>('loading');
 
@@ -98,6 +111,12 @@ export class GameStore {
   resultOpen = $state(false);
   archiveOpen = $state(false);
 
+  // §5.10.4: the photo-credits view.
+  creditsOpen = $state(false);
+  credits = $state<CreditRow[]>([]);
+  creditsStatus = $state<'loading' | 'ready' | 'failed'>('loading');
+  creditsLoadingMore = $state(false);
+
   toast = $state<string | null>(null);
 
   private backend: StorageBackend;
@@ -107,6 +126,17 @@ export class GameStore {
   private todayDateKey = '';
   private visListener: (() => void) | null = null;
   private focusListener: (() => void) | null = null;
+
+  // §5.10.4 credits-view bookkeeping — private, the component only ever sees the derived getters
+  // below. `$state` (not a plain field) so `creditsHasMore`/`creditsRemaining` stay reactive —
+  // same reason `today` is `$state` and `unlockedLevel` is a getter over it.
+  private creditsEligible = $state<string[]>([]);
+  private creditsLoadedCount = $state(0);
+  // Caches the whole `PuzzleLoadResult`, not just a successful `Puzzle` — a `no-puzzle` (404) day
+  // is a permanent fact about that URL within a session, so caching it too is what makes
+  // "re-opening the dialog issues zero further requests" true for EVERY eligible day, not just
+  // the ones that resolved.
+  private puzzleCache = new Map<string, PuzzleLoadResult>();
 
   constructor(backend: StorageBackend = new LocalStorageBackend()) {
     this.backend = backend;
@@ -121,6 +151,17 @@ export class GameStore {
   get unlockedLevel(): number {
     if (this.today.status !== 'in_progress') return 5;
     return Math.min(5, this.today.guesses.length + 1);
+  }
+
+  /** §5.10.4: more eligible days remain to fetch. False once every eligible date has been
+   *  attempted (loaded or skipped), including at the launch-day empty state (`eligible.length === 0`). */
+  get creditsHasMore(): boolean {
+    return this.creditsLoadedCount < this.creditsEligible.length;
+  }
+
+  /** Count for the `Show more (N remaining)` label. */
+  get creditsRemaining(): number {
+    return this.creditsEligible.length - this.creditsLoadedCount;
   }
 
   assetUrl(relSrc: string): string {
@@ -326,6 +367,99 @@ export class GameStore {
 
   closeArchive(): void {
     this.archiveOpen = false;
+  }
+
+  /** §5.10.4: opens the credits view and (re)loads its first batch. Loads the manifest first if
+   *  it isn't already cached (same lazy pattern as `openArchive()`). Re-derives the eligible-date
+   *  list every open — today's finished-status may have changed since the dialog was last open —
+   *  but the `puzzleCache` (below) means an already-fetched day costs no further network call. */
+  async openCredits(): Promise<void> {
+    this.creditsOpen = true;
+    this.creditsStatus = 'loading';
+    this.credits = [];
+    this.creditsLoadedCount = 0;
+    this.creditsEligible = [];
+
+    if (!this.manifest) {
+      const result = await loadManifest();
+      if (result.status === 'ok') this.manifest = result.manifest;
+    }
+    if (!this.manifest) {
+      this.creditsStatus = 'failed';
+      return;
+    }
+
+    this.creditsEligible = eligibleCreditDates(this.manifest, this.todayDateKey, this.isTodayGameFinished());
+    await this.fetchCreditsBatch();
+  }
+
+  closeCredits(): void {
+    this.creditsOpen = false;
+  }
+
+  /** `Show more` — fetches `nextCreditBatch(...)` and appends. A no-op while a batch is already
+   *  in flight, or once nothing remains. */
+  async loadMoreCredits(): Promise<void> {
+    if (this.creditsLoadingMore || !this.creditsHasMore) return;
+    this.creditsLoadingMore = true;
+    try {
+      await this.fetchCreditsBatch();
+    } finally {
+      this.creditsLoadingMore = false;
+    }
+  }
+
+  /** Fetches `nextCreditBatch(...)` and appends the rows it produces. Missing (`no-puzzle`, 404)
+   *  and broken (`load-failed`) days are skipped silently — no row, no message — but still count
+   *  toward `creditsLoadedCount`, so `Show more` can never loop on one. On the FIRST batch only,
+   *  zero rows plus at least one `load-failed` is treated as a real connectivity problem, not a
+   *  quiet pulled-day skip (§5.10.4's Failed state). */
+  private async fetchCreditsBatch(): Promise<void> {
+    const isFirstBatch = this.creditsLoadedCount === 0;
+    const batch = nextCreditBatch(this.creditsEligible, this.creditsLoadedCount);
+    if (batch.length === 0) {
+      if (isFirstBatch) this.creditsStatus = 'ready'; // launch-day empty state
+      return;
+    }
+
+    const results = await Promise.all(batch.map((date) => this.loadPuzzleCached(date)));
+    const newRows: CreditRow[] = [];
+    let sawLoadFailed = false;
+    for (const result of results) {
+      if (result.status === 'ok') newRows.push(toCreditRow(result.puzzle));
+      else if (result.status === 'load-failed') sawLoadFailed = true;
+      // 'no-puzzle' (404): a pulled/never-scheduled day — skipped silently, not an error.
+    }
+
+    this.creditsLoadedCount += batch.length;
+    this.credits = [...this.credits, ...newRows];
+    if (isFirstBatch) {
+      this.creditsStatus = newRows.length === 0 && sawLoadFailed ? 'failed' : 'ready';
+    }
+  }
+
+  /** Reuses `puzzleCache`, then the already-loaded `this.puzzle` (today's own puzzle needs no
+   *  re-fetch), before falling back to a real fetch — whose result (success OR failure) is then
+   *  cached for next time. */
+  private async loadPuzzleCached(date: string): Promise<PuzzleLoadResult> {
+    const cached = this.puzzleCache.get(date);
+    if (cached) return cached;
+    if (this.puzzle && this.puzzle.date === date) {
+      const result: PuzzleLoadResult = { status: 'ok', puzzle: this.puzzle };
+      this.puzzleCache.set(date, result);
+      return result;
+    }
+    const result = await loadPuzzle(date);
+    this.puzzleCache.set(date, result);
+    return result;
+  }
+
+  /** §5.10.4: read from the REAL today record in storage, never `this.today` (which may be a
+   *  practice record) and never the practice key — a practice win must not unlock today's credits
+   *  row, and playing in practice mode must not hide it once today's own game has finished. */
+  private isTodayGameFinished(): boolean {
+    const fallback = freshToday({ date: this.todayDateKey, number: 0, id: '' } as Puzzle);
+    return loadTodayState(this.backend, this.todayDateKey, fallback).status !== 'in_progress';
   }
 
   showToast(message: string): void {

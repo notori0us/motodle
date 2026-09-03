@@ -21,7 +21,7 @@ const REQUEST_TIMEOUT_MS = 60_000; // a stalled socket must not hang a 1,000-cal
 // User-Agent (§6.8, D5) — assembled and validated BEFORE any request is ever made.
 // -------------------------------------------------------------------------------------------
 
-export const DEFAULT_UA_CONTACT = 'https://github.com/reenchree/motodle; homelab hobby project';
+export const DEFAULT_UA_CONTACT = 'https://playmotodle.com; homelab hobby project';
 
 /** Fails fast (before any request) if the assembled UA is empty or still contains a literal
  *  `<`/`>` placeholder — a `<owner>` template yields a 404 contact URL, which under Wikimedia's

@@ -92,4 +92,22 @@ test('practice mode: a full win against an archived puzzle never touches motodle
   const practiceRecord = await page.evaluate(() => window.localStorage.getItem('motodle:practice:2026-09-02'));
   expect(practiceRecord).not.toBeNull();
   expect(JSON.parse(practiceRecord as string).status).toBe('won');
+
+  // ---- The credits view (§5.10.4), second (cheaper) leg -----------------------------------------
+  // "Today" is still NO_PUZZLE_DAY, well past every fixture, so all three committed puzzles are
+  // eligible -- newest first, and 3 < CREDITS_PAGE_SIZE means no "Show more". Also exercises
+  // fixture #3's real, non-null creditNote (the only fixture that has one).
+  await page.getByRole('button', { name: 'Close' }).click(); // close ResultModal
+  await page.locator('#mtd-credits-link').click(); // footer entry point
+  await expect(page.getByRole('heading', { name: 'Photo credits' })).toBeVisible();
+
+  const creditRows = page.locator('[data-mtd-credit-row]');
+  await expect(creditRows).toHaveCount(3);
+  await expect(creditRows.nth(0)).toHaveAttribute('data-date', '2026-09-04'); // #3, newest
+  await expect(creditRows.nth(1)).toHaveAttribute('data-date', '2026-09-03'); // #2
+  await expect(creditRows.nth(2)).toHaveAttribute('data-date', '2026-09-02'); // #1, oldest
+  await expect(creditRows.nth(0)).toContainText('Motodle #3');
+  await expect(creditRows.nth(0)).toContainText('1995 Ducati 916');
+  await expect(page.getByText('Przemysław Jahr / Wikimedia Commons')).toBeVisible(); // fixture #3's creditNote
+  await expect(page.locator('#mtd-credits-more')).toHaveCount(0);
 });

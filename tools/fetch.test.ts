@@ -349,7 +349,7 @@ describe('buildReviewCandidate result validates against review.schema.json', () 
       schema: 1,
       batch: '2026-09-02-batch01',
       generatedAt: '2026-09-02',
-      userAgent: 'motodle/0.1 (https://github.com/reenchree/motodle; homelab hobby project) node-fetch',
+      userAgent: 'motodle/0.1 (https://playmotodle.com; homelab hobby project) node-fetch',
       candidates: [candidate],
     };
     const schema = JSON.parse(await fs.readFile(path.join(ROOT, 'schema/review.schema.json'), 'utf8')) as JSONSchema;

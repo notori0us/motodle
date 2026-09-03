@@ -3,7 +3,7 @@
   ResultModal's job, lazily, only at game end.
 -->
 <script lang="ts">
-  import type { PuzzleImage } from '../../schema/types';
+  import type { CreditBlock, PuzzleImage } from '../../schema/types';
   import { resolveAssetUrl } from '../lib/puzzle';
   import Modal from './Modal.svelte';
 
@@ -12,8 +12,12 @@
     unlockedLevel: number;
     viewLevel: number;
     onchangeLevel: (level: number) => void;
+    /** §5.10.1: ONLY `credit.license.{name,url}` may reach this subtree. No `author`,
+     *  `fileTitle`, `descriptionUrl` or `creditNote` anywhere below — not as text, not in an
+     *  attribute — those are Commons-file-title-adjacent and would spoil the answer mid-game. */
+    credit: CreditBlock;
   }
-  let { image, unlockedLevel, viewLevel, onchangeLevel }: Props = $props();
+  let { image, unlockedLevel, viewLevel, onchangeLevel, credit }: Props = $props();
 
   let enlargeOpen = $state(false);
 
@@ -60,23 +64,34 @@
     {/key}
   </button>
 
-  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -- roving-arrow-key navigation
-       delegated to the group; each segment button is independently focusable/operable. -->
-  <div class="scrub" role="group" aria-label="Crop level" onkeydown={handleKeydown}>
-    {#each image.levels as l (l.level)}
-      <button
-        type="button"
-        class="scrub__seg"
-        class:active={l.level === viewLevel}
-        disabled={l.level > unlockedLevel}
-        aria-disabled={l.level > unlockedLevel}
-        aria-current={l.level === viewLevel ? 'true' : undefined}
-        aria-label={`Crop level ${l.level} of ${image.levels.length}`}
-        onclick={() => selectLevel(l.level)}
-      >
-        {l.level}
-      </button>
-    {/each}
+  <div class="image-stage__meta">
+    <a
+      id="mtd-photo-licence"
+      class="image-stage__licence"
+      href={credit.license.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Photo licence: ${credit.license.name} (opens the licence deed)`}
+    >Photo: {credit.license.name}</a>
+
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -- roving-arrow-key navigation
+         delegated to the group; each segment button is independently focusable/operable. -->
+    <div class="scrub" role="group" aria-label="Crop level" onkeydown={handleKeydown}>
+      {#each image.levels as l (l.level)}
+        <button
+          type="button"
+          class="scrub__seg"
+          class:active={l.level === viewLevel}
+          disabled={l.level > unlockedLevel}
+          aria-disabled={l.level > unlockedLevel}
+          aria-current={l.level === viewLevel ? 'true' : undefined}
+          aria-label={`Crop level ${l.level} of ${image.levels.length}`}
+          onclick={() => selectLevel(l.level)}
+        >
+          {l.level}
+        </button>
+      {/each}
+    </div>
   </div>
 </div>
 
@@ -141,9 +156,30 @@
     height: auto;
   }
 
+  /* §5.10.1: the in-play licence line shares this row with the scrub control instead of costing
+     its own vertical space (§5.10.2's measured fold budget). */
+  .image-stage__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .image-stage__licence {
+    flex: 1 1 auto;
+    min-width: 0; /* load-bearing: lets the text wrap instead of forcing horizontal overflow */
+    display: flex;
+    align-items: center;
+    min-height: var(--touch-target); /* §5.8's 44px rule */
+    font-size: 0.7rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    color: var(--color-muted);
+  }
+
   .scrub {
+    flex: 0 1 auto;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(var(--touch-target), 1fr));
     gap: var(--space-1);
   }
 

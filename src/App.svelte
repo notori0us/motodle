@@ -9,6 +9,7 @@
   import './styles/app.css';
   import { onMount } from 'svelte';
   import ArchiveList from './components/ArchiveList.svelte';
+  import CreditsModal from './components/CreditsModal.svelte';
   import GuessForm from './components/GuessForm.svelte';
   import HelpModal from './components/HelpModal.svelte';
   import ImageStage from './components/ImageStage.svelte';
@@ -131,6 +132,7 @@
             unlockedLevel={game.unlockedLevel}
             viewLevel={game.today.viewLevel}
             onchangeLevel={(l) => game.setViewLevel(l)}
+            credit={game.puzzle.credit}
           />
 
           <Scoreboard guesses={game.today.guesses} colorblind={game.prefs.colorblind} />
@@ -153,8 +155,11 @@
     </main>
 
     <footer class="app-footer">
-      <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
-        >Photos via Wikimedia Commons</a
+      Photos: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
+        >Wikimedia Commons</a
+      >, Creative Commons licences ·
+      <button type="button" id="mtd-credits-link" class="link-button" onclick={() => game.openCredits()}
+        >Photo credits</button
       >
     </footer>
   </div>
@@ -177,6 +182,7 @@
     isPractice={game.isPractice}
     onclose={() => game.closeResult()}
     onshare={handleShare}
+    oncredits={() => game.openCredits()}
   />
 {/if}
 <ArchiveList
@@ -184,6 +190,17 @@
   manifest={game.manifest}
   todayDateKey={game.resolvedTodayKey}
   onclose={() => game.closeArchive()}
+/>
+<CreditsModal
+  open={game.creditsOpen}
+  rows={game.credits}
+  status={game.creditsStatus}
+  hasMore={game.creditsHasMore}
+  remaining={game.creditsRemaining}
+  loadingMore={game.creditsLoadingMore}
+  onmore={() => game.loadMoreCredits()}
+  onretry={() => game.openCredits()}
+  onclose={() => game.closeCredits()}
 />
 <Modal open={manualShareText !== null} titleId="manual-share-title" onclose={() => (manualShareText = null)}>
   <h2 id="manual-share-title">Copy your result</h2>

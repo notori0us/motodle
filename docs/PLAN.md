@@ -57,7 +57,7 @@ Every one of these is either a brief instruction or a fix for a defect the UX re
 | **D2** | The **Ducati 916 fixture stays**, cropped with the computed `sourceCrop` (§6.9). Losing the bottom sliver of both wheels is accepted. |
 | **D3** | **Exactly three fixtures.** No 4th or 5th; the two zero-year-evidence CC0 candidates stay rejected (§6.9). |
 | **D4** | The catalog carries **both** variant families and their depth-2 variants as separate entries (`Ducati Monster` *and* `Ducati Monster 900`); `answer.acceptModelIds` decides correctness (§3.1). |
-| **D5** | `SITE_URL = "https://playmotodle.com"` — a config value in `src/config.ts` that the operator may change (§10.6); tests import it rather than hard-coding the string. Wikimedia User-Agent = `motodle/0.1 (https://github.com/reenchree/motodle; homelab hobby project)` (§6.8). **No email address anywhere in the repo.** |
+| **D5** | `SITE_URL = "https://playmotodle.com"` — a config value in `src/config.ts` that the operator may change (§10.6); tests import it rather than hard-coding the string. Wikimedia User-Agent = `motodle/0.1 (https://playmotodle.com; homelab hobby project)` (§6.8) — **amended 2026-09-02**: the contact is now the live site, not the GitHub repo, which is private and therefore a 404 to a Wikimedia operator following it. **No email address anywhere in the repo.** |
 | **D6** | **RULE A — the MAKE tile has a yellow band.** Green if the guessed make *is* the answer's make; otherwise **yellow if the two makes share a country**; otherwise red. Requires `makes[].country` (§3.2). Yellow locks nothing and scores nothing. |
 | **D7** | **RULE B — the MODEL tile has a yellow band.** Green if the guess is in `acceptModelIds`; otherwise **yellow if the guessed model's production range contains the *answer's* year**; otherwise red. This makes `models[].years` load-bearing (§3.2). Yellow locks nothing and scores nothing. |
 
@@ -436,7 +436,7 @@ Written by `npm run fetch`, **edited by the operator**, consumed by `npm run sch
   "schema": 1,
   "batch": "2026-09-02-batch01",
   "generatedAt": "2026-09-02",
-  "userAgent": "motodle/0.1 (https://github.com/reenchree/motodle; homelab hobby project)",
+  "userAgent": "motodle/0.1 (https://playmotodle.com; homelab hobby project)",
   "candidates": [
     {
       "candidateId": "M12193306",
@@ -1458,6 +1458,287 @@ Output is a table plus a non-zero exit on any breach. The probe measured a Svelt
 **10.66 KB gzipped**, so the 60 KB budget has ~5× headroom — provided `catalog.json` and the puzzle
 JSON are `fetch`ed, never imported.
 
+### 5.10 Photo licences and credits
+
+Every puzzle photo comes from Wikimedia Commons under CC BY / CC BY-SA / CC0 / public domain, and
+§3.1 already makes the whole credit block a **required** field of every puzzle file (`author`,
+`license{id,name,url,jurisdiction}`, `descriptionUrl`, `fileTitle`, `modified`, `creditNote`,
+`attributionRequired`). Today that block is rendered **only** by `ResultModal`, i.e. only after the
+game ends. Operator decision, 2026-09-02: **the licence must be visible while the photo is on
+screen**, and the whole back-catalogue of credits must be reachable from a permanent link.
+
+The one hard constraint the design has to respect is the **spoiler surface**. A Commons file title
+is typically `File:2004 Suzuki GSXR-750 Left SIde.jpg` and the author name is sometimes the make
+("Suzuki Motor Corp"). So during play the *only* credit field that may reach the DOM is
+`credit.license.name` (plus its deed URL, which is a licence-template URL and never names the bike).
+`author`, `fileTitle` and `descriptionUrl` are game-end material.
+
+Four pieces, in the order a player meets them.
+
+#### 5.10.1 In play — the licence line on the image stage
+
+**Where it lives: inside `ImageStage.svelte`, sharing a flex row with the 5-segment scrub control.**
+Not a new row of its own — see the measurement in §5.10.2 — and not an overlay chip on the photo
+either: an overlay would have to be a *sibling* of the enlarge `<button>` (a link may not be nested
+inside a button), stacked over it, so its 44 px hit area would steal taps from the enlarge control
+and cover ~40 % of a 187×140 px crop at 360×640. The scrub row is already 44 px tall because its
+segments are touch targets, and at 360 px it has ~92 px of horizontal slack once the segments are
+allowed to shrink to their 44 px minimum. The licence line goes in that slack, and costs **zero**
+vertical pixels.
+
+Markup, replacing the bare `.scrub` sibling in `ImageStage.svelte`:
+
+```svelte
+<div class="image-stage__meta">
+  <a
+    id="mtd-photo-licence"
+    class="image-stage__licence"
+    href={credit.license.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={`Photo licence: ${credit.license.name} (opens the licence deed)`}
+  >Photo: {credit.license.name}</a>
+
+  <!-- the existing role="group" aria-label="Crop level" scrub, unchanged -->
+  <div class="scrub" role="group" aria-label="Crop level" onkeydown={handleKeydown}> … </div>
+</div>
+```
+
+```css
+.image-stage__meta { display: flex; align-items: center; gap: var(--space-2); }
+.image-stage__licence {
+  flex: 1 1 auto; min-width: 0;            /* min-width:0 is load-bearing: it lets the text wrap
+                                              instead of forcing horizontal page overflow */
+  display: flex; align-items: center; min-height: var(--touch-target);   /* §5.8's 44px rule */
+  font-size: 0.7rem; line-height: 1.25; overflow-wrap: anywhere;
+  color: var(--color-muted);
+}
+.scrub { flex: 0 1 auto; grid-template-columns: repeat(5, minmax(var(--touch-target), 1fr)); }
+```
+
+Rules, all of them testable:
+
+- **Exact text: `Photo: ` + `credit.license.name`, verbatim** — `Photo: CC BY-SA 4.0`,
+  `Photo: CC BY-SA 2.0 de`, `Photo: Public domain`. Never constructed from `license.id` (§3.1's
+  jurisdiction rule), never abbreviated.
+- **The whole string is one link to `credit.license.url`**, including for `PD`/`CC0`, whose `url` is
+  the Commons licence-template page and is required non-null by §3.1. `target="_blank"` +
+  `rel="noopener noreferrer"`, like every other outbound link in the app.
+- **Nothing else from `credit` may appear anywhere in the stage subtree** — not as text, not in
+  `title`, `alt`, `aria-label` or `data-*`. Specifically: no `author`, no `fileTitle`, no
+  `descriptionUrl`, no `creditNote`. A tooltip leak is still a leak.
+- `ImageStage` gains one prop, `credit: PuzzleCredit`, passed from `App.svelte` as
+  `credit={game.puzzle.credit}`. No store change; the puzzle is already loaded.
+- The line is present in **every** in-play state, practice included, and stays after the game ends
+  (the ResultModal's full credit is additive, not a replacement).
+- Colour is `--color-muted` at `0.7rem`; it must never compete with the scrub for attention. It is
+  **not** part of the colourblind palette — it carries no game state.
+
+#### 5.10.2 Why the fold rule survives — measured, not argued
+
+§5.8's frozen rule is enforced by `e2e/mobile-layout.spec.ts`: at 360×640, unfocused, `scrollY === 0`,
+`submit.getBoundingClientRect().bottom <= window.innerHeight`, and no horizontal overflow. The
+current layout at 360×640 (measured against `vite preview` on the real build, 2026-09-02):
+
+| Box | top | bottom | height |
+|---|---:|---:|---:|
+| header | 12 | 56 | 44 |
+| image frame (`--stage-max-h` = `clamp(120px, 100svh − 500px, 36svh)` → **140 px**) | 64 | 204 | 140 |
+| scrub row | 212 | 256 | 44 |
+| scoreboard | 264 | 429.9 | 165.9 |
+| form | 437.9 | 612.9 | 175 |
+| **submit button** | 568.9 | **612.9** | 44 |
+| viewport | — | **640** | — |
+
+**Slack above the fold: 27.1 px.** That is the entire budget, and it is why a new full-height row is
+forbidden: a 0.7 rem line plus a `--space-2` gap is ~25 px, which would consume 92 % of it. The
+alternative — adding the row and paying for it by bumping the `100svh − 500px` term to `− 525px` —
+was rejected: at 640 svh the clamp then hits its own 120 px floor, so the stage gives back only 20 px
+against 25 px spent, and every viewport shorter than ~645 svh pays the full 25 px with nothing back.
+
+The shared-row design was **prototyped against the running build and re-measured** at four viewports
+(inject the markup + CSS above into the live page, then read the boxes back):
+
+| Viewport | submit bottom, before | submit bottom, after | `scrollWidth` vs `clientWidth` | licence box | scrub | segment |
+|---|---:|---:|---|---|---|---|
+| 360×640 | 612.9 | **612.9** | 360 = 360 | 92 × 44 | 236 × 44 | 44 × 44 |
+| 375×667 | 639.9 | **639.9** | 375 = 375 | 107 × 44 | 236 × 44 | 44 × 44 |
+| 412×915 | 763.9 | **763.9** | 412 = 412 | 144 × 44 | 236 × 44 | 44 × 44 |
+| 768×1024 | 1015 | **1015** | 768 = 768 | 236 × 44 | 236 × 44 | 44 × 44 |
+
+Zero movement at every width, no horizontal overflow, and the scrub segments land exactly on the
+44 px touch-target minimum at 360 px (5 × 44 + 4 × `--space-1` = 236 px), which is the width at which
+the design stops shrinking — below 360 px the licence line wraps to two or three lines *inside* the
+44 px row and still costs nothing. The longest licence label in §6.5's allowlist,
+`Photo: CC BY-SA 2.0 de` (22 chars), wraps to two lines in the 92 px box at 360 px; three lines at
+0.7 rem/1.25 is 42 px, still under the row's 44 px. **If a future licence label ever exceeds three
+lines at 360 px the row grows and the fold spec fails — which is the correct failure**: the e2e spec
+is the guard, not this paragraph.
+
+The footer (§5.10.5) is free for the same structural reason, verified the same way: `.app-column` is
+a flex column with `flex: 1 1 auto` and the footer carries `margin-top: auto`, so at 360×640 the
+content already overflows the column and the footer simply follows it below the fold. Swapping the
+one-line footer for the two-part line moved the submit button by **0.0 px** at all four viewports
+(measured: 612.9 / 639.9 / 763.9 / 1015 with the taller footer in place).
+
+#### 5.10.3 At game end — `ResultModal`, unchanged plus one link
+
+The existing attribution block (§5.6, §7.3) is **not** regressed: author · licence link ·
+`credit.modified` · `Source on Commons` · `creditNote` when present, shown regardless of
+`attributionRequired`. One addition only: a `Photo credits` button on the same row as `Share`
+(`id="mtd-credits-link-result"`, `class="link-button"`) that closes the result modal and opens the
+credits view (§5.10.4). Both modals are `Modal.svelte`-based and `Modal` traps focus, so they must
+not be open at once: the handler is `onclose(); oncredits();`.
+
+#### 5.10.4 The credits view — `CreditsModal.svelte`
+
+A new component (12th in §5.2's list) plus one new pure module, `src/lib/credits.ts`. It is a
+`Modal.svelte` dialog, `titleId="credits-title"`, opened from the footer link and from the result
+modal.
+
+**Copy.** Title `Photo credits`. Intro, verbatim:
+
+> Photos come from Wikimedia Commons under Creative Commons or public-domain licences and are
+> cropped, resized and re-encoded.
+
+Then one row per eligible past puzzle, **newest first** (descending `number`):
+
+```
+Motodle #3 · 2026-09-04 · 1995 Ducati 916 — photo by <author> · <licence name (deed link)> ·
+Source on Commons (link) · cropped, resized, re-encoded to WebP
+```
+
+`creditNote`, when non-null, renders verbatim as an italic line under its row (same treatment as
+`ResultModal`) — it is an author's prose request and the credits view is exactly where it belongs.
+
+**The spoiler rule is one pure function, used once.** `src/lib/credits.ts`:
+
+```ts
+export interface CreditRow { number: number; date: string; id: string;
+  year: number; make: string; model: string; credit: PuzzleCredit; }
+
+/** Dates whose credits may be shown, newest first: strictly before today, plus today itself only
+ *  when today's real game has ended (won | lost | gave_up). Never a future date. */
+export function eligibleCreditDates(
+  manifest: Manifest, todayDateKey: string, todayFinished: boolean,
+): string[];
+
+/** The next slice to fetch. Batch size is CREDITS_PAGE_SIZE = 20 (§5.10.4). */
+export function nextCreditBatch(eligible: string[], loadedCount: number): string[];
+```
+
+- `date < todayDateKey` → always eligible. `date === todayDateKey` → eligible iff `todayFinished`.
+  `date > todayDateKey` → **never**, under any circumstance.
+- `todayFinished` is read from the **real** today state, never from the practice state: the store
+  computes it as `loadTodayState(backend, todayDateKey, fresh).status !== 'in_progress'`. Winning a
+  *practice* round for an old date must not unlock today's row, and playing in practice mode must
+  not hide today's row once today's own game is finished. §4.6 practice/archive isolation is
+  otherwise untouched — `ArchiveList` keeps its own `date < today` filter and its own spoiler-free
+  manifest rendering.
+- Because a row carries the answer, this function is the **only** place the filter exists. No
+  component re-derives it (same rule as tile colours, §5.2/§4.2).
+
+**Data flow.** `manifest.json` (§3.3) is answer-free and gives dates/numbers/ids; the answer and the
+credit live in the per-day puzzle JSON, so each eligible day needs one fetch. In `game.svelte.ts`:
+
+| Field / method | Behaviour |
+|---|---|
+| `creditsOpen` | dialog visibility; `openCredits()` / `closeCredits()` |
+| `openCredits()` | sets `creditsOpen = true`; loads the manifest first if `this.manifest === null` (same lazy pattern as `openArchive()`); then fetches the first batch |
+| `credits: CreditRow[]` | rows built so far, newest first |
+| `creditsStatus` | `'loading' \| 'ready' \| 'failed'` |
+| `creditsLoadingMore` | true while a `Show more` batch is in flight |
+| `creditsHasMore` | `loadedCount < eligible.length` |
+| `loadMoreCredits()` | fetches `nextCreditBatch(...)` and appends |
+| private `puzzleCache: Map<string, Puzzle>` | so re-opening the dialog re-fetches nothing, and today's already-loaded puzzle is reused rather than re-fetched |
+
+**Batching, explicitly.** `CREDITS_PAGE_SIZE = 20`. A batch is fetched with one `Promise.all` over at
+most 20 `loadPuzzle(date)` calls (`src/lib/puzzle.ts`, reused verbatim — it already validates the
+shape and maps 404 → `no-puzzle`); the next batch is only started by a **`Show more`** click. A year
+of puzzles therefore costs 20 requests on open, not 365. `Show more` reads
+`Show more (N remaining)` and is `disabled` with the label `Loading…` while its batch is in flight.
+
+**Missing days are skipped silently.** A `no-puzzle` (404) or `load-failed` result for a listed date
+contributes no row and produces no message — a manifest entry whose file was pulled is not a player-
+facing error. It still counts toward `loadedCount`, so `Show more` cannot loop on it.
+
+**States.**
+
+| State | Condition | Rendered |
+|---|---|---|
+| Loading | `creditsStatus === 'loading'` | `Loading…` |
+| Empty | `ready`, `credits.length === 0` | `No photo credits yet — they appear here once a puzzle is finished.` (the launch-day case, and the only state a first-time player can reach) |
+| List | `ready`, rows present | intro + rows + `Show more` when `creditsHasMore` |
+| Failed | `failed` — the manifest failed to load, **or** the first batch produced zero rows with at least one `load-failed` (i.e. a network problem, not a pulled day) | `Couldn't load the photo credits.` + `Retry` (`onretry` → re-runs `openCredits()`'s load path) |
+
+**Component shape** (presentational, like `ArchiveList`; the store owns fetching and filtering):
+
+```ts
+interface Props {
+  open: boolean;
+  rows: CreditRow[];
+  status: 'loading' | 'ready' | 'failed';
+  hasMore: boolean;
+  loadingMore: boolean;
+  onmore: () => void;
+  onretry: () => void;
+  onclose: () => void;
+}
+```
+
+**DOM hooks (frozen for e2e, same status as §5.3.1's contract):**
+
+| Hook | On |
+|---|---|
+| `#mtd-credits-link` | the footer button that opens the view |
+| `#mtd-credits-link-result` | the same affordance inside `ResultModal` |
+| `#mtd-credits` | the `<ul>` of credit rows |
+| `data-mtd-credit-row` + `data-date="YYYY-MM-DD"` | each `<li>` |
+| `#mtd-credits-more` | the `Show more` button |
+| `#mtd-credits-empty` | the empty-state paragraph |
+| `#mtd-photo-licence` | the in-play licence link (§5.10.1) |
+| `credits-title` | the dialog's `aria-labelledby` target |
+
+#### 5.10.5 The footer
+
+`App.svelte`'s footer becomes one short line, below the form (and, at 360×640, below the fold — which
+§5.8 permits: only the submit button must be above it):
+
+```svelte
+<footer class="app-footer">
+  Photos: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
+    >Wikimedia Commons</a>, Creative Commons licences ·
+  <button type="button" id="mtd-credits-link" class="link-button" onclick={() => game.openCredits()}
+    >Photo credits</button>
+</footer>
+```
+
+The footer sits outside `<main>` in `App.svelte`, so it renders on **every** screen — game, loading,
+"no puzzle today" and "load failed" alike — and the credits view therefore stays reachable on a day
+with no puzzle (which is exactly the day someone browses the back catalogue).
+
+It is a `<button>`, not an `<a href="#">` — it opens an in-page dialog, and `Modal` returns focus to
+its opener. `.link-button` is a new shared class in `app.css` (transparent background, no border,
+`color: var(--color-muted)`, `text-decoration: underline`, `font: inherit`, `cursor: pointer`); the
+44 px touch-target rule is relaxed here exactly as it already is for the existing footer link, which
+is inline text in a 32.8 px-tall footer — this is a footnote link, not a game control, and growing it
+to 44 px would make the footer taller than the practice bar.
+
+#### 5.10.6 What this does **not** change
+
+- **CSP stays byte-identical.** The credits view fetches only same-origin `/puzzles/*.json`
+  (`connect-src 'self'` — already allowed, it is the same fetch the game itself makes), renders no
+  images, and adds only `<a>` navigations, which the policy in §13.2.6 does not restrict (there is no
+  `navigate-to` directive, and `form-action 'none'` governs forms, not links). **No allowance is
+  needed; nothing in `infra/variables.tf` or `schema/constants.ts` is touched.**
+- **Payload budgets (§5.9) are unaffected in kind**: one small component + one small pure module,
+  ~2 KB gzipped against a 60 KB JS budget with ~49 KB headroom. Credit data is fetched from files
+  that already exist and are already counted per-day; nothing is added to the 400 KB day budget.
+- Game rules, scoring, share text, the storage schema and §5.3.1's `#mtd-make` / `#mtd-model` /
+  `#mtd-year` DOM contract are untouched. `docs/ATTRIBUTION.md` remains the generated, in-repo record
+  (§6.3); it is **not** shipped in `dist/`, which is precisely why the credits view has to build
+  itself from the manifest at runtime rather than link to it.
+
 ---
 
 ## 6. Content pipeline
@@ -1700,12 +1981,17 @@ return as "BMW").
 - **User-Agent (required on every request, api and upload hosts alike):**
 
   ```
-  motodle/0.1 (https://github.com/reenchree/motodle; homelab hobby project) node-fetch
+  motodle/0.1 (https://playmotodle.com; homelab hobby project) node-fetch
   ```
 
   Assembled in `tools/lib/wikimedia.ts` from `MOTODLE_UA_CONTACT`, which **defaults to the contact URL
-  above** (operator decision D5) and may be overridden by the environment to another **real** repo or
-  contact URL. **Fail fast at startup** — before any request — if the assembled UA is empty or still
+  above** (operator decision D5, amended 2026-09-02 from the GitHub repo URL to `https://playmotodle.com`
+  — the repo is private, so a Wikimedia operator following it would get a 404, which the UA policy treats
+  as worse than no URL) and may be overridden by the environment to another **real** repo or
+  contact URL. `DEFAULT_UA_CONTACT` in `tools/lib/wikimedia.ts` is the single source of the string; the
+  literal copies in `tools/fetch.test.ts`, `tools/schedule.test.ts` and `schema/validate.test.ts` are
+  updated with it, and the fail-fast checks plus the "no `@` anywhere in the UA" test are unchanged and
+  still pass. **Fail fast at startup** — before any request — if the assembled UA is empty or still
   contains `<` or `>`: a literal `<owner>` placeholder yields a 404 contact URL, which under
   Wikimedia's UA policy is worse than no URL at all. **No email address is used anywhere** (D5).
   Document the variable in the README beside `npm run catalog` / `npm run fetch`.
@@ -1910,14 +2196,32 @@ proved that without it `mount()` throws `lifecycle_function_unavailable`.
 | `GuessForm` | `#mtd-make` carries the `"Choose a make…"` placeholder first and then **every** catalog make, alphabetical by display name, `option.value` = make id; `#mtd-model` is `disabled` with `"Choose a make first"` until a make is chosen; choosing a make fills `#mtd-model` with **exactly that make's models — all of them, families and depth-2 variants, no year filtering**, alphabetical, option text = model name with the make **not** repeated, and no other make's model present; **changing the make resets `#mtd-model` to the placeholder**; a complete make+model+year submit calls `onsubmit` **once** with `{makeId, modelId, make, model, year}`; **submit with nothing chosen is never silently dead** — the button is `aria-disabled="true"`, `#mtd-make` gets `aria-invalid="true"` + `aria-describedby` and the inline *"Choose a make"* renders; with a make but no model the same happens on `#mtd-model` with *"Choose a model"*; out-of-range/empty year shows the year message (all offending fields marked on the same attempt); **locked MAKE** ⇒ `#mtd-make` is `disabled` showing the locked make with the locked chip and `aria-label`, while `#mtd-model` still lists that make's models and stays enabled; **locked MODEL** ⇒ `#mtd-model` is `disabled` too, showing **the player's own chosen model** (never `answer.model`), and only `#mtd-year` is editable; a **resumed** game whose locks are already set pre-fills both selects on mount (the §5.3.6 `$effect`, not `$state(prop)`); selections survive a submitted guess and are never silently cleared; give-up shows the confirmation step and only then calls `ongiveup` |
 | `YearInput` | steppers clamp at 1885 and `currentYear+1`; non-numeric blocked; disabled + pre-filled when year is locked |
 | `Scoreboard` | 5×3 tiles; colours match results, **including yellow in the make and model columns** (RULES A and B); colourblind glyphs present |
-| `ImageStage` | level N shown during guess N; scrub back allowed, forward disabled; **all 5 levels unlock once `status !== 'in_progress'`**; `viewLevel` persists; full reveal is **not requested** before game end |
-| `ResultModal` | attribution renders (author, licence link, Commons link) **even when `attributionRequired` is false**; **`credit.modified` renders beside the licence link**; `creditNote` renders verbatim; a non-4:3 `full` image is **letterboxed, not distorted** |
+| `ImageStage` | level N shown during guess N; scrub back allowed, forward disabled; **all 5 levels unlock once `status !== 'in_progress'`**; `viewLevel` persists; full reveal is **not requested** before game end; **the in-play licence line (§5.10.1)**: `#mtd-photo-licence` renders exactly `Photo: ` + `credit.license.name` and its `href` is `credit.license.url` (assert with a jurisdiction-suffixed fixture, `CC BY-SA 2.0 de`, so nobody re-derives the label from `license.id`); and the **spoiler assertion** — `container.innerHTML` (attributes included, so a `title=`/`aria-label=` leak is caught too) contains **none of** `credit.author`, `credit.fileTitle`, `credit.descriptionUrl`, `credit.creditNote`; a PD fixture renders `Photo: Public domain`, still linked |
+| `ResultModal` | attribution renders (author, licence link, Commons link) **even when `attributionRequired` is false**; **`credit.modified` renders beside the licence link**; `creditNote` renders verbatim; a non-4:3 `full` image is **letterboxed, not distorted**; the `Photo credits` affordance `#mtd-credits-link-result` is present and its click closes the result modal **and** opens the credits view (both callbacks fire, never two dialogs at once — §5.10.3) |
 | `StatsModal` | 8 distribution buckets always present; today's bucket highlighted; countdown format |
 | `HelpModal` | auto-opens when `seenHelp` is unset; sets the flag; does not re-open |
+| `CreditsModal` *(new, §5.10.4)* | with `status='ready'` and three rows, `#mtd-credits` renders three `[data-mtd-credit-row]` items **newest first**, each carrying puzzle number, date, `year make model`, `photo by <author>`, the licence name linked to `license.url`, `Source on Commons` linked to `descriptionUrl`, and `credit.modified`; a row whose `creditNote` is non-null renders it verbatim; the intro sentence renders verbatim; `rows: []` + `ready` renders `#mtd-credits-empty` and **no** `#mtd-credits`; `hasMore=false` renders no `#mtd-credits-more`, `hasMore=true` renders it labelled `Show more (N remaining)` and calls `onmore` once per click; `loadingMore=true` renders it `disabled` and labelled `Loading…`; `status='failed'` renders the failure copy + a `Retry` that calls `onretry` |
 
 `GuessCombobox.test.ts` is **deleted** with its component (§5.3.7). Its assertions have no analogue: a native
 `<select>` needs no `aria-expanded`, no `aria-activedescendant`, no always-mounted listbox and no `pointerdown`
 commit — the browser owns all of it (§5.3.5).
+
+**`src/lib/credits.test.ts` — the spoiler filter and the batching (§5.10.4).** These are pure-function
+tests and follow §7.1's rules (no DOM, `vi.setSystemTime` where a date is read), but they are listed
+here because they are the safety net behind the `CreditsModal` rows above and must land with it:
+
+- `eligibleCreditDates()` returns days **strictly before** `todayDateKey`, newest first, and **never**
+  a future day — asserted against a manifest that contains tomorrow and the day after (the committed
+  fixture set is exactly this shape: 2026-09-02..04).
+- Today's own date is **excluded** when `todayFinished` is `false` and **included** when it is `true`
+  — the same manifest, both ways, one assertion each.
+- A manifest with only future days yields `[]` (the launch-day empty state).
+- `nextCreditBatch()` returns at most `CREDITS_PAGE_SIZE` (20) dates, resumes at `loadedCount`, and
+  returns `[]` when everything is loaded — a 365-day manifest yields 20 on open, then 20 per call,
+  never 365 (this is the assertion that keeps a year of puzzles from becoming 365 fetches).
+- The store-level test (`src/state/game.test.ts`) rounds it out with a stub fetch: `openCredits()`
+  issues **exactly** `min(20, eligible.length)` requests, a 404 day contributes no row and no error,
+  and re-opening the dialog issues **zero** further requests (the `puzzleCache`).
 
 Async flush: prefer `await tick()` from `'svelte'`; the probe used `await new Promise(r => setTimeout(r, 0))`
 and that works — the recon flagged `tick()` as idiomatic-but-untested, so the first component test to
@@ -1990,6 +2294,36 @@ button. Option **values are catalog ids**, so specs address them by id and never
     stronger check — focusing a control can itself scroll the page, which would pass the assertion
     for the wrong reason (§5.8) — so the e2e spec asserts that, not a "focus `#mtd-model` then check"
     variant. (The keyboard-open case is §7.5 step 10 — headless Chromium cannot simulate it, §5.8.)
+13. **The in-play licence chip, and what it must not say** (§5.10.1) — in the win spec, clock pinned
+    to 2026-09-02, after the help modal closes and **before any guess**: `#mtd-photo-licence` is
+    visible, its text is exactly `Photo: Public domain` (fixture #1's `license.name`) and its `href`
+    is fixture #1's `license.url`. Then the spoiler assertion, against the **whole page**
+    (`page.content()`, so attributes count): it contains neither the author string `Pawlex`, nor the
+    substring `File:`, nor `GSXR`, nor `commons.wikimedia.org/wiki/File:` — i.e. the Commons file
+    title and description URL are nowhere in the DOM while the game is in progress. (`GSXR`,
+    unhyphenated, is the *file title's* spelling; the catalog's model label is `GSX-R750`, so a
+    populated `#mtd-model` dropdown cannot false-fail this assertion.) Re-assert after
+    guess 1 (level 2 showing) that the chip is still there and the page is still clean.
+14. **The credits view** (§5.10.4) — same spec, after the win of item 5: close the result modal via
+    its `Photo credits` button (`#mtd-credits-link-result`), assert the credits dialog is open, and
+    that `#mtd-credits` contains **exactly one** `[data-mtd-credit-row]`, the one with
+    `data-date="2026-09-02"`, whose text carries `Motodle #1`, the answer `2004 Suzuki GSX-R750`, the
+    author, a licence link and a `Source on Commons` link whose `href` is fixture #1's
+    `descriptionUrl`. **Then the spoiler assertion that matters**: no row exists for `2026-09-03` or
+    `2026-09-04` (both are future days and both puzzle files are published — §13.8), and
+    `#mtd-credits-more` is absent (nothing more to load). Close it, re-open from the **footer** link
+    `#mtd-credits-link`, and assert the same single row — the two entry points render one view.
+    A second, cheaper leg in the practice spec (clock pinned to 2026-09-05, playing `?d=2026-09-02`):
+    all three days are past, so the view lists **three** rows, newest first (`#3`, `#2`, `#1`), and
+    still no `#mtd-credits-more` at 3 < 20.
+15. **The fold rule, with the licence chip present** — `e2e/mobile-layout.spec.ts` gains three
+    assertions to the existing 360×640 case, and nothing else about it changes (§5.10.2): the
+    submit-button/`innerHeight` and `scrollWidth`/`clientWidth` assertions stay exactly as written;
+    `#mtd-photo-licence` is **visible**; and every `.scrub__seg` still measures ≥ 44 × 44 CSS px
+    (the licence line takes its width out of the scrub, so a regression that squeezes the segments
+    below the touch target is the realistic way this design fails). The footer's `Photo credits`
+    button is deliberately **not** asserted to be above the fold — §5.8 requires only the submit
+    button.
 
 Config: `workers: 1`, `webServer.command = npx vite preview --port 4173 --strictPort --host 127.0.0.1`.
 **`--host 127.0.0.1` is mandatory** — Vite otherwise binds IPv6-only (`[::1]`) on this host and
@@ -2188,6 +2522,8 @@ A UI writes `decision` and a target date into the review file and shells out to 
 `id` is minted once and never regenerated, so re-scheduling a date is safe.
 
 ### 9.5 S3 + CloudFront
+
+> **Superseded by §13 (§13.1 D2, D3); kept unedited for history.**
 
 `PUZZLE_BASE_URL` and `CATALOG_URL` are config values in `src/config.ts` and every puzzle `src` is
 relative (§3), so moving puzzles to a CDN is a one-line change plus a CORS rule.
@@ -2508,7 +2844,7 @@ All five are now frozen in **§1.3** and referenced from the sections that consu
 | Q2 | Keep the Ducati 916 fixture with the computed `sourceCrop` | §1.3 D2, §6.9 |
 | Q3 | Stay at 3 fixtures | §1.3 D3, C2, §6.9 |
 | Q4 | Catalog keeps families **and** depth-2 variants; `acceptModelIds` decides correctness | §1.3 D4, §3.1, §6.10 |
-| Q5 | `SITE_URL = https://playmotodle.com` (config value); UA = `motodle/0.1 (https://github.com/reenchree/motodle; homelab hobby project)`; **no email anywhere** | §1.3 D5, §3.4, §4.4, §6.8, §9.5, §10.6 |
+| Q5 | `SITE_URL = https://playmotodle.com` (config value); UA = `motodle/0.1 (https://playmotodle.com; homelab hobby project)` (contact URL amended 2026-09-02, §11.12); **no email anywhere** | §1.3 D5, §3.4, §4.4, §6.8, §9.5, §10.6 |
 
 ### 11.7 The two new rules
 
@@ -2630,6 +2966,36 @@ write permission lives in the new `deploy.yml`, which only runs after a successf
 `main`. §12.9's "a deploy job — out of scope, deployment needs write permissions this workflow
 deliberately does not take" is still correct: the deploy is a **separate** workflow, exactly as that
 row anticipated.
+
+### 11.12 Revision 6 — photo credits, code licence, contact URL, deploy doc-drift 2026-09-02
+
+Operator brief of 2026-09-02, after the pre-apply infra review. One new frontend section (**§5.10**),
+three small edits to existing sections, and four documentation-drift corrections in §13. **No game
+rule, no §1.3 decision, no DOM contract, no scoring, no share text, no storage-schema and no payload
+budget changes; the CSP stays byte-identical.** `infra/*.tf` is deliberately **not touched** — a
+validated saved plan exists and must stay valid, so every §13 change here is prose.
+
+| # | Change | Where | Why |
+|---|---|---|---|
+| R6-1 | **§5.10, new**: photo licences and credits — the in-play licence line, the unchanged game-end credit, the `CreditsModal` credits view, and the footer link | §5.10 | Commons photos are CC BY / CC BY-SA / CC0 / PD; the licence has to be visible *while the photo is on screen*, not only after the game ends |
+| R6-2 | The in-play line shows **only** `Photo: <license.name>`, linked to `license.url`, and the stage subtree may contain **no** `author`, `fileTitle`, `descriptionUrl` or `creditNote` — attributes included | §5.10.1, §7.3 (`ImageStage` row) | A Commons file title is typically `File:2004 Suzuki GSXR-750 Left SIde.jpg`: showing it during play hands over the answer |
+| R6-3 | It lives **in the scrub row**, not in a row of its own — measured against the running build: submit-button bottom is **612.9 px vs a 640 px viewport before and after** at 360×640, and unmoved at 375×667, 412×915 and 768×1024; the 27.1 px of slack is untouched and the scrub segments stay exactly 44×44 | §5.10.2 | §5.8's fold rule is frozen and `e2e/mobile-layout.spec.ts` enforces it. The two alternatives were measured and rejected: a new row costs ~25 px of a 27.1 px budget, and paying for it by moving `--stage-max-h`'s `100svh − 500px` term to `− 525px` hits the clamp's 120 px floor at 640 svh and gives back only 20 px |
+| R6-4 | New `CreditsModal.svelte` (a 12th component, extending §5.2's list) + new pure module `src/lib/credits.ts`; manifest-driven, on-demand puzzle fetches, **20 per batch** behind `Show more`, missing days skipped silently, `puzzleCache` so re-opening fetches nothing | §5.10.4 | `manifest.json` is answer-free (§3.3) and the credit lives in the per-day JSON, so the view has to join them at runtime. Batching is what keeps a year of puzzles at 20 requests instead of 365 |
+| R6-5 | **The spoiler rule is one pure function**, `eligibleCreditDates()`: strictly-past days always, today only when today's **real** (never practice) game has ended, a future day never | §5.10.4, §7.3 | Every credit row carries the answer. §4.6's practice/archive isolation is otherwise untouched, and `ArchiveList` keeps its own filter |
+| R6-6 | Footer becomes `Photos: Wikimedia Commons, Creative Commons licences · Photo credits`; the same view is reachable from `ResultModal` | §5.10.3, §5.10.5 | Two entry points, one view. Measured: the taller footer moves the submit button by **0.0 px** at all four viewports — `.app-column` is a flex column whose footer carries `margin-top: auto`, and at 360×640 the content already overflows it |
+| R6-7 | Tests: `ImageStage`, `ResultModal` and a new `CreditsModal` row in **§7.3**, plus `src/lib/credits.test.ts` and a store-level fetch-count test; e2e items **13–15** in §7.4 (licence chip + whole-page spoiler assertion, the credits view after a win listing day #1 and **not** days #2/#3, and the fold rule re-asserted with the chip present) | §7.3, §7.4 | The spoiler rules and the fold rule are both the kind of thing that regresses silently |
+| R6-8 | **Code licence = MIT.** `LICENSE` (MIT, "Copyright (c) 2026 Chris Wallace"), `package.json` `"license": "MIT"`, `package-lock.json` `packages[""].license` hand-edited to match (`npm ci` does not compare it), README's licence paragraph names it | repo files, not §1.3 | The repo shipped `"license": "ISC"` from `npm init` with no `LICENSE` file. §6.5a already says the repo's own licence does not extend to the images — that stays true and `docs/ATTRIBUTION.md` stays the photo record |
+| R6-9 | **Wikimedia contact URL = `https://playmotodle.com`** (was the GitHub repo URL), in `DEFAULT_UA_CONTACT` and the literal fixture strings in `tools/fetch.test.ts`, `tools/schedule.test.ts`, `schema/validate.test.ts`; the fail-fast checks and the no-`@` test are unchanged | §1.3 D5, §3.4, §6.8, §11.6 Q5 | The repo is **private**, so a Wikimedia operator following the old contact URL gets a 404 — worse than no URL under their UA policy |
+| R6-10 | **§13.4's `deploy.yml` block now matches the shipped file byte-for-byte**, including the `vars.AWS_DEPLOY_ROLE_ARN != '' && (…)` pre-provisioning guard; item 1's "three conditions" becomes **four**, and §13.7's row-3 assertion gained the guard as a fifth substring | §13.4, §13.7 | The plan block was the pre-guard draft. A verification matrix that doesn't assert the guard would let a later edit drop it silently |
+| R6-11 | **§13.6 step 9.5 rewritten** from "nothing has been pushed yet" to a *check*: `deploy.yml` is already on `main` (commit `7c43481`, CI green, the `Deploy` run **skipped** by the guard), so after the variables are set, run `gh workflow run deploy.yml` or `gh run rerun <skipped-run-id>`. Step 10's "may already have triggered and failed" wording corrected to "skipped, not failed" | §13.6 | The runbook described a repository state that no longer exists |
+| R6-12 | **§9.5 gets a one-line superseded banner** at its top | §9.5 | §11 R5's "supersede, don't scatter-edit" convention only works if the superseded section says so where a reader lands |
+| R6-13 | **The "reaper race" recorded as an accepted limitation**: pass G's `--delete` can remove a hashed bundle that a PoP still serving the previous `index.html` (`s-maxage=60`) references, for up to a minute after a deploy. Mitigation, if it ever matters: `--exclude "assets/*"` on pass G plus occasional manual pruning | §13.8 | Found in the pre-apply infra review. It is a real, bounded exposure and belongs in the accepted-trade-offs list, not in a review comment that disappears |
+
+**Explicitly not done.** No new `§1.3` decision row (the §13.1 D-numbers already occupy `D8`–`D10`
+and a second `D8` would make every "(D8)" citation ambiguous) — R6-8's MIT decision is recorded here
+and in the README instead. No CSP edit: the credits view fetches same-origin `/puzzles/*.json` under
+the existing `connect-src 'self'` and adds only `<a>` navigations, so §13.2.6's policy string and
+`schema/constants.ts` stay byte-identical. No `infra/*.tf` edit of any kind.
 
 ---
 
@@ -3990,11 +4356,14 @@ jobs:
   deploy:
     # CI also runs on pull_request, and workflow_run fires for those too. Deploy only a
     # successful CI run that was itself triggered by a push to main.
+    # Skips (green, not red) until the operator has applied infra/ and set the repository
+    # variables — otherwise every push to main would fail at configure-aws-credentials.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      vars.AWS_DEPLOY_ROLE_ARN != '' &&
+      (github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main')
+      github.event.workflow_run.head_branch == 'main'))
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
@@ -4132,10 +4501,17 @@ being able to read them in the run log is a feature):
 
 Seven things in that file are deliberate and must survive review:
 
-1. **The `if:` gate is three conditions, not one.** `workflow_run` fires for CI's `pull_request` runs
+1. **The `if:` gate is four conditions, not one.** `workflow_run` fires for CI's `pull_request` runs
    as well as its pushes, and a `workflow_run` `branches:` filter matches the PR's *head* branch, not
    its base. Gating on `conclusion == 'success'` alone would deploy a pull-request head — including a
    fork's — straight to production. `event == 'push'` **and** `head_branch == 'main'` are both required.
+   The fourth condition, `vars.AWS_DEPLOY_ROLE_ARN != ''`, is ANDed over the whole disjunction (note
+   the extra parentheses) and is a **pre-provisioning guard**: until the operator has applied `infra/`
+   and set the three repository variables (§13.6 step 9), every push to `main` would otherwise reach
+   `configure-aws-credentials` and fail red. With the guard the job **skips** — a grey run, not a red
+   one — and the first real deploy is the operator's own `gh workflow run deploy.yml` at §13.6 step 10.
+   The block above is the **shipped** file, verbatim (commit `7c43481`); this plan text was corrected
+   to match it on 2026-09-02 (§11.12), not the other way round.
 2. **`ref: ${{ inputs.ref || github.event.workflow_run.head_sha || github.sha }}`.** Three terms, in
    priority order: `inputs.ref` is set only on a rollback dispatch (§13.6 "Rollback") and wins when
    present; `github.event.workflow_run.head_sha` is the commit CI actually verified, for the normal
@@ -4403,35 +4779,38 @@ gh variable set CLOUDFRONT_DISTRIBUTION_ID --body '<E…, from terraform output 
 gh variable list
 ```
 
-**Step 9.5 — land W6 on `main`, and only now.** Everything above ran `infra/` from a working tree;
-nothing has been pushed yet, and `deploy.yml` does not exist on `main` until this step. The ordering
-is load-bearing in **both** directions: merging `infra/`, `.github/workflows/deploy.yml` and
-`public/404.html` to `main` *before* step 9 (the GitHub variables) fires an automatic deploy the
-moment CI goes green, and it dies at "Assert the repository variables are set" with nothing to
-retry cleanly; landing them *after* the bucket and distribution exist but *before* the variables are
-set means the same failure on the very next push. Step 9.5 is deliberately between the two.
+**Step 9.5 — W6 is already on `main`; this step is now a *check*, not a push.** *(Rewritten
+2026-09-02 — the original text said "nothing has been pushed yet", which is stale: `deploy.yml`,
+`public/404.html` and `infra/**` landed on `main` in commit `7c43481`, CI is green on it, and the
+`Deploy` run for that commit **skipped** rather than failed, because the shipped `if:` carries the
+`vars.AWS_DEPLOY_ROLE_ARN != ''` pre-provisioning guard, §13.4 item 1.)*
 
-Before committing, confirm the B1 fix is in the same commit — `git status --porcelain -uall infra/`
-must list exactly the 11 `.tf` files plus `.terraform.lock.hcl`, nothing under `infra/.terraform/`.
-Committing `infra/.terraform/` (~675 MB of provider binary) to an otherwise ~2 MB repo is not
-practically recoverable without a history rewrite; getting the `.gitignore` edit into the *same*
-commit as the rest of W6, not a follow-up, is the only cheap way to avoid it.
+The old ordering worry — that landing the workflow before step 9's variables fires a red deploy — is
+what the guard removed. Landing it early is now safe in both directions, and the runbook's ordering
+constraint is reduced to: **the variables (step 9) must be set before you deliberately trigger a
+deploy (step 10).**
 
-Commit and push `infra/`, `.github/workflows/deploy.yml`, `public/404.html` and everything else W6
-touched (§13.9 file set) to `main` through the repo's normal PR/merge path, then confirm CI is green
-on the resulting commit. If the automatic `workflow_run` deploy fires anyway before step 9's
-variables are set (a push landed the workflow file and its own CI run raced this runbook), it will
-fail fast at the first step with a clear error naming the missing variable — that failure is
-harmless and expected; after step 9, re-run it with `gh run rerun <run-id>` (from `gh run list
---workflow deploy.yml`) rather than waiting for the next push.
-
-**Step 10 — first deploy.** The bucket is empty at this point, so the site is a 404 until this runs.
-Step 9.5's push may already have triggered (and failed, per above) or succeeded here — check `gh run
-list --workflow deploy.yml` first. `gh workflow run deploy.yml` (no `--ref`, no `-f ref=`) is only
-needed if no run exists yet or the existing one needs a fresh attempt with the variables now set:
+What to confirm here, before moving on:
 
 ```bash
-gh workflow run deploy.yml
+gh run list --workflow ci.yml --limit 3          # CI green on the tip of main
+gh run list --workflow deploy.yml --limit 3      # expect: skipped (grey), not failed (red)
+git status --porcelain -uall infra/              # must be EMPTY on a clean tree
+```
+
+The `infra/` hygiene check from the original step still stands and is permanent, not one-off: the
+tracked set is exactly the 11 `.tf` files plus `.terraform.lock.hcl`, and **nothing** under
+`infra/.terraform/` (~675 MB of provider binary) may ever be committed — recovering from that needs a
+history rewrite. `.gitignore` already covers it; verify, do not re-add.
+
+**Step 10 — first deploy.** The bucket is empty at this point, so the site is a 404 until this runs.
+No successful deploy exists yet: the runs from step 9.5's commit are **skipped**, not failed, so
+there is nothing to "retry" in the sense the old text meant. With the variables now set, either
+trigger a fresh run or re-run the skipped one — both work, and `gh workflow run deploy.yml` (no
+`--ref`, no `-f ref=`; §13.4's trust-policy note) is the simpler of the two:
+
+```bash
+gh workflow run deploy.yml          # or: gh run rerun <skipped-run-id>
 gh run watch
 ```
 
@@ -4560,6 +4939,21 @@ whatever `npm run generate` last produced and a human pushed — `dist/` as of t
 runway with `curl -s "$H/puzzles/manifest.json" | jq -r .latest` and compare against today's date;
 keeping at least a week ahead is a reasonable target given the fetcher/review loop (§6.3) is a manual
 step, not a cron job.
+
+**Accepted: the reaper race.** Pass G (`aws s3 sync dist/ … --delete`, §13.4) runs *after* pass F has
+already published the new `index.html`, and `index.html` is served with `s-maxage=60`. For up to a
+minute after a deploy, an edge PoP that has not yet revalidated can still be handing out the
+**previous** `index.html`, which names the **previous** hashed bundle — and pass G has just deleted
+that bundle from the bucket. A viewer unlucky enough to fetch the old HTML in that window gets a hard
+404 on `/assets/index-<oldhash>.js` and a blank page; a reload after the invalidation lands fixes it.
+The window is bounded by the `s-maxage` (60 s) and the deploy's own `/index.html` invalidation
+(~30–60 s), and it only bites viewers who load the site *during* those seconds, on a PoP that has not
+revalidated. **Accepted as-is for a hobby site** — the alternatives (keep N old builds, or a two-phase
+deploy) both need bookkeeping this design deliberately does not have. If it ever matters, the cheap
+mitigation is one line: add `--exclude "assets/*"` to pass G so hashed bundles are never reaped, and
+prune the accumulated `assets/` keys by hand every few months (`aws s3 ls s3://$SITE_BUCKET/assets/`
+against the current `dist/assets/`). Noted 2026-09-02 (§11.12) from the pre-apply infra review; it
+changes no `.tf` file and no workflow file today.
 
 **Related, and worth knowing:** `/puzzles/img/NNNN/*` is keyed by puzzle **number**, not content, and
 future-dated images ship before their date — so bytes at an "immutable" path can legitimately change
@@ -4697,7 +5091,7 @@ Nothing else. W6 does **not** touch `ci.yml`, any `src/**` file, any puzzle cont
 |---|---|---|
 | 1 | Terraform is formatted | `terraform fmt -check -recursive infra/` → no output, exit 0 |
 | 2 | Terraform is valid | `cd infra && terraform init -backend=false && terraform validate` → *"Success! The configuration is valid."* |
-| 3 | `deploy.yml` parses, **and the deploy gate survives** | `python3 -c "import yaml; g=yaml.safe_load(open('.github/workflows/deploy.yml'))['jobs']['deploy']['if']; assert all(s in g for s in ['workflow_dispatch', \"conclusion == 'success'\", \"event == 'push'\", \"head_branch == 'main'\"])"` — parsing alone doesn't prove the three-condition `if:` (§13.4 item 1) survived an edit; this asserts all four substrings are still present in whatever the parser hands back |
+| 3 | `deploy.yml` parses, **and the deploy gate survives** | `python3 -c "import yaml; g=yaml.safe_load(open('.github/workflows/deploy.yml'))['jobs']['deploy']['if']; assert all(s in g for s in ['workflow_dispatch', \"conclusion == 'success'\", \"event == 'push'\", \"head_branch == 'main'\", \"vars.AWS_DEPLOY_ROLE_ARN != ''\"])"` — parsing alone doesn't prove the four-condition `if:` (§13.4 item 1) survived an edit; this asserts all five substrings are still present in whatever the parser hands back, the pre-provisioning guard included |
 | 4 | The 404 page ships | `npm run build && test -f dist/404.html` |
 | 5 | The app works under the production CSP | `npm run test:e2e` (with W6-4 applied) — 9 spec files green (the pre-existing 8 plus `e2e/csp.spec.ts`), and **zero** `securitypolicyviolation` / console errors in the run |
 | 6 | CSP cannot drift | `npm test` — `schema/csp-contract.test.ts` green |

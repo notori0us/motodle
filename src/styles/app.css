@@ -157,6 +157,20 @@ a {
   opacity: 0.5;
 }
 
+/* §5.10.5: a footnote-style link that opens an in-page dialog, not a game control — the 44px
+   touch-target rule is relaxed here exactly as it already was for the old inline footer link. */
+.link-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--color-muted);
+  text-decoration: underline;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
 .practice-bar {
   display: flex;
   align-items: center;
