@@ -3702,6 +3702,7 @@ All under `tools/`, TypeScript, run with `tsx`. Never imported by `src/`.
 |---|---|:--:|---|
 | `catalog` | `tsx tools/catalog.ts` | ✓ | Build `public/catalog.json` |
 | `fetch` | `tsx tools/fetch.ts` | ✓ | Find candidates → `data/review/<batch>.json` |
+| `prefetch` | `tsx tools/prefetch.ts` | ✓ | Cache approved candidates' originals for `schedule` (which never downloads) + write review thumbnails (added 2026-09-03) |
 | `crop` | `tsx tools/crop.ts` | ✗ | Source image + params → 5 WebP levels + full |
 | `schedule` | `tsx tools/schedule.ts` | ✗ | Approved candidates → `public/puzzles/**` |
 | **`generate`** | `tsx tools/generate.ts` | **✗** | **crop + schedule over `fixtures/` — the offline path** |
