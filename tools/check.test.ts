@@ -1,3 +1,4 @@
+/** @vitest-environment node -- tesseract.js spawns a Node worker; under jsdom its path resolves as a URL. */
 import { existsSync } from 'node:fs';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
