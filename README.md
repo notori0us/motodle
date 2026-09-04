@@ -2,9 +2,6 @@
 
 [![CI](https://github.com/reenchree/motodle/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/reenchree/motodle/actions/workflows/ci.yml)
 
-This repo is private, so the badge image above only renders for viewers authenticated with repo
-access — it shows as broken in an anonymous or mirrored context. That's expected, not a config bug.
-
 A daily motorbike-guessing game, in the shape of Wordle/Cardle. Guess the motorbike in 5 tries.
 A new motorbike is available each day. Fully static — Vite + TypeScript + Svelte 5,
 no runtime dependencies, no backend, no third-party scripts. See `docs/PLAN.md` for the full
@@ -37,6 +34,8 @@ npm run fetch         # network: find candidate photos -> data/review/<batch>.js
 npm run prefetch       # network: cache approved candidates' originals (schedule needs them) + write review thumbnails
 npm run crop           # offline: crop.ts's five WebP levels + full reveal for one source image
 npm run schedule        # offline: an approved review batch -> public/puzzles/** + manifest.json
+npm run check:content    # cache-only: OCR each approved candidate's original + rendered levels for a legible year
+npm run add            # network (--commons) or offline (--file): one puzzle, start to finish — see below
 ```
 
 `docs/CATALOG-REVIEW.md` is a render of `public/catalog.json` and a unit test pins the two together
@@ -46,9 +45,9 @@ byte for byte — after editing the catalog (the source of truth), re-render it 
 `npm run catalog` and `npm run fetch` are the two scripts that talk to Wikimedia, and both require
 `MOTODLE_UA_CONTACT` — a contact URL sent as part of the Wikimedia API `User-Agent`
 (`motodle/0.1 (<contact>) node-fetch`, assembled in `tools/lib/wikimedia.ts`). It defaults to
-`https://playmotodle.com; homelab hobby project` — the live site, not this repo, since the repo is
-private and a Wikimedia operator following a repo URL here would just get a 404; override it for a
-fork:
+`https://playmotodle.com; homelab hobby project` — the live site, not this repo, since the live
+site is the stable contact point for a Wikimedia operator following the user-agent string; override
+it for a fork:
 
 ```sh
 MOTODLE_UA_CONTACT="https://github.com/<you>/<fork>" npm run catalog
@@ -57,6 +56,26 @@ MOTODLE_UA_CONTACT="https://github.com/<you>/<fork>" npm run catalog
 Wikimedia's UA policy wants a real, dereferenceable URL — a `<placeholder>` angle-bracket template
 or an empty string is rejected before any request is made (fail fast, not a bad first request). No
 email address is used anywhere in this pipeline (operator decision D5, `docs/PLAN.md` §1.3).
+
+### Adding one puzzle by hand
+
+No AI in the loop, one command (docs/ROADMAP.md item 3; full walkthrough in
+`docs/CONTENT-RUNBOOK.md`'s "Manual path"):
+
+```sh
+npm run add -- --commons "File:Honda CB750 Four.jpg" --model honda-cb750 --year 1972 \
+  --date 2026-11-02 --focus 0.5,0.45
+
+npm run add -- --file ~/Pictures/my-cb750.jpg --author "Chris Wallace" --license CC0 \
+  --model honda-cb750 --year 1972 --date 2026-11-02
+```
+
+Fetches (or reads) the photo, runs the same licence/author/width gates and year-confidence rules
+`npm run fetch`/`npm run schedule` do, crops it, and — unless you pass `--dry-run` — schedules
+the date and writes `data/preview/<date>.html`: open it in a browser to eyeball all five levels
+and the full reveal before you commit. `--dry-run` still fetches, validates and upserts the
+candidate into `--review` (default `data/review/manual.json`); it only skips the actual schedule
+and preview write.
 
 ## Toolchain
 
@@ -68,9 +87,7 @@ Versions are pinned and were verified together on this host (see `docs/PLAN.md` 
 
 ## Status
 
-This repo is being built in workstreams (`docs/PLAN.md` §8). All of W0-W5 have landed: the game
-is fully wired up, the content pipeline and its contract tests are in place, and the e2e suite
-below covers the full playthrough. See `docs/PLAN.md` §11 for the workstream-by-workstream log.
+Live at https://playmotodle.com since 2026-09-03.
 
 ## Playing a specific day locally (`todayOverride` / `?today=`)
 
@@ -85,8 +102,8 @@ neither can leak into a production build):
   instead of retyping the query string every reload. Leave it `null` (the committed value) to
   track the real date.
 
-Only the three committed fixture dates (`2026-09-02`, `2026-09-03`, `2026-09-04`) have puzzle
-files. A real static host 404s any other date's `puzzles/YYYY-MM-DD.json`, and the app turns that
+The committed schedule runs to the `latest.date` in `public/puzzles/manifest.json`. A real static
+host 404s any other date's `puzzles/YYYY-MM-DD.json`, and the app turns that
 into the "no puzzle today" screen (`docs/PLAN.md` §7.4a, §7.5 step 9, §4.6) — that is a pass, not
 a failure. `vite.config.ts` sets `appType: 'mpa'` so `npm run dev` and `npm run preview` 404 a missing
 puzzle file exactly like a real static host (the Vite default, `'spa'`, would serve `index.html` with
@@ -111,10 +128,11 @@ This needs network access and is a no-op if the browser is already cached. A zer
 alternative that floats with the OS's installed Chrome instead of a pinned version: set
 `channel: 'chrome'` in `playwright.config.ts`'s `projects` entry.
 
-Every spec pins `page.clock` to one of the three fixture dates (or the day after, for the "no
-puzzle today" screen) — see `docs/PLAN.md` §7.4a for why this is mandatory, not a convenience: an
-unpinned suite is self-contradictory on every single calendar date once fixtures exist for only
-three of them.
+Every spec pins `page.clock` to the date of one of the three hand-authored fixture puzzles
+(`DAY1`/`DAY2`/`DAY3` in `e2e/helpers.ts`, sourced from `fixtures/fixtures.json`), or a date far
+past the end of the committed schedule (`NO_PUZZLE_DAY`), for the "no puzzle today" screen — see
+`docs/PLAN.md` §7.4a for why this is mandatory, not a convenience: the specs hard-code those three
+puzzles' answers, so an unpinned suite is self-contradictory on every other calendar date.
 
 | Spec | Proves |
 |---|---|
@@ -125,7 +143,8 @@ three of them.
 | `rollover.spec.ts` | The persistent rollover banner at local midnight (`page.clock.install` + `pauseAt` + `runFor`, §4.5) without disturbing an in-progress board, and that the two days' state never mixes once Reload is clicked. |
 | `blocked-submit.spec.ts` | The submit button is `aria-disabled`, not natively `disabled` — the inline "Choose a make" / "Choose a model" / year-range message stays reachable via a forced click or Enter in a select or the year field, and no path submits a guess. |
 | `colorblind.spec.ts` | The `[data-colorblind="true"]` CSS cascade wins over both an explicit dark theme and OS-level `prefers-color-scheme: dark` (jsdom cannot resolve this cascade at all, so it is asserted only here). |
-| `mobile-layout.spec.ts` | At 360×640, with no focus call and no scroll, the submit button sits above the fold; the viewport meta preserves pinch-zoom (no `user-scalable=no`/`maximum-scale`). |
+| `mobile-layout.spec.ts` | At 360×640, with no focus call and no scroll, the submit button sits above the fold; the viewport meta preserves pinch-zoom (no `user-scalable=no`/`maximum-scale`); and the first-run help modal's own "Got it" button is above the fold at 360×640. |
+| `csp.spec.ts` | Zero `securitypolicyviolation` events (or console/pageerror/5xx problems) across a full winning round plus a direct hit on `/404.html` and `/about.html`, under the real production CSP headers served by `vite preview`. |
 
 ## Payload budgets
 
@@ -146,6 +165,11 @@ Commons photograph and is distributed under **that photograph's own licence**, n
 in `docs/ATTRIBUTION.md` and shown in the game's result screen. Where the source is CC BY-SA, the
 derivative is offered under the **same CC BY-SA version**; reusers inherit that share-alike
 obligation.
+
+## Analytics and privacy
+
+The site runs no third-party scripts and sets no cookies — see `/about.html` (deployed at
+https://playmotodle.com/about.html) for the full privacy statement.
 
 ## "Runs great locally" acceptance checklist
 

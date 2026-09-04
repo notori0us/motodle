@@ -60,6 +60,55 @@
         "h": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     },
+    "checkOcrHit": {
+      "type": "object",
+      "required": ["level", "text", "bbox"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "string" },
+        "text": { "type": "string" },
+        "bbox": {
+          "type": "object",
+          "required": ["x", "y", "w", "h"],
+          "additionalProperties": false,
+          "properties": {
+            "x": { "type": "number", "minimum": 0, "maximum": 1 },
+            "y": { "type": "number", "minimum": 0, "maximum": 1 },
+            "w": { "type": "number", "minimum": 0, "maximum": 1 },
+            "h": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "checkResult": {
+      "type": "object",
+      "required": ["ranAt", "ocr", "faces"],
+      "additionalProperties": false,
+      "properties": {
+        "ranAt": { "type": "string" },
+        "ocr": { "type": "array", "items": { "$ref": "#/$defs/checkOcrHit" } },
+        "faces": { "type": ["integer", "null"] }
+      }
+    },
+    "candidateSignals": {
+      "type": "object",
+      "required": [
+        "museumWord", "seriesMarker", "portrait", "descriptionOnlyYear", "modelNameAbsent",
+        "p180Present", "p180Matches", "uploader", "categories"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "museumWord": { "type": "boolean" },
+        "seriesMarker": { "type": "boolean" },
+        "portrait": { "type": "boolean" },
+        "descriptionOnlyYear": { "type": "boolean" },
+        "modelNameAbsent": { "type": "boolean" },
+        "p180Present": { "type": "boolean" },
+        "p180Matches": { "type": ["boolean", "null"] },
+        "uploader": { "type": "string" },
+        "categories": { "type": "array", "items": { "type": "string" } }
+      }
+    },
     "operatorOverride": {
       "type": "object",
       "required": ["year", "focus", "sourceCrop", "cropFractions", "modelIdOverride", "note"],
@@ -108,7 +157,9 @@
         "yearProposed": { "type": ["integer", "null"] },
         "yearConfidence": { "enum": ["high", "medium", "low", "none"] },
         "warnings": { "type": "array", "items": { "type": "string" } },
-        "operator": { "$ref": "#/$defs/operatorOverride" }
+        "operator": { "$ref": "#/$defs/operatorOverride" },
+        "check": { "$ref": "#/$defs/checkResult" },
+        "signals": { "$ref": "#/$defs/candidateSignals" }
       }
     }
   }

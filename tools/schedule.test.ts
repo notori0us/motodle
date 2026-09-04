@@ -7,6 +7,7 @@ import { validate, type JSONSchema } from '../schema/validate';
 import { cacheKeyFor } from './lib/wikimedia';
 import {
   assertAuthorPresent,
+  assertOcrResolved,
   assertSourceWidthApprovable,
   deriveYearEvidence,
   extensionForMime,
@@ -230,6 +231,54 @@ describe('assertAuthorPresent (§3.1/§6.9)', () => {
   });
 });
 
+describe('assertOcrResolved (§6.6)', () => {
+  it('does nothing when there is no check block at all', () => {
+    expect(() => assertOcrResolved(candidate())).not.toThrow();
+  });
+
+  it('does nothing when check.ocr is empty', () => {
+    const c = candidate({ check: { ranAt: '2026-09-05T00:00:00.000Z', ocr: [], faces: null } });
+    expect(() => assertOcrResolved(c)).not.toThrow();
+  });
+
+  it('throws naming the level and the text when there is an unresolved OCR hit', () => {
+    const c = candidate({
+      check: {
+        ranAt: '2026-09-05T00:00:00.000Z',
+        ocr: [{ level: 'l4', text: '1995', bbox: { x: 0.1, y: 0.1, w: 0.2, h: 0.1 } }],
+        faces: null,
+      },
+    });
+    expect(() => assertOcrResolved(c)).toThrow(/l4/);
+    expect(() => assertOcrResolved(c)).toThrow(/1995/);
+  });
+
+  it('prints the bbox fractions so the operator can set operator.sourceCrop', () => {
+    const c = candidate({
+      check: {
+        ranAt: '2026-09-05T00:00:00.000Z',
+        ocr: [{ level: 'l4', text: '1995', bbox: { x: 0.123, y: 0.456, w: 0.2, h: 0.1 } }],
+        faces: null,
+      },
+    });
+    expect(() => assertOcrResolved(c)).toThrow(/x=0\.123/);
+    expect(() => assertOcrResolved(c)).toThrow(/y=0\.456/);
+    expect(() => assertOcrResolved(c)).toThrow(/fractions of the rendered l4/);
+  });
+
+  it('passes once operator.note contains the literal token "OCR-OK"', () => {
+    const c = candidate({
+      check: {
+        ranAt: '2026-09-05T00:00:00.000Z',
+        ocr: [{ level: 'full', text: '2004', bbox: { x: 0, y: 0, w: 0.1, h: 0.1 } }],
+        faces: null,
+      },
+      operator: { ...WORKING_OVERRIDE, note: 'Badging only, reviewed the placard myself. OCR-OK' },
+    });
+    expect(() => assertOcrResolved(c)).not.toThrow();
+  });
+});
+
 describe('extensionForMime', () => {
   it('maps known mimes', () => {
     expect(extensionForMime('image/jpeg')).toBe('.jpg');
@@ -386,6 +435,31 @@ describe('scheduleApproved — refusals', () => {
 
     await expect(scheduleApproved(baseOpts())).rejects.toThrow(/MIN_SOURCE_WIDTH/);
     await expect(fs.readFile(path.join(puzzlesDir, '2026-09-05.json'))).rejects.toThrow();
+  });
+
+  it('refuses an approve with an unresolved OCR year hit, unless operator.note carries "OCR-OK" (§6.6)', async () => {
+    const bad = candidate({
+      candidateId: 'M9011',
+      check: {
+        ranAt: '2026-09-05T00:00:00.000Z',
+        ocr: [{ level: 'l5', text: '1995', bbox: { x: 0.1, y: 0.8, w: 0.2, h: 0.1 } }],
+        faces: null,
+      },
+    });
+    await seedOriginal(bad.originalUrl, FIXTURE_IMAGE);
+    await writeReview(reviewFile([bad]));
+
+    await expect(scheduleApproved(baseOpts())).rejects.toThrow(/unresolved OCR year hit/);
+    await expect(fs.readFile(path.join(puzzlesDir, '2026-09-05.json'))).rejects.toThrow();
+
+    // The literal "OCR-OK" override in operator.note lets the SAME candidate through.
+    const rescued = candidate({
+      ...bad,
+      operator: { ...bad.operator, note: 'Checked the placard by eye, it is fine. OCR-OK' },
+    });
+    await writeReview(reviewFile([rescued]));
+    const result = await scheduleApproved(baseOpts());
+    expect(result.scheduled).toHaveLength(1);
   });
 
   it('refuses an approve whose author is empty or the literal "Unknown" (§3.1/§6.9)', async () => {

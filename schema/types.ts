@@ -250,6 +250,24 @@ export interface OperatorOverride {
   note: string | null;
 }
 
+/** tools/check.ts's offline OCR/face signals (§5 of docs/CONTENT-WITHOUT-AI.md). Bbox fractions
+ *  are of the image named by `level` ("original" = the ORIGINAL after operator.sourceCrop,
+ *  "l1".."l5" = the rendered crop levels, "full" = the lazy-reveal render). */
+export interface CheckOcrHit {
+  level: string;
+  /** The matched \b(18|19|20)\d\d\b token, verbatim. */
+  text: string;
+  bbox: { x: number; y: number; w: number; h: number };
+}
+
+export interface CheckResult {
+  /** ISO-8601 timestamp of the check run that produced this block. */
+  ranAt: string;
+  ocr: CheckOcrHit[];
+  /** Face count from a detector, or null when face detection did not run (§3 TODO). */
+  faces: number | null;
+}
+
 export interface ReviewCandidate {
   /** Commons M-id ("M" + pageid). */
   candidateId: string;
@@ -282,6 +300,37 @@ export interface ReviewCandidate {
   /** The only fields a human edits (plus `decision`). Non-null values win over everything the
    *  fetcher proposed. */
   operator: OperatorOverride;
+  /** Written by `tools/check.ts`. Absent until that tool has run over this candidate — omitting
+   *  it (rather than a null placeholder) is what keeps every review file written before it
+   *  existed still schema-valid. */
+  check?: CheckResult;
+  /** RANKING signals only (CONTENT-WITHOUT-AI.md §5) — never auto-decide anything. Optional so
+   *  every review file written before this field existed stays schema-valid. */
+  signals?: ReviewCandidateSignals;
+}
+
+/** Correlates with reject in the labelled batch but is never precise enough to gate on alone
+ *  (§2 of CONTENT-WITHOUT-AI.md) — shown to the operator, not acted on automatically. */
+export interface ReviewCandidateSignals {
+  /** "museum"/"show" word in the title, description, or a category name. */
+  museumWord: boolean;
+  /** Filename ends in a small parenthesised index, e.g. "...(2)". */
+  seriesMarker: boolean;
+  /** height > 1.15 * width. */
+  portrait: boolean;
+  /** The proposed year came from the description only (no title-leading token). */
+  descriptionOnlyYear: boolean;
+  /** The catalog model's name appears in neither the title nor the description. */
+  modelNameAbsent: boolean;
+  /** SDC P180 ("depicts") is present at all. */
+  p180Present: boolean;
+  /** `null` when P180 is absent or the source category's own Wikidata item is unresolved;
+   *  otherwise whether P180 includes that item. */
+  p180Matches: boolean | null;
+  /** Same value as `author`, surfaced here for a future per-uploader running score. */
+  uploader: string;
+  /** Category names from `prop=categories` (§6.7). */
+  categories: string[];
 }
 
 export interface ReviewFile {

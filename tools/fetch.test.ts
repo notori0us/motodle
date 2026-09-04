@@ -4,14 +4,17 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   buildReviewCandidate,
+  computeHardGateWarnings,
   dateTimeOriginalYear,
   fetchCandidates,
   guessCategory,
   licenseFamilyOf,
   parseLicenseFamilies,
   parseRestrictions,
+  stripFileTitle,
   stripHtml,
   normalizeQueryPage,
+  type HardGateInput,
   type RawFilePage,
 } from './fetch';
 import { validate, type JSONSchema } from '../schema/validate';
@@ -58,6 +61,37 @@ describe('dateTimeOriginalYear', () => {
   it('null/undefined -> null', () => {
     expect(dateTimeOriginalYear(undefined)).toBeNull();
     expect(dateTimeOriginalYear(null)).toBeNull();
+  });
+
+  // CONTENT-WITHOUT-AI.md §5 gate 3 — real Commons free-text HTML (verified against
+  // .cache/wikimedia: M152990445 "Ducati Monster in 2024.jpg" and M98436361 "Helsingin
+  // olympialaiset 1952…"). The old leading-token-only regex returned null for both.
+  it('strips tags and finds the year in "19 August 2024 (according to <span>Exif</span> data)"', () => {
+    const raw =
+      '19 August 2024 (according to <span lang="en" dir="ltr">' +
+      '<a href="https://en.wikipedia.org/wiki/Exif" class="extiw" title="en:Exif">Exif</a></span> data)';
+    expect(dateTimeOriginalYear(raw)).toBe(2024);
+  });
+
+  it('strips tags and finds the year in "July 1952<div…>QS:P571,+1952-…</div>", no digit-adjacent false boundary', () => {
+    const raw = 'July 1952<div style="display: none;">date QS:P571,+1952-07-00T00:00:00Z/10</div>';
+    expect(dateTimeOriginalYear(raw)).toBe(1952);
+  });
+
+  it('ignores an out-of-range token via the minYear/maxYear bounds', () => {
+    expect(dateTimeOriginalYear('scan 0042 batch', 1885, 2027)).toBeNull();
+  });
+});
+
+describe('stripFileTitle', () => {
+  it('drops the "File:" prefix and extension', () => {
+    expect(stripFileTitle('File:2004 Suzuki GSXR-750 Left SIde.jpg')).toBe('2004 Suzuki GSXR-750 Left SIde');
+    expect(stripFileTitle('File:Puch PLUS-PROGRAM 1977.PNG')).toBe('Puch PLUS-PROGRAM 1977');
+  });
+  it('can diverge from ObjectName (real recon: a filename-only detail suffix)', () => {
+    // "File:Yamaha Fz8 (25976223) instrument-panel.jpeg" vs. ObjectName "Yamaha Fz8" — the
+    // detail-token gate (7) reads THIS, never ObjectName, for exactly this reason.
+    expect(stripFileTitle('File:Yamaha Fz8 (25976223) instrument-panel.jpeg')).toBe('Yamaha Fz8 (25976223) instrument-panel');
   });
 });
 
@@ -285,6 +319,229 @@ describe('buildReviewCandidate — DateTimeOriginal negative evidence', () => {
   });
 });
 
+// -----------------------------------------------------------------------------------------
+// computeHardGateWarnings — the EIGHT hard gates (CONTENT-WITHOUT-AI.md §5). One real-batch
+// example per gate (from docs/content-review/2026-09-03-batch01.json, all genuine rejects),
+// plus the two lost-pass traps the spec explicitly calls out.
+// -----------------------------------------------------------------------------------------
+
+function gateInput(overrides: Partial<HardGateInput> = {}): HardGateInput {
+  return {
+    title: 'Suzuki GSX-R750',
+    description: 'A Suzuki GSX-R750.',
+    filename: 'Suzuki GSX-R750',
+    mime: 'image/jpeg',
+    dtoYear: null,
+    officialYearScan: { yearProposed: null, source: '' },
+    modelYears: null,
+    makeNames: [],
+    currentYear: 2026,
+    ...overrides,
+  };
+}
+
+describe('computeHardGateWarnings', () => {
+  it('gate 1: non-jpeg mime -> not-a-photograph', () => {
+    expect(computeHardGateWarnings(gateInput({ mime: 'image/png' }))).toContain('not-a-photograph');
+  });
+
+  it('gate 1: poster/scale-model wording -> not-a-photograph (real: "Modello in scala della Moto Guzzi Falcone 500…")', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({
+        filename: 'Moto Guzzi Falcone 500 model Polstrada (1967)',
+        description: 'Modello in scala della Moto Guzzi Falcone 500 utilizzata dalla Polizia Stradale.',
+      }),
+    );
+    expect(warnings).toContain('not-a-photograph');
+  });
+
+  it('gate 2: yearProposed outside catalog.models[].years widened by ±1', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({ officialYearScan: { yearProposed: 1928, source: 'title' }, modelYears: [2015, null] }),
+    );
+    expect(warnings).toContain('year-outside-catalog-window');
+  });
+
+  it('gate 2: inside the ±1 widened window does NOT fire', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({ officialYearScan: { yearProposed: 2014, source: 'title' }, modelYears: [2015, null] }),
+    );
+    expect(warnings).not.toContain('year-outside-catalog-window');
+  });
+
+  it('gate 2: null upper bound (still on sale) never rejects a recent year', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({ officialYearScan: { yearProposed: 2026, source: 'title' }, modelYears: [2015, null] }),
+    );
+    expect(warnings).not.toContain('year-outside-catalog-window');
+  });
+
+  it('gate 3: proposed year equals the capture year and is not title-leading (real: "Ducati Monster in 2024")', () => {
+    // Title/description both "Ducati Monster in 2024" — 2024 is not title-LEADING (the title
+    // starts with "Ducati"), and it equals the real DateTimeOriginal year (19 August 2024).
+    const warnings = computeHardGateWarnings(
+      gateInput({
+        title: 'Ducati Monster in 2024',
+        description: 'Ducati Monster in 2024',
+        officialYearScan: { yearProposed: null, source: '' }, // the with-discard scan strips it to nothing
+        dtoYear: 2024,
+      }),
+    );
+    expect(warnings).toContain('year-matches-capture-date');
+  });
+
+  it('gate 3: a title-LEADING year equal to the capture year is exempt', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({
+        title: '2024 Ducati Monster',
+        description: '2024 Ducati Monster',
+        officialYearScan: { yearProposed: null, source: '' },
+        dtoYear: 2024,
+      }),
+    );
+    expect(warnings).not.toContain('year-matches-capture-date');
+  });
+
+  it('gate 4: a second, different catalog make right after " - " (real: "Kawasaki Z650 FOUR - Yamaha TX750")', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({ filename: 'Kawasaki Z650 FOUR - Yamaha TX750 (23110313245)', makeNames: ['Kawasaki', 'Yamaha', 'Honda'] }),
+    );
+    expect(warnings).toContain('second-make-in-title');
+  });
+
+  it('gate 4: own make mentioned incidentally, no hyphen listing -> does NOT fire (real lost-pass trap)', () => {
+    // Ground truth: M36340402, decision "pending" — a museum-row filename naming three
+    // exhibits without a " - " separator must NOT be caught by this gate.
+    const warnings = computeHardGateWarnings(
+      gateInput({
+        filename: '1996 Kawasaki ZG1000 Concours 1983 Honda CB550 Nighthawk 2001 Aprilia Futura NMUSAF 26Sept09',
+        makeNames: ['Kawasaki', 'Honda', 'Aprilia'],
+      }),
+    );
+    expect(warnings).not.toContain('second-make-in-title');
+  });
+
+  it('gate 5: sidecar wording in the FILENAME (real: "2016 Triumph Thruxton R with sidecar 1.2")', () => {
+    expect(computeHardGateWarnings(gateInput({ filename: '2016 Triumph Thruxton R with sidecar 1.2' }))).toContain(
+      'sidecar-in-title',
+    );
+  });
+
+  it('gate 5: sidecar named only in the DESCRIPTION (a neighbouring bike) does NOT fire', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({ filename: 'Moto Guzzi California Stone', description: 'Parked next to a sidecar rig.' }),
+    );
+    expect(warnings).not.toContain('sidecar-in-title');
+  });
+
+  it('gate 6: production-span prose in the description, year not title-leading (real: "Bauzeit 1953 bis 1970")', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({
+        description: 'Puch 250 SGS, Bauzeit 1953 bis 1970, Zweitakt-Doppelkolbenmotor.',
+        officialYearScan: { yearProposed: 1953, source: 'description' },
+      }),
+    );
+    expect(warnings).toContain('production-span-prose');
+  });
+
+  it('gate 6: a bare "YYYY–YYYY" in the title is NOT this rule', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({
+        title: 'Velocette Venom 1955-1970',
+        description: 'A Velocette Venom.',
+        officialYearScan: { yearProposed: null, source: '' },
+      }),
+    );
+    expect(warnings).not.toContain('production-span-prose');
+  });
+
+  it('gate 6: production-span prose is exempt when the year IS title-leading', () => {
+    const warnings = computeHardGateWarnings(
+      gateInput({
+        description: 'Bauzeit 1953 bis 1970.',
+        officialYearScan: { yearProposed: 1953, source: 'title' },
+      }),
+    );
+    expect(warnings).not.toContain('production-span-prose');
+  });
+
+  it('gate 7: detail token in the filename (real: "V4 engine with right crankcase cover removed"), never front/rear/left/right', () => {
+    expect(
+      computeHardGateWarnings(gateInput({ filename: '2000 Honda VFR800 V4 engine with right crankcase cover removed' })),
+    ).toContain('detail-token-in-filename');
+    expect(computeHardGateWarnings(gateInput({ filename: '2004 Suzuki GSXR-750, front left' }))).not.toContain(
+      'detail-token-in-filename',
+    );
+  });
+
+  it('gate 8: event token in the filename (real: "Hatfield Heath Festival 2023")', () => {
+    expect(computeHardGateWarnings(gateInput({ filename: '2007 Triumph Rocket III 2294 cc Hatfield Heath Festival 2023 A' }))).toContain(
+      'event-token-in-filename',
+    );
+  });
+
+  it('gate 8: "concours d\'Elegance" fires, but a bare "Concours" (Kawasaki\'s own model name) does NOT', () => {
+    // Found scanning catalog.models[] against this regex: "Concours (ZG1000/1400)" is a real
+    // catalog model — a bare "concours" match would reject every candidate of it outright.
+    expect(computeHardGateWarnings(gateInput({ filename: "2023 Greenwich Concours d'Elegance" }))).toContain(
+      'event-token-in-filename',
+    );
+    expect(computeHardGateWarnings(gateInput({ filename: 'Kawasaki Concours 1000' }))).not.toContain('event-token-in-filename');
+  });
+
+  it('no gate fires on a clean pass-shaped candidate', () => {
+    expect(
+      computeHardGateWarnings(
+        gateInput({
+          title: '2004 Suzuki GSXR-750 Left SIde',
+          description: '2004 Suzuki GSXR-750, US market model.',
+          filename: '2004 Suzuki GSXR-750 Left SIde',
+          officialYearScan: { yearProposed: 2004, source: 'title+description' },
+          modelYears: [1985, null],
+          makeNames: ['Suzuki', 'Honda'],
+        }),
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe('buildReviewCandidate — hard gates wired end-to-end', () => {
+  it('a hard-gate hit forces decision=reject even though the year alone would only be "medium" (stays pending)', () => {
+    const candidate = buildReviewCandidate({
+      page: page({
+        ObjectName: { value: 'Kawasaki Z650 FOUR - Yamaha TX750 (23110313245)' },
+        ImageDescription: { value: 'Kawasaki Z650 FOUR and Yamaha TX750 side by side, both built in 1978, museum row.' },
+      }, { title: 'File:Kawasaki Z650 FOUR - Yamaha TX750 (23110313245).jpg' }),
+      makeId: 'kawasaki',
+      modelId: 'kawasaki-z650',
+      sourceCategory: 'x',
+      p275: [],
+      makeNames: ['Kawasaki', 'Yamaha', 'Suzuki'],
+      now: NOW_2026,
+    });
+    expect(candidate!.yearConfidence).toBe('medium'); // would stay "pending" on its own
+    expect(candidate!.decision).toBe('reject');
+    expect(candidate!.warnings).toContain('second-make-in-title');
+  });
+
+  it('the catalog-year gate uses the passed-in model, ±1 widened', () => {
+    const candidate = buildReviewCandidate({
+      page: page({
+        ObjectName: { value: '1928 Indian 101 Scout' },
+        ImageDescription: { value: '1928 Indian 101 Scout, restored.' },
+      }),
+      makeId: 'indian',
+      modelId: 'indian-scout',
+      sourceCategory: 'x',
+      p275: [],
+      model: { id: 'indian-scout', makeId: 'indian', name: 'Scout', aliases: [], years: [2015, null] },
+      now: NOW_2026,
+    });
+    expect(candidate!.decision).toBe('reject');
+    expect(candidate!.warnings).toContain('year-outside-catalog-window');
+  });
+});
+
 describe('buildReviewCandidate — author/creditNote', () => {
   it('auto-rejects when Artist is empty — "Unknown" is a reject, never a value (§3.1, §6.9)', () => {
     const candidate = buildReviewCandidate({
@@ -357,6 +614,99 @@ describe('buildReviewCandidate result validates against review.schema.json', () 
     };
     const schema = JSON.parse(await fs.readFile(path.join(ROOT, 'schema/review.schema.json'), 'utf8')) as JSONSchema;
     expect(validate(schema, reviewFile)).toEqual([]);
+  });
+});
+
+// -----------------------------------------------------------------------------------------
+// signals — RANKING only, never gates (§5). Optional field; must stay schema-valid either way.
+// -----------------------------------------------------------------------------------------
+
+describe('buildReviewCandidate — signals (never gates)', () => {
+  it('populates every signal and stays schema-valid', async () => {
+    const candidate = buildReviewCandidate({
+      page: page(
+        {
+          ObjectName: { value: 'Suzuki GSX-R750 at the Barber Vintage Motorsports Museum (2)' },
+          ImageDescription: { value: 'On display at the museum, no year stated here.' },
+        },
+        { title: 'File:Suzuki GSX-R750 at the Barber Vintage Motorsports Museum (2).jpg', categories: [{ title: 'Category:Barber Vintage Motorsports Museum' }] },
+      ),
+      makeId: 'suzuki',
+      modelId: 'suzuki-gsxr750',
+      sourceCategory: 'Category:Suzuki GSX-R750',
+      p275: [],
+      p180: ['Q34493'],
+      categoryQid: 'Q7374148',
+      model: { id: 'suzuki-gsxr750', makeId: 'suzuki', name: 'GSX-R750', aliases: [], years: [1985, null] },
+      now: NOW_2026,
+    })!;
+    expect(candidate.signals).toEqual({
+      museumWord: true,
+      seriesMarker: true,
+      portrait: false,
+      descriptionOnlyYear: false, // no year anywhere here at all
+      modelNameAbsent: false, // "GSX-R750" IS in the title
+      p180Present: true,
+      p180Matches: false, // Q34493 (generic "motorcycle") != the category's own Q7374148
+      uploader: candidate.author,
+      categories: ['Category:Barber Vintage Motorsports Museum'],
+    });
+
+    const schema = JSON.parse(await fs.readFile(path.join(ROOT, 'schema/review.schema.json'), 'utf8')) as JSONSchema;
+    const reviewFile = {
+      schema: 1,
+      batch: 'x',
+      generatedAt: '2026-09-02',
+      userAgent: 'motodle/0.1 (https://playmotodle.com; homelab hobby project) node-fetch',
+      candidates: [candidate],
+    };
+    expect(validate(schema, reviewFile)).toEqual([]);
+  });
+
+  it('modelNameAbsent is true when the model name appears in neither title nor description', () => {
+    const candidate = buildReviewCandidate({
+      page: page({ ObjectName: { value: 'A random motorcycle' }, ImageDescription: { value: 'Nice bike.' } }),
+      makeId: 'suzuki',
+      modelId: 'suzuki-gsxr750',
+      sourceCategory: 'x',
+      p275: [],
+      model: { id: 'suzuki-gsxr750', makeId: 'suzuki', name: 'GSX-R750', aliases: [], years: null },
+      now: NOW_2026,
+    })!;
+    expect(candidate.signals?.modelNameAbsent).toBe(true);
+  });
+
+  it('p180Matches is null when P180 is absent, and null (not false) when the category Q-id is unresolved', () => {
+    const noP180 = buildReviewCandidate({
+      page: page(),
+      makeId: 'suzuki',
+      modelId: 'suzuki-gsxr750',
+      sourceCategory: 'x',
+      p275: [],
+      categoryQid: 'Q7374148',
+      now: NOW_2026,
+    })!;
+    expect(noP180.signals?.p180Present).toBe(false);
+    expect(noP180.signals?.p180Matches).toBeNull();
+
+    const unresolvedCategory = buildReviewCandidate({
+      page: page(),
+      makeId: 'suzuki',
+      modelId: 'suzuki-gsxr750',
+      sourceCategory: 'x',
+      p275: [],
+      p180: ['Q7374148'],
+      categoryQid: null,
+      now: NOW_2026,
+    })!;
+    expect(unresolvedCategory.signals?.p180Present).toBe(true);
+    expect(unresolvedCategory.signals?.p180Matches).toBeNull();
+  });
+
+  it('a review file with no `signals` on any candidate (pre-existing files) still validates', async () => {
+    const raw = JSON.parse(await fs.readFile(path.join(ROOT, 'docs/content-review/2026-09-03-batch01.json'), 'utf8'));
+    const schema = JSON.parse(await fs.readFile(path.join(ROOT, 'schema/review.schema.json'), 'utf8')) as JSONSchema;
+    expect(validate(schema, { ...raw, candidates: raw.candidates.slice(0, 5) })).toEqual([]);
   });
 });
 
@@ -443,9 +793,12 @@ describe('fetchCandidates — counts licence-rejected/family-filtered candidates
     const queryUrl =
       `https://commons.wikimedia.org/w/api.php?action=query&generator=categorymembers&` +
       `gcmtitle=${encodeURIComponent(category)}&gcmtype=file&gcmlimit=${perModel}&gcmsort=timestamp&gcmdir=desc&` +
-      `prop=imageinfo&iiprop=extmetadata%7Curl%7Csize%7Cmime%7Ctimestamp&iiurlwidth=800&` +
+      `prop=imageinfo%7Ccategories&cllimit=max&iiprop=extmetadata%7Curl%7Csize%7Cmime%7Ctimestamp&iiurlwidth=800&` +
       `iiextmetadatafilter=LicenseShortName%7CLicense%7CUsageTerms%7CArtist%7CCredit%7CAttribution%7C` +
       `AttributionRequired%7CCopyrighted%7CRestrictions%7CImageDescription%7CDateTimeOriginal%7CObjectName%7CLicenseUrl`;
+    const categoryQidUrl =
+      `https://commons.wikimedia.org/w/api.php?action=query&prop=categoryinfo%7Cpageprops&` +
+      `titles=${encodeURIComponent(category)}`;
 
     const allowedPage = page(); // pageid 12193306, PD — passes the licence gate and the "pd" family filter
     const gfdlPage = page({ LicenseShortName: { value: 'GFDL 1.2' } }, { pageid: 555001, title: 'File:GFDL example.jpg' });
@@ -455,6 +808,7 @@ describe('fetchCandidates — counts licence-rejected/family-filtered candidates
     );
 
     await seedJsonResponse(queryUrl, { query: { pages: [allowedPage, gfdlPage, ccBySaPage] } });
+    await seedJsonResponse(categoryQidUrl, { query: { pages: [{ title: category }] } }); // no wikibase_item — p180Matches stays null
 
     const mIds = [allowedPage, gfdlPage, ccBySaPage].map((p) => `M${p.pageid}`);
     const wbUrl = `https://commons.wikimedia.org/w/api.php?action=wbgetentities&ids=${mIds.join('|')}&props=claims`;
@@ -482,6 +836,64 @@ describe('fetchCandidates — counts licence-rejected/family-filtered candidates
   });
 });
 
+describe('fetchCandidates — SDC P275/P180 live under `statements`, not `claims` (real API shape)', () => {
+  it('a sole-GFDL P275 under `statements` is actually denied (this was silently inert before the fix)', async () => {
+    const category = 'Category:Suzuki GSX-R750';
+    const perModel = 20;
+    const queryUrl =
+      `https://commons.wikimedia.org/w/api.php?action=query&generator=categorymembers&` +
+      `gcmtitle=${encodeURIComponent(category)}&gcmtype=file&gcmlimit=${perModel}&gcmsort=timestamp&gcmdir=desc&` +
+      `prop=imageinfo%7Ccategories&cllimit=max&iiprop=extmetadata%7Curl%7Csize%7Cmime%7Ctimestamp&iiurlwidth=800&` +
+      `iiextmetadatafilter=LicenseShortName%7CLicense%7CUsageTerms%7CArtist%7CCredit%7CAttribution%7C` +
+      `AttributionRequired%7CCopyrighted%7CRestrictions%7CImageDescription%7CDateTimeOriginal%7CObjectName%7CLicenseUrl`;
+    const categoryQidUrl =
+      `https://commons.wikimedia.org/w/api.php?action=query&prop=categoryinfo%7Cpageprops&` +
+      `titles=${encodeURIComponent(category)}`;
+
+    // LicenseShortName looks fine on its own — only the SDC P275 statement (dual-licence collapse,
+    // §6.5) reveals the sole GFDL. If `fetchEntityClaims` still read `.claims` instead of
+    // `.statements`, this candidate would slip through as CC-BY-SA-3.0.
+    const gfdlBySdc = page(
+      { LicenseShortName: { value: 'CC BY-SA 3.0' } },
+      { pageid: 777001, title: 'File:GFDL by SDC.jpg' },
+    );
+    const p180Page = page({}, { pageid: 777002, title: 'File:Has P180.jpg' });
+
+    await seedJsonResponse(queryUrl, { query: { pages: [gfdlBySdc, p180Page] } });
+    await seedJsonResponse(categoryQidUrl, { query: { pages: [{ title: category, pageprops: { wikibase_item: 'Q7374148' } }] } });
+
+    const mIds = [gfdlBySdc, p180Page].map((p) => `M${p.pageid}`);
+    const wbUrl = `https://commons.wikimedia.org/w/api.php?action=wbgetentities&ids=${mIds.join('|')}&props=claims`;
+    await seedJsonResponse(wbUrl, {
+      entities: {
+        [`M${gfdlBySdc.pageid}`]: {
+          type: 'mediainfo',
+          statements: { P275: [{ mainsnak: { datavalue: { value: { id: 'Q26921686' } } } }] }, // GFDL 1.2, sole value
+        },
+        [`M${p180Page.pageid}`]: {
+          type: 'mediainfo',
+          statements: { P180: [{ mainsnak: { datavalue: { value: { id: 'Q7374148' } } } }] },
+        },
+      },
+    });
+
+    const result = await fetchCandidates({
+      modelIds: ['suzuki-gsxr750'],
+      outPath,
+      batch: 'test-batch',
+      cacheDir,
+      catalogPath,
+    });
+
+    expect(result.filteredLicence).toBe(1); // the sole-GFDL-by-SDC file, denied only via `statements`
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].candidateId).toBe(`M${p180Page.pageid}`);
+    expect(result.candidates[0].signals?.p180Present).toBe(true);
+    expect(result.candidates[0].signals?.p180Matches).toBe(true); // matches the resolved category Q-id
+    expect(result.stats.networkRequests).toBe(0); // everything served from the seeded cache
+  });
+});
+
 // -----------------------------------------------------------------------------------------
 // normalizeQueryPage — formatversion=2 returns `imageinfo` as an ARRAY (live run 2026-09-03)
 // -----------------------------------------------------------------------------------------
@@ -501,5 +913,22 @@ describe('normalizeQueryPage', () => {
     expect(normalizeQueryPage({ pageid: 3, title: 'File:empty.jpg', imageinfo: [] })).toBeNull();
     const noMeta = { ...page().imageinfo, extmetadata: undefined as unknown as RawFilePage['imageinfo']['extmetadata'] };
     expect(normalizeQueryPage({ pageid: 4, title: 'File:nometa.jpg', imageinfo: [noMeta] })).toBeNull();
+  });
+
+  it('carries `categories` (prop=categories, §6.7) through untouched', () => {
+    const wire = {
+      pageid: 5,
+      title: 'File:x.jpg',
+      imageinfo: [page().imageinfo],
+      categories: [{ title: 'Category:Suzuki GSX-R750' }, { title: 'Category:1985 motorcycles' }],
+    };
+    expect(normalizeQueryPage(wire)?.categories).toEqual([
+      { title: 'Category:Suzuki GSX-R750' },
+      { title: 'Category:1985 motorcycles' },
+    ]);
+  });
+
+  it('a page with no categories at all leaves the field absent, never a crash', () => {
+    expect(normalizeQueryPage({ pageid: 6, title: 'File:x.jpg', imageinfo: [page().imageinfo] })?.categories).toBeUndefined();
   });
 });

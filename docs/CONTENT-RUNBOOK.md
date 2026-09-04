@@ -30,7 +30,16 @@ candidates → 182 eligible → 125 reviewed → 46 approved → 33 shipped.
    ```
    Serial, rate-limited, ~8 minutes. Categories are guessed as `Category:<Make> <Model>`;
    about 40 % of hits are the wrong bike or an unusable composition, which is what the review
-   is for. Re-runs replay from the cache.
+   is for. Re-runs replay from the cache. `fetch` also auto-`reject`s EIGHT deterministic hard
+   gates before anything reaches a human (CONTENT-WITHOUT-AI.md §5; measured 27/79 rejects
+   caught, 0/46 passes lost on the 2026-09-03 batch) — each pushes its own `warnings[]` string:
+   not a photograph (wrong mime or poster/scale-model wording), the proposed year outside
+   `catalog.models[].years` ±1, the proposed year matching only the capture date, a second
+   catalog make in the filename, sidecar wording in the filename, production-span prose in the
+   description, a detail token in the filename (never front/rear/left/right), and an event token
+   in the filename. It also writes ranking-only `signals` (museum wording, a trailing series
+   marker, portrait aspect, description-only year, absent model name, SDC P180 presence/match,
+   uploader) — shown to the operator, never auto-decided.
 2. **Triage** into a pool (usable 4:3 width ≥ 2182 px, year confidence high/medium, ≤ 2 per
    model, balanced by make; skip models already scheduled):
    ```sh
@@ -80,22 +89,80 @@ licence URL (schedule falls back to the file page); an adjudicator's empty focus
 
 ## Manual path (no AI)
 
-Adding one puzzle by hand, today:
+**One command** (ROADMAP item 3), for a Commons photo:
+
+```sh
+npm run add -- --commons "File:Honda CB750 Four.jpg" --model honda-cb750 --year 1972 \
+  --date 2026-11-02 [--focus x,y] [--crop x,y,w,h] [--note "…"] \
+  [--review data/review/manual.json] [--dry-run]
+```
+
+or your own photograph:
+
+```sh
+npm run add -- --file ~/Pictures/my-cb750.jpg --author "Chris Wallace" [--license CC0|PD] \
+  --model honda-cb750 --year 1972 --date 2026-11-02 [--focus x,y] [--crop x,y,w,h]
+```
+
+What it does, in order — every step through "pre-flight checks" runs whether or not you pass
+`--dry-run`; only the schedule + preview write are skipped:
+
+1. **`--commons`**: queries Commons for that ONE file title (same `iiprop`/`iiextmetadatafilter`
+   recipe `tools/fetch.ts` uses, plus `wbgetentities` for SDC `P275`) and runs it through the same
+   `buildReviewCandidate()` the batch path uses — same licence gate, same year-confidence scan,
+   same eight hard gates (§6.5, §6.4, `docs/CONTENT-WITHOUT-AI.md` §5). **`--file`**: reads
+   dimensions with `sharp`, builds a candidate by hand (a content-hash-derived `candidateId`,
+   since there is no Commons M-id), and copies the file into the Wikimedia response cache under a
+   synthetic URL so `schedule.ts`'s cache-only read finds it later — an own photo never touches
+   the network at all.
+2. Sets `decision: "approve"` and layers `--focus`/`--crop`/`--note` onto `operator.*`.
+   `operator.year` is set explicitly whenever it wasn't already the fetcher's own high/medium-
+   confidence proposal (own photos: always, since there is no fetcher proposal to defer to).
+3. Validates the candidate against `schema/review.schema.json` and **upserts** it into
+   `--review` (default `data/review/manual.json`, created if absent) — re-running `add` against
+   the same Commons file or the same photo file replaces that one entry rather than duplicating
+   it, so tightening a focus/crop is just re-running the same command.
+4. Caches the original (`--commons`: `prefetch.ts`'s own logic, through the same client; `--file`:
+   the synthetic cache entry from step 1), then runs `schedule.ts`'s own pre-flight asserts
+   (`assertSourceWidthApprovable`, `assertAuthorPresent`, `needsYearRescue`) so a bad candidate
+   fails here with the same messages `schedule` would give, before anything is scheduled.
+5. Unless `--dry-run`: schedules **only this candidate** onto `--date` (never the rest of
+   `--review`'s accumulated history — a scratch single-candidate file is what `scheduleApproved()`
+   actually runs against, so a `data/review/manual.json` with several earlier approved photos in
+   it is never re-dated by a later `add`), then writes `data/preview/<date>.html` — all five
+   crop levels plus the full reveal, as data URIs — for you to open in a browser before
+   committing anything.
+6. Prints the preview path and the next commands: eyeball the preview, `npm run generate`,
+   `npm test`, commit, push.
+
+`add` never writes a `check` block (§6.6 legible-year), so `assertOcrResolved` passes silently —
+the preview page from step 5 is where *you* look for legible year text on l4/l5 before shipping.
+`data/review/manual.json` is `.gitignore`d; copy `data/review/manual.json` to
+`docs/content-review/manual.json` in the same commit so a later wrong-year fix (ROADMAP item 1)
+has a committed file to edit. Never run `npm run prefetch` over a manual review file — a `--file`
+candidate's `thumbUrl`/`originalUrl` are the synthetic `motodle://local-upload/<sha>` scheme,
+which goes to a real (and unsupported) `fetch()` once the 7-day cache entry `add` wrote has
+expired.
+
+An own photo needs the same ≥2182px usable-4:3-width source `schedule.ts` requires of a Commons
+one — `npm run add` has no `--fractions` override, so a too-small photo fails
+`assertSourceWidthApprovable` immediately rather than shipping a cropped-in level 1. The synthetic
+cache entry a `--file` add writes carries the same 7-day TTL as every other cache entry; scheduling
+that date again after the cache has aged out needs another `npm run add` (not `npm run fetch`,
+which has nothing to fetch for a local file).
+
+The old multi-command path still works — `npm run add` is a wrapper around exactly these steps,
+not a replacement contract — and is the fallback if the wrapper itself is ever broken:
 
 1. Find the Commons file and its M-id (the `pageid` on the file page's "Page information").
-2. Run the fetch for that one model so the file lands in a review JSON with licence, author
-   and year tokens filled in (`npm run fetch -- --models <modelId> --out data/review/manual.json`),
-   or hand-write the candidate block (PLAN §3.4 shape; `schema/review.schema.json` validates it).
+2. `npm run fetch -- --models <modelId> --out data/review/manual.json` (or hand-write the
+   candidate block, PLAN §3.4 shape; `schema/review.schema.json` validates it).
 3. Edit the candidate: `decision: "approve"`, `operator.year` if the title's year is not the
-   model year, `operator.focus` (fractions of the image, where level 1 should look),
-   `operator.sourceCrop` if a placard or second bike must go.
+   model year, `operator.focus`, `operator.sourceCrop` if a placard or second bike must go.
 4. `npm run prefetch -- --review data/review/manual.json --originals`, then
    `npm run schedule -- --review data/review/manual.json --start <date>`, then look at
    `public/puzzles/img/NNNN/l1.webp` … `full.webp` yourself, then `npm run generate`, `npm test`,
    commit, push.
 
-That works, and it is the backup if AI is ever unavailable, but it is not straightforward. The
-requirement (ROADMAP item 3) is a one-command add — `npm run add -- --commons "File:…"
---model <id> --year 1996 --date 2026-11-02` that fetches, validates, crops with a default or
-given focus, writes a preview page, and schedules — followed by the review desk UI. Neither
-needs AI; the AI review is an accelerator for volume, never a dependency.
+Neither path needs AI; the AI review (the batch path above) is an accelerator for volume, never
+a dependency.

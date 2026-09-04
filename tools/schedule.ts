@@ -196,6 +196,33 @@ export function assertAuthorPresent(candidate: ReviewCandidate): void {
   }
 }
 
+/** §6.6: `tools/check.ts` OCRs the original (after `operator.sourceCrop`) and every rendered
+ *  level for a legible year. An unresolved hit refuses the run — the operator either removes it
+ *  (a tighter `sourceCrop`, or reject the candidate) or explicitly overrides by adding the
+ *  literal token `OCR-OK` to `operator.note`. No `check` block, or an empty `check.ocr`, passes
+ *  silently (this is a gate on a signal, not a requirement that the signal has run). */
+export function assertOcrResolved(candidate: ReviewCandidate): void {
+  const hits = candidate.check?.ocr ?? [];
+  if (hits.length === 0) return;
+  if ((candidate.operator.note ?? '').includes('OCR-OK')) return;
+  const detail = hits
+    .map((h) => {
+      const b = h.bbox;
+      const frame = h.level === 'original' || h.level === 'full'
+        ? 'fractions of the source-cropped original'
+        : `fractions of the rendered ${h.level}`;
+      return `    ${h.level} "${h.text}" bbox x=${b.x.toFixed(3)} y=${b.y.toFixed(3)} ` +
+        `w=${b.w.toFixed(3)} h=${b.h.toFixed(3)} (${frame})`;
+    })
+    .join('\n');
+  throw new Error(
+    `schedule.ts: candidate ${candidate.candidateId} has ${hits.length} unresolved OCR year hit(s):\n` +
+      `${detail}\n` +
+      '  — tighten operator.sourceCrop, reject the candidate, or add the literal token "OCR-OK" to ' +
+      'operator.note to confirm the year text is acceptable (§6.6).',
+  );
+}
+
 /** Some PD files carry no `LicenseUrl` on Commons (fetcher warning `missing-license-url`); the
  *  puzzle contract requires a URL, so fall back to the file's own description page, which is
  *  where the licence statement actually lives. */
@@ -362,6 +389,7 @@ export async function scheduleApproved(opts: ScheduleOptions): Promise<ScheduleR
     }
     assertSourceWidthApprovable(candidate);
     assertAuthorPresent(candidate);
+    assertOcrResolved(candidate);
   }
 
   // Phase 1: PLAN every approved candidate, sequential dates starting at --start.

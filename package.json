@@ -2,7 +2,7 @@
   "name": "motodle",
   "version": "0.1.0",
   "private": true,
-  "description": "Daily motorbike guessing game \u2014 a fully static Vite + Svelte 5 site.",
+  "description": "Daily motorbike guessing game — a fully static Vite + Svelte 5 site.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,10 @@
     "fetch": "tsx tools/fetch.ts",
     "prefetch": "tsx tools/prefetch.ts",
     "crop": "tsx tools/crop.ts",
-    "schedule": "tsx tools/schedule.ts"
+    "og": "tsx tools/og.ts",
+    "schedule": "tsx tools/schedule.ts",
+    "check:content": "tsx tools/check.ts",
+    "add": "tsx tools/add.ts"
   },
   "keywords": [],
   "author": "Chris Wallace",
@@ -38,6 +41,7 @@
     "sharp": "^0.35.4",
     "svelte": "^5.57.0",
     "svelte-check": "^4.7.6",
+    "tesseract.js": "^7.0.0",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "vite": "^8.2.2",
