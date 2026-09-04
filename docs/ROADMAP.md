@@ -35,6 +35,14 @@ implemented yet (see 5).
 
 ## 2. Launch plumbing (docs/LAUNCH.md)
 
+**Done 2026-09-04 (commit 3bf1cd1):** B1 deploy plumbing + `/*` invalidation, B2 OG card + head
+metadata, B3 robots/sitemap, B4 About page (privacy text is the logs-only variant — update it in
+the same push as A.3), B5 README, B9 runway alert (`runway.yml`, verified green on dispatch), K3
+pinned by e2e. **Still open:** A.3/A.6 logs + Athena and the beacon (decisions A/B), B7 error
+visibility (needs `cloudfront:GetInvalidation` on the deploy role, applied through HCP), B6 the
+public flip (after the `.claude/` decision). OG card has no wordmark yet (text rendering is not
+byte-deterministic across machines) — a hand-made card or a bundled font is a small follow-up.
+
 In order: B1 deploy plumbing → B8 done (budget lives in terraform-core) → B2 OG image and head
 metadata → B3 robots/sitemap → B4 About page and contact → B9 runway alert → B7 error
 visibility → A.3/A.6 logs and Athena → A.5 beacon (operator decision) → B5/B6 README and the
@@ -43,8 +51,8 @@ public flip. Community drafts are in section C; posting is operator-only.
 ## 3. Manual add without AI, then the review desk (operator tooling)
 
 **Requirement (operator, 2026-09-04): new puzzles must be addable without any AI in the loop,
-straightforwardly.** Today that is possible but takes three commands and a JSON edit
-(docs/CONTENT-RUNBOOK.md, "Manual path"). Two steps close the gap:
+straightforwardly.** Step 1 below shipped 2026-09-04 as `npm run add` (docs/CONTENT-RUNBOOK.md,
+"Manual path"). Step 2 is the review desk.
 
 1. `npm run add -- --commons "File:…" --model <catalogId> --year <yyyy> --date <yyyy-mm-dd>
    [--focus x,y] [--crop x,y,w,h]` — fetches the file's metadata through the existing client,
@@ -67,6 +75,8 @@ the same tools, so nothing downstream changes. Also the natural place to re-try 
 candidates from the first batch, nine of which only need a tighter crop to fit the byte budgets.
 
 ## 4. Content
+
+**Done 2026-09-04 (commit 0505226):** the eight gates (27/79 rejects caught, 0/46 passes lost), ranking signals, `prop=categories`, the capture-date and SDC `.statements` bugs, `npm run check:content` (OCR; faces deferred pending the YuNet licence check and a 300 MB onnxruntime install), `npm run add` (Commons file or own photo, preview page, refuses personality-restricted files). Open: Ural/Dnepr sidecar-native models vs gate 5 (0 candidates today); `--force`/strict flag parsing and a catalog-year sanity check on `--year` in add.ts; the "Source on Commons" label is wrong for own photos.
 
 **Pipeline direction (measured, see docs/CONTENT-WITHOUT-AI.md):** eight deterministic gates in
 `tools/fetch.ts` (mime, catalog-year window, capture-date year, second make in title, sidecar in
