@@ -16,3 +16,6 @@ infra/tfplan
 *.tfstate
 *.tfstate.backup
 node-compile-cache/
+
+# Local Claude Code config + vendored skills (third-party licences, hooks). Untracked 2026-09-04 ahead of the public flip.
+.claude/
