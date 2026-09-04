@@ -41,10 +41,15 @@ plan review), About page privacy text updated in the same push, `.claude/` untra
 inaccuracy report link (§1), and the repository transferred `reenchree` → `notori0us` with the
 deploy role trusting both owners through the move. **Still open:** A.6 Athena table + Step 0
 (create after the first log objects land, ~4 h after the apply; the primary workgroup has no
-results location, so pass one per query), B7 error visibility (needs `cloudfront:GetInvalidation`
-on the deploy role, applied through HCP), the HCP workspace VCS re-point (blocked on adding `motodle` to the GitHub App
+results location, so pass one per query), B7 error visibility is BUILT (`infra/alarms.tf`, `GetInvalidation` on the deploy role, the
+`assets/*` reaper exclusion and the post-deploy smoke test in `deploy.yml`); its infra half
+applies with the next HCP run and the email subscription appears once the operator sets the
+sensitive workspace variable `alert_email` in HCP (the tree must never carry the address); the
+history rewrite (commit email → GitHub noreply address, `.claude/` purged from history) is
+operator-run — commands in the 2026-09-04 session report; the HCP workspace VCS re-point (blocked on adding `motodle` to the GitHub App
 installation on `notori0us` in the browser — exact steps in `docs/HCP-REMOTE-RUNS.md`, last
-section), then the pushed owner-flip run (1 update, drops the `reenchree` subjects), B6 the public
+section), then the pushed infra run (owner flip + B7: expect the deploy role's trust and policy updated,
+the SNS topic and two alarms created, nothing destroyed), B6 the public
 flip (operator: `gh repo edit notori0us/motodle --visibility public
 --accept-visibility-change-consequences`). OG card has no wordmark yet (text rendering is not
 byte-deterministic across machines) — a hand-made card or a bundled font is a small follow-up.

@@ -345,3 +345,9 @@ an installation with a `gh` OAuth token (403), so:
 
 Until step 3 applies, the deploy role keeps trusting the `reenchree` subjects too. That is
 harmless (the org no longer holds the repo) but it is drift from the committed config.
+
+**B7 addendum (same pending run).** `infra/alarms.tf` and the deploy role's `GetInvalidation`
+grant are also queued behind the re-point. `var.alert_email` is null by default so the plan
+succeeds without it; to get the email subscription, add a **sensitive, Terraform-category**
+workspace variable `alert_email` in HCP (Workspace → Variables), then queue another run — expect
+1 create (`aws_sns_topic_subscription.alerts_email[0]`) and a confirmation mail to click.
