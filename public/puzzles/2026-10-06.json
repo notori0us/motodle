@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0035",
+  "number": 35,
+  "date": "2026-10-06",
+  "answer": {
+    "makeId": "yamaha",
+    "make": "Yamaha",
+    "modelId": "yamaha-fzr1000",
+    "model": "FZR1000",
+    "year": 1991,
+    "acceptModelIds": [
+      "yamaha-fzr1000"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.84,
+      "y": 0.73
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0035/l1.webp",
+        "w": 338,
+        "h": 254,
+        "rect": {
+          "w": 338,
+          "h": 254
+        },
+        "bytes": 6750
+      },
+      {
+        "level": 2,
+        "src": "img/0035/l2.webp",
+        "w": 584,
+        "h": 438,
+        "rect": {
+          "w": 584,
+          "h": 438
+        },
+        "bytes": 19190
+      },
+      {
+        "level": 3,
+        "src": "img/0035/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 983,
+          "h": 737
+        },
+        "bytes": 44400
+      },
+      {
+        "level": 4,
+        "src": "img/0035/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1690,
+          "h": 1268
+        },
+        "bytes": 64986
+      },
+      {
+        "level": 5,
+        "src": "img/0035/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2918,
+          "h": 2189
+        },
+        "bytes": 83232
+      }
+    ],
+    "full": {
+      "src": "img/0035/full.webp",
+      "w": 1400,
+      "h": 1050,
+      "bytes": 165848
+    }
+  },
+  "credit": {
+    "fileTitle": "File:YAMAHA FZR1000 1991.JPG",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:YAMAHA_FZR1000_1991.JPG",
+    "author": "Kuro8124",
+    "license": {
+      "id": "CC-BY-SA-3.0",
+      "name": "CC BY-SA 3.0",
+      "url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "Fetcher-proposed and accepted: 1991 appears in both the title ('File:YAMAHA FZR1000 1991.JPG') and the description ('ヤマハFZR1000(3GM)'1991年モデル' — literally '1991 model'), which is an explicit model-year statement, not the 2010 capture date. 1991 is at the bottom edge of the blind ID's 1991–1995 range and inside claim.catalogYears 1987–1995. No operator override. | blind: Yamaha FZR1000 EXUP (3LE-generation Genesis/Deltabox) 1991-1995 (medium) | The Commons description says model code 3GM while th",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

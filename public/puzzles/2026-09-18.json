@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0017",
+  "number": 17,
+  "date": "2026-09-18",
+  "answer": {
+    "makeId": "jawa",
+    "make": "Jawa",
+    "modelId": "jawa-350634",
+    "model": "350/634",
+    "year": 1978,
+    "acceptModelIds": [
+      "jawa-350634"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.45,
+      "y": 0.5
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0017/l1.webp",
+        "w": 289,
+        "h": 217,
+        "rect": {
+          "w": 289,
+          "h": 217
+        },
+        "bytes": 8642
+      },
+      {
+        "level": 2,
+        "src": "img/0017/l2.webp",
+        "w": 499,
+        "h": 374,
+        "rect": {
+          "w": 499,
+          "h": 374
+        },
+        "bytes": 24884
+      },
+      {
+        "level": 3,
+        "src": "img/0017/l3.webp",
+        "w": 840,
+        "h": 630,
+        "rect": {
+          "w": 840,
+          "h": 630
+        },
+        "bytes": 58724
+      },
+      {
+        "level": 4,
+        "src": "img/0017/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1444,
+          "h": 1083
+        },
+        "bytes": 84958
+      },
+      {
+        "level": 5,
+        "src": "img/0017/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2495,
+          "h": 1871
+        },
+        "bytes": 92720
+      }
+    ],
+    "full": {
+      "src": "img/0017/full.webp",
+      "w": 1400,
+      "h": 1321,
+      "bytes": 234184
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Jawa 634 8.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Jawa_634_8.jpg",
+    "author": "Віктор Ходєєв /Viktor Khodyeyev",
+    "license": {
+      "id": "PD",
+      "name": "Public domain",
+      "url": "https://commons.wikimedia.org/wiki/File:Jawa_634_8.jpg",
+      "jurisdiction": null
+    },
+    "attributionRequired": false,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "description",
+    "note": "fetcher-proposed, from the Commons description 'Jawa 350 typ 634-8, 1978'; 1978 sits inside claim.catalogYears 1973-1984 and inside the blind ID's 1973-1984 range. No override. | blind: Jawa 350 Type 634 (two-stroke twin, red tank with chrome panels, twin pipes) 1973-1984 (high) | Variant naming: blind ID calls type 634 from the panel shape and cites the later 638 as the alternative if misread; the description's '634-8' matches the claimed modelId, so this is low risk but the published answer sh",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0005",
+  "number": 5,
+  "date": "2026-09-06",
+  "answer": {
+    "makeId": "benelli",
+    "make": "Benelli",
+    "modelId": "benelli-750sei",
+    "model": "750 Sei",
+    "year": 1976,
+    "acceptModelIds": [
+      "benelli-750sei"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.345,
+      "y": 0.66
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0005/l1.webp",
+        "w": 513,
+        "h": 385,
+        "rect": {
+          "w": 513,
+          "h": 385
+        },
+        "bytes": 26006
+      },
+      {
+        "level": 2,
+        "src": "img/0005/l2.webp",
+        "w": 887,
+        "h": 665,
+        "rect": {
+          "w": 887,
+          "h": 665
+        },
+        "bytes": 70800
+      },
+      {
+        "level": 3,
+        "src": "img/0005/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1493,
+          "h": 1120
+        },
+        "bytes": 80648
+      },
+      {
+        "level": 4,
+        "src": "img/0005/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2567,
+          "h": 1925
+        },
+        "bytes": 76608
+      },
+      {
+        "level": 5,
+        "src": "img/0005/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 4434,
+          "h": 3326
+        },
+        "bytes": 63222
+      }
+    ],
+    "full": {
+      "src": "img/0005/full.webp",
+      "w": 1400,
+      "h": 907,
+      "bytes": 113846
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Benelli 750 SEI 1976 noBG.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Benelli_750_SEI_1976_noBG.jpg",
+    "author": "Quelle: User:Thesupermat / Freisteller, Bildbearbeitung & Retusche von Auge=mit",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "1976 is fetcher-proposed and appears in both the Commons title and description; inside the blind 1974-1978 band and inside catalogYears 1972-1978. No override. | blind: Benelli 750 Sei (transverse air-cooled six, six pipes) 1974-1978 (high) | Derivative file — a cut-out/retouch of a Thesupermat photo, so attribution must credit both the source photographer and the retoucher (CC-BY-SA-4.0, share-alike is fine). The 1976 is asserted by the derivative's uploader, not by a museum placard (±1 tolerab",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

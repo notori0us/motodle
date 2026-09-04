@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0030",
+  "number": 30,
+  "date": "2026-10-01",
+  "answer": {
+    "makeId": "ktm",
+    "make": "KTM",
+    "modelId": "ktmrc390",
+    "model": "RC 390",
+    "year": 2015,
+    "acceptModelIds": [
+      "ktmrc390"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.36,
+      "y": 0.53
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0030/l1.webp",
+        "w": 284,
+        "h": 213,
+        "rect": {
+          "w": 284,
+          "h": 213
+        },
+        "bytes": 7834
+      },
+      {
+        "level": 2,
+        "src": "img/0030/l2.webp",
+        "w": 490,
+        "h": 368,
+        "rect": {
+          "w": 490,
+          "h": 368
+        },
+        "bytes": 19894
+      },
+      {
+        "level": 3,
+        "src": "img/0030/l3.webp",
+        "w": 826,
+        "h": 620,
+        "rect": {
+          "w": 826,
+          "h": 620
+        },
+        "bytes": 51186
+      },
+      {
+        "level": 4,
+        "src": "img/0030/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1420,
+          "h": 1065
+        },
+        "bytes": 63946
+      },
+      {
+        "level": 5,
+        "src": "img/0030/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2452,
+          "h": 1839
+        },
+        "bytes": 71072
+      }
+    ],
+    "full": {
+      "src": "img/0030/full.webp",
+      "w": 1400,
+      "h": 923,
+      "bytes": 120942
+    }
+  },
+  "credit": {
+    "fileTitle": "File:2015 KTM RC390 right.JPG",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2015_KTM_RC390_right.JPG",
+    "author": "Dennis Bratland",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "high",
+    "source": "title+description",
+    "note": "Fetcher-proposed 2015, from the Commons title \"2015 KTM RC390 right\" and the description \"2015 KTM RC390 at the 2014-2015 Seattle International Motorcycle Show\" — the 2014-2015 there is the show season, the leading 2015 is the model year of a bike shown in November 2014 (EXIF 2014-11-22), which is exactly how a new model year is presented at a late-autumn show. Inside blind range 2014-2016 and inside catalog 2014-present. | blind: KTM RC 390 (first generation) 2014-2016 (high) | Smallest file in",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

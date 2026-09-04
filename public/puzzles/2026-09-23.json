@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0022",
+  "number": 22,
+  "date": "2026-09-23",
+  "answer": {
+    "makeId": "ducati",
+    "make": "Ducati",
+    "modelId": "ducati-monster-900",
+    "model": "Monster 900",
+    "year": 1994,
+    "acceptModelIds": [
+      "ducati-monster-900"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.375,
+      "y": 0.605
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0022/l1.webp",
+        "w": 444,
+        "h": 333,
+        "rect": {
+          "w": 444,
+          "h": 333
+        },
+        "bytes": 19488
+      },
+      {
+        "level": 2,
+        "src": "img/0022/l2.webp",
+        "w": 766,
+        "h": 575,
+        "rect": {
+          "w": 766,
+          "h": 575
+        },
+        "bytes": 46890
+      },
+      {
+        "level": 3,
+        "src": "img/0022/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1290,
+          "h": 968
+        },
+        "bytes": 79696
+      },
+      {
+        "level": 4,
+        "src": "img/0022/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2218,
+          "h": 1664
+        },
+        "bytes": 97034
+      },
+      {
+        "level": 5,
+        "src": "img/0022/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 3830,
+          "h": 2873
+        },
+        "bytes": 103802
+      }
+    ],
+    "full": {
+      "src": "img/0022/full.webp",
+      "w": 1400,
+      "h": 1050,
+      "bytes": 245024
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Ducati Monster 900 1994 at QGOMA, Brisbane, 01.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Ducati_Monster_900_1994_at_QGOMA,_Brisbane,_01.jpg",
+    "author": "Chris Olszewski",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "Fetcher-proposed 1994, not an override. Both the file title ('Ducati Monster 900 1994 at QGOMA, Brisbane, 01') and the description assert 1994 for this specific machine, not a production span or a capture date (dateTimeOriginal is 2020-12-05). 1994 sits inside the blind ID's 1993-1999 window and inside catalogYears 1993-2002. | blind: Ducati Monster 900 (M900), air-cooled 2-valve desmo, red 1993-1999 (high) | Variant naming: the family entry ducati-monster would also fit; ducati-monster-900 is r",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

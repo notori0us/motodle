@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0029",
+  "number": 29,
+  "date": "2026-09-30",
+  "answer": {
+    "makeId": "ktm",
+    "make": "KTM",
+    "modelId": "ktm390-duke",
+    "model": "390 Duke",
+    "year": 2014,
+    "acceptModelIds": [
+      "ktm390-duke"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.58,
+      "y": 0.57
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0029/l1.webp",
+        "w": 481,
+        "h": 361,
+        "rect": {
+          "w": 481,
+          "h": 361
+        },
+        "bytes": 18236
+      },
+      {
+        "level": 2,
+        "src": "img/0029/l2.webp",
+        "w": 830,
+        "h": 623,
+        "rect": {
+          "w": 830,
+          "h": 623
+        },
+        "bytes": 50196
+      },
+      {
+        "level": 3,
+        "src": "img/0029/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1398,
+          "h": 1049
+        },
+        "bytes": 71116
+      },
+      {
+        "level": 4,
+        "src": "img/0029/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2403,
+          "h": 1802
+        },
+        "bytes": 100256
+      },
+      {
+        "level": 5,
+        "src": "img/0029/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 4151,
+          "h": 3113
+        },
+        "bytes": 99486
+      }
+    ],
+    "full": {
+      "src": "img/0029/full.webp",
+      "w": 1400,
+      "h": 1050,
+      "bytes": 216028
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Moscow, KTM Duke 390 motorcycle September 2024 05.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Moscow,_KTM_Duke_390_motorcycle_September_2024_05.jpg",
+    "author": "Retired electrician",
+    "license": {
+      "id": "CC0",
+      "name": "CC0",
+      "url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "jurisdiction": null
+    },
+    "attributionRequired": false,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "description",
+    "note": "2014 is fetcher-proposed and taken from the Commons description text, not from the 2024 capture date; inside the blind 2013-2016 band and inside catalogYears 2013-present. No override. | blind: KTM 390 Duke (first generation, orange trellis frame, white/orange bodywork) 2013-2016 (medium) | Displacement is not visible from this angle — the gen-1 125/200 Duke share this bodywork, so '390' rests on the ABS tone ring plus orange wheels plus the uploader's caption rather than a badge; glance at the ",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

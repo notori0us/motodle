@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0032",
+  "number": 32,
+  "date": "2026-10-03",
+  "answer": {
+    "makeId": "moto-guzzi",
+    "make": "Moto Guzzi",
+    "modelId": "moto-guzzi-v85tt",
+    "model": "V85 TT",
+    "year": 2020,
+    "acceptModelIds": [
+      "moto-guzzi-v85tt"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.63,
+      "y": 0.63
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0032/l1.webp",
+        "w": 494,
+        "h": 371,
+        "rect": {
+          "w": 494,
+          "h": 371
+        },
+        "bytes": 15128
+      },
+      {
+        "level": 2,
+        "src": "img/0032/l2.webp",
+        "w": 853,
+        "h": 640,
+        "rect": {
+          "w": 853,
+          "h": 640
+        },
+        "bytes": 36196
+      },
+      {
+        "level": 3,
+        "src": "img/0032/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1436,
+          "h": 1077
+        },
+        "bytes": 67102
+      },
+      {
+        "level": 4,
+        "src": "img/0032/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2468,
+          "h": 1851
+        },
+        "bytes": 96552
+      },
+      {
+        "level": 5,
+        "src": "img/0032/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 4264,
+          "h": 3198
+        },
+        "bytes": 126286
+      }
+    ],
+    "full": {
+      "src": "img/0032/full.webp",
+      "w": 1400,
+      "h": 1050,
+      "bytes": 225926
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Moto Guzzi V85 TT, 2020 (2).jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Moto_Guzzi_V85_TT,_2020_(2).jpg",
+    "author": "Cjp24",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "Fetcher-proposed 2020, from title \"Moto Guzzi V85 TT, 2020 (2)\" and description \"Moto Guzzi V85 TT de 2020...\" — an explicit model year; the photo itself was taken 2022-05-28 at an Italian-bike day, so the capture year is not being mistaken for the model year. 2020 is inside the blind ID's 2019-2024 range and inside catalogYears 2019–present. | blind: Moto Guzzi V85 TT (with factory panniers — Travel/Adventure spec) 2019-2024 (high) | Operator should glance at the background figure (white cap, b",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

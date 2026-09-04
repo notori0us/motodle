@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0025",
+  "number": 25,
+  "date": "2026-09-26",
+  "answer": {
+    "makeId": "mv-agusta",
+    "make": "MV Agusta",
+    "modelId": "mv-agusta-750-sport",
+    "model": "750 Sport",
+    "year": 1974,
+    "acceptModelIds": [
+      "mv-agusta-750-sport"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.5,
+      "y": 0.57
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0025/l1.webp",
+        "w": 323,
+        "h": 242,
+        "rect": {
+          "w": 323,
+          "h": 242
+        },
+        "bytes": 12114
+      },
+      {
+        "level": 2,
+        "src": "img/0025/l2.webp",
+        "w": 557,
+        "h": 418,
+        "rect": {
+          "w": 557,
+          "h": 418
+        },
+        "bytes": 34418
+      },
+      {
+        "level": 3,
+        "src": "img/0025/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 939,
+          "h": 704
+        },
+        "bytes": 74174
+      },
+      {
+        "level": 4,
+        "src": "img/0025/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1613,
+          "h": 1210
+        },
+        "bytes": 95828
+      },
+      {
+        "level": 5,
+        "src": "img/0025/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2786,
+          "h": 2090
+        },
+        "bytes": 71224
+      }
+    ],
+    "full": {
+      "src": "img/0025/full.webp",
+      "w": 1400,
+      "h": 933,
+      "bytes": 107828
+    }
+  },
+  "credit": {
+    "fileTitle": "File:MV Agusta 750 S 1974 noBG.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:MV_Agusta_750_S_1974_noBG.jpg",
+    "author": "Klaus Nahr / Freisteller, Bildbearbeitung & Retusche von Auge=mit",
+    "license": {
+      "id": "CC-BY-SA-3.0",
+      "name": "CC BY-SA 3.0",
+      "url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "File:Alpentour August 2017 119 Top Mountain Motorcycle Museum Timmelsjoch.jpg"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "fetcher-proposed, from title + description ('MV Agusta 750 S 1974 noBG', 'MV Agusta 750 S Bj. 1974'); 1974 sits inside claim.catalogYears 1971-1975 and inside the blind ID's 1970-1975 range (and inside its narrower disc-braked 1973-75 read). No override. | blind: MV Agusta 750 S (750 Sport, four-cylinder, red/white/blue Sport livery, twin front discs) 1970-1975 (high) | Blind ID names the '750 S'; the catalog entry is '750 Sport' — the same machine, so treat as the family entry, not a mismatch. ",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

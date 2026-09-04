@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0023",
+  "number": 23,
+  "date": "2026-09-24",
+  "answer": {
+    "makeId": "moto-guzzi",
+    "make": "Moto Guzzi",
+    "modelId": "moto-guzzi-v7-sport",
+    "model": "V7 Sport",
+    "year": 1971,
+    "acceptModelIds": [
+      "moto-guzzi-v7-sport"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.8,
+      "y": 0.54
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0023/l1.webp",
+        "w": 444,
+        "h": 333,
+        "rect": {
+          "w": 444,
+          "h": 333
+        },
+        "bytes": 20268
+      },
+      {
+        "level": 2,
+        "src": "img/0023/l2.webp",
+        "w": 766,
+        "h": 575,
+        "rect": {
+          "w": 766,
+          "h": 575
+        },
+        "bytes": 46092
+      },
+      {
+        "level": 3,
+        "src": "img/0023/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1290,
+          "h": 968
+        },
+        "bytes": 69482
+      },
+      {
+        "level": 4,
+        "src": "img/0023/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2218,
+          "h": 1664
+        },
+        "bytes": 98132
+      },
+      {
+        "level": 5,
+        "src": "img/0023/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 3830,
+          "h": 2873
+        },
+        "bytes": 119670
+      }
+    ],
+    "full": {
+      "src": "img/0023/full.webp",
+      "w": 1400,
+      "h": 1050,
+      "bytes": 243166
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Moto Guzzi V7 Sport Telaio Rosso 750cc 1971 a.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Moto_Guzzi_V7_Sport_Telaio_Rosso_750cc_1971_a.jpg",
+    "author": "Montesita",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "HELD: five WebP levels exceed CROP_BUDGET_BYTES at q56 (crop.ts); needs a tighter sourceCrop or a different photo. Fetcher-proposed and accepted as-is: 1971 appears in both the Commons title ('Moto Guzzi V7 Sport Telaio Rosso 750cc 1971 a') and the description, it is the first year of claim.catalogYears 1971–1974, and it sits inside the blind ID's 1971–1974 window — the blind ID further narrows to the earliest 1971–72 cars on the red tubular frame plus drum front brake, which I can see. No opera",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

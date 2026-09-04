@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0011",
+  "number": 11,
+  "date": "2026-09-12",
+  "answer": {
+    "makeId": "indian",
+    "make": "Indian",
+    "modelId": "indian-chief",
+    "model": "Chief",
+    "year": 1935,
+    "acceptModelIds": [
+      "indian-chief"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.5,
+      "y": 0.645
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0011/l1.webp",
+        "w": 250,
+        "h": 188,
+        "rect": {
+          "w": 250,
+          "h": 188
+        },
+        "bytes": 6072
+      },
+      {
+        "level": 2,
+        "src": "img/0011/l2.webp",
+        "w": 432,
+        "h": 324,
+        "rect": {
+          "w": 432,
+          "h": 324
+        },
+        "bytes": 19706
+      },
+      {
+        "level": 3,
+        "src": "img/0011/l3.webp",
+        "w": 727,
+        "h": 545,
+        "rect": {
+          "w": 727,
+          "h": 545
+        },
+        "bytes": 54416
+      },
+      {
+        "level": 4,
+        "src": "img/0011/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1250,
+          "h": 938
+        },
+        "bytes": 96270
+      },
+      {
+        "level": 5,
+        "src": "img/0011/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2158,
+          "h": 1619
+        },
+        "bytes": 150230
+      }
+    ],
+    "full": {
+      "src": "img/0011/full.webp",
+      "w": 1400,
+      "h": 1050,
+      "bytes": 238950
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Indian Chief Bj. 1935 001.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Indian_Chief_Bj._1935_001.jpg",
+    "author": "Chief335",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "Fetcher-proposed 1935, accepted: the uploader's own title \"Indian Chief Bj. 1935\" (Bj. = Baujahr, year of construction) and the description \"Indian Chief Bj 1935 Hubraum 1200 ccm\" both state it as a build year, not a capture date (EXIF capture is 2009-01-11). 1935 falls inside the blind ID's 1934-1939 generation range and inside catalogYears 1922-1953. | blind: Indian Chief (74ci sidevalve V-twin, rigid frame) — possibly Sport Scout 45 1934-1939 (medium) | Year rests solely on the uploader's \"Bj",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

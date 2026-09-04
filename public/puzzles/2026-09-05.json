@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0004",
+  "number": 4,
+  "date": "2026-09-05",
+  "answer": {
+    "makeId": "cfmoto",
+    "make": "CFMoto",
+    "modelId": "cfmoto-700clx",
+    "model": "700CL-X",
+    "year": 2022,
+    "acceptModelIds": [
+      "cfmoto-700clx"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.46,
+      "y": 0.72
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0004/l1.webp",
+        "w": 467,
+        "h": 350,
+        "rect": {
+          "w": 467,
+          "h": 350
+        },
+        "bytes": 10768
+      },
+      {
+        "level": 2,
+        "src": "img/0004/l2.webp",
+        "w": 806,
+        "h": 605,
+        "rect": {
+          "w": 806,
+          "h": 605
+        },
+        "bytes": 34944
+      },
+      {
+        "level": 3,
+        "src": "img/0004/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1358,
+          "h": 1019
+        },
+        "bytes": 68982
+      },
+      {
+        "level": 4,
+        "src": "img/0004/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2334,
+          "h": 1751
+        },
+        "bytes": 107114
+      },
+      {
+        "level": 5,
+        "src": "img/0004/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 4032,
+          "h": 3024
+        },
+        "bytes": 115044
+      }
+    ],
+    "full": {
+      "src": "img/0004/full.webp",
+      "w": 1400,
+      "h": 1192,
+      "bytes": 243120
+    }
+  },
+  "credit": {
+    "fileTitle": "File:2022 CFMoto 700CL-X, front left.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2022_CFMoto_700CL-X,_front_left.jpg",
+    "author": "Mr.choppers",
+    "license": {
+      "id": "CC-BY-SA-3.0",
+      "name": "CC BY-SA 3.0",
+      "url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "high",
+    "source": "title+description",
+    "note": "Fetcher-proposed: 2022 leads both the Commons title ('2022 CFMoto 700CL-X, front left') and the description; inside the blind ID's 2020-2025 range and inside catalogYears 2020-present. The 2023 capture/event date was not used. | blind: CFMoto 700CL-X (Heritage) 2020-2025 (high) | Variant naming: blind called it '700CL-X (Heritage)', the Commons description says '(base)'; the family entry 700CL-X covers both, so publish the family name. Year is a single-year claim on a model sold essentially unch",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0036",
+  "number": 36,
+  "date": "2026-10-07",
+  "answer": {
+    "makeId": "triumph",
+    "make": "Triumph",
+    "modelId": "triumph-scrambler",
+    "model": "Scrambler",
+    "year": 2019,
+    "acceptModelIds": [
+      "triumph-scrambler"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.36,
+      "y": 0.52
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0036/l1.webp",
+        "w": 311,
+        "h": 233,
+        "rect": {
+          "w": 311,
+          "h": 233
+        },
+        "bytes": 7692
+      },
+      {
+        "level": 2,
+        "src": "img/0036/l2.webp",
+        "w": 537,
+        "h": 403,
+        "rect": {
+          "w": 537,
+          "h": 403
+        },
+        "bytes": 25000
+      },
+      {
+        "level": 3,
+        "src": "img/0036/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 905,
+          "h": 679
+        },
+        "bytes": 72694
+      },
+      {
+        "level": 4,
+        "src": "img/0036/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1555,
+          "h": 1166
+        },
+        "bytes": 82016
+      },
+      {
+        "level": 5,
+        "src": "img/0036/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2686,
+          "h": 2015
+        },
+        "bytes": 89092
+      }
+    ],
+    "full": {
+      "src": "img/0036/full.webp",
+      "w": 1400,
+      "h": 1358,
+      "bytes": 199790
+    }
+  },
+  "credit": {
+    "fileTitle": "File:2019 Triumph Scrambler 1200 XE Guy Martin custom built.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2019_Triumph_Scrambler_1200_XE_Guy_Martin_custom_built.jpg",
+    "author": "Vauxford",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "high",
+    "source": "title+description",
+    "note": "Fetcher-proposed 2019, accepted: Commons title and description both read '2019 Triumph Scrambler 1200 XE Guy Martin custom built' (capture date 2023-01-28, correctly ignored; no event year in the title). 2019 is the first year of the blind ID's 2019-2023 Scrambler 1200 range and inside catalog 2006-present. | blind: Triumph Scrambler 1200 XE (off-road/desert-spec show build) 2019-2023 (high) | Two things the operator should knowingly accept. (1) Naming: the catalog entry is the generic 'Scramble",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

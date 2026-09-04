@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0027",
+  "number": 27,
+  "date": "2026-09-28",
+  "answer": {
+    "makeId": "ktm",
+    "make": "KTM",
+    "modelId": "ktm1290-super-duke-r",
+    "model": "1290 Super Duke R",
+    "year": 2017,
+    "acceptModelIds": [
+      "ktm1290-super-duke-r"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.02,
+      "y": 0.02
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0027/l1.webp",
+        "w": 444,
+        "h": 333,
+        "rect": {
+          "w": 444,
+          "h": 333
+        },
+        "bytes": 11466
+      },
+      {
+        "level": 2,
+        "src": "img/0027/l2.webp",
+        "w": 766,
+        "h": 575,
+        "rect": {
+          "w": 766,
+          "h": 575
+        },
+        "bytes": 25184
+      },
+      {
+        "level": 3,
+        "src": "img/0027/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1290,
+          "h": 968
+        },
+        "bytes": 36916
+      },
+      {
+        "level": 4,
+        "src": "img/0027/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2218,
+          "h": 1664
+        },
+        "bytes": 86672
+      },
+      {
+        "level": 5,
+        "src": "img/0027/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 3830,
+          "h": 2873
+        },
+        "bytes": 140226
+      }
+    ],
+    "full": {
+      "src": "img/0027/full.webp",
+      "w": 1400,
+      "h": 1050,
+      "bytes": 237048
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Image KTM 1290 R.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Image_KTM_1290_R.jpg",
+    "author": "TheRealSlimShadyUK",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "description",
+    "note": "Fetcher-proposed, no override. Commons description reads 'KTM Super Duke R 2017' (the only year token; the 2018-12-19 file date is a capture/upload date, not a model year). 2017 is the first year of the blind ID's 2017-2019 'Beast 2.0' generation range and inside catalogYears 2014-present. | blind: KTM 1290 Super Duke R (\"Beast 2.0\", 2017 facelift) 2017-2019 (high) | The level-2 window clips the edge of the dark-red 'READY TO RACE' stencil (brand slogan on bodywork - permitted, but worth a glanc",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

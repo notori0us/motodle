@@ -196,9 +196,12 @@ export function assertAuthorPresent(candidate: ReviewCandidate): void {
   }
 }
 
-function stripLicenseForCredit(candidate: ReviewCandidate): CreditBlock['license'] {
+/** Some PD files carry no `LicenseUrl` on Commons (fetcher warning `missing-license-url`); the
+ *  puzzle contract requires a URL, so fall back to the file's own description page, which is
+ *  where the licence statement actually lives. */
+export function stripLicenseForCredit(candidate: ReviewCandidate): CreditBlock['license'] {
   const { id, name, url, jurisdiction } = candidate.license;
-  return { id, name, url, jurisdiction };
+  return { id, name, url: url || candidate.descriptionUrl, jurisdiction };
 }
 
 // -------------------------------------------------------------------------------------------

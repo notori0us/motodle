@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "id": "mtd-0007",
+  "number": 7,
+  "date": "2026-09-08",
+  "answer": {
+    "makeId": "dkw",
+    "make": "DKW",
+    "modelId": "dkwrt350",
+    "model": "RT350",
+    "year": 1956,
+    "acceptModelIds": [
+      "dkwrt350"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.61,
+      "y": 0.46
+    },
+    "sourceCrop": {
+      "x": 0.1,
+      "y": 0,
+      "w": 0.9,
+      "h": 1
+    },
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0007/l1.webp",
+        "w": 424,
+        "h": 318,
+        "rect": {
+          "w": 424,
+          "h": 318
+        },
+        "bytes": 11400
+      },
+      {
+        "level": 2,
+        "src": "img/0007/l2.webp",
+        "w": 733,
+        "h": 550,
+        "rect": {
+          "w": 733,
+          "h": 550
+        },
+        "bytes": 33314
+      },
+      {
+        "level": 3,
+        "src": "img/0007/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1235,
+          "h": 926
+        },
+        "bytes": 58312
+      },
+      {
+        "level": 4,
+        "src": "img/0007/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2122,
+          "h": 1592
+        },
+        "bytes": 95892
+      },
+      {
+        "level": 5,
+        "src": "img/0007/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 3666,
+          "h": 2750
+        },
+        "bytes": 92878
+      }
+    ],
+    "full": {
+      "src": "img/0007/full.webp",
+      "w": 1400,
+      "h": 1172,
+      "bytes": 209220
+    }
+  },
+  "credit": {
+    "fileTitle": "File:DKW RT 350 S, Bj. 1956 (links) im museum mobile.JPG",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:DKW_RT_350_S,_Bj._1956_(links)_im_museum_mobile.JPG",
+    "author": "Lothar Spurzem",
+    "license": {
+      "id": "CC-BY-SA-2.0",
+      "name": "CC BY-SA 2.0 de",
+      "url": "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en",
+      "jurisdiction": "de"
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "fetcher-proposed, from title + description ('DKW RT 350 S, Bj. 1956', 'Baujahr 1956', '5290 Stueck von 1955 bis 1956 gebaut'); 1956 sits inside claim.catalogYears 1953-1957 and inside the blind ID's 1955-1958 range. No override. | blind: DKW RT 350 S (two-stroke twin, chrome-panelled black tank, red/black dual seat) 1955-1958 (medium) | CHECK FIRST AT FULL RESOLUTION: two museum interpretive panels on the wall at original x 0.24-0.34, y 0.02-0.16. Both the blind agent (7x) and I (5x upscale) rea",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

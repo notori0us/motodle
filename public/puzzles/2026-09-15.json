@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "id": "mtd-0014",
+  "number": 14,
+  "date": "2026-09-15",
+  "answer": {
+    "makeId": "bimota",
+    "make": "Bimota",
+    "modelId": "bimota-tesi-1d",
+    "model": "Tesi 1D",
+    "year": 1992,
+    "acceptModelIds": [
+      "bimota-tesi-1d"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.2,
+      "y": 0.49
+    },
+    "sourceCrop": {
+      "x": 0,
+      "y": 0.08,
+      "w": 1,
+      "h": 0.92
+    },
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0014/l1.webp",
+        "w": 478,
+        "h": 359,
+        "rect": {
+          "w": 478,
+          "h": 359
+        },
+        "bytes": 6988
+      },
+      {
+        "level": 2,
+        "src": "img/0014/l2.webp",
+        "w": 825,
+        "h": 619,
+        "rect": {
+          "w": 825,
+          "h": 619
+        },
+        "bytes": 20034
+      },
+      {
+        "level": 3,
+        "src": "img/0014/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1389,
+          "h": 1042
+        },
+        "bytes": 41278
+      },
+      {
+        "level": 4,
+        "src": "img/0014/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2388,
+          "h": 1791
+        },
+        "bytes": 61614
+      },
+      {
+        "level": 5,
+        "src": "img/0014/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 4124,
+          "h": 3093
+        },
+        "bytes": 100368
+      }
+    ],
+    "full": {
+      "src": "img/0014/full.webp",
+      "w": 1400,
+      "h": 1015,
+      "bytes": 206540
+    }
+  },
+  "credit": {
+    "fileTitle": "File:1992 Bimota Tesi 1D 904SR, front right.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:1992_Bimota_Tesi_1D_904SR,_front_right.jpg",
+    "author": "Mr.choppers",
+    "license": {
+      "id": "CC-BY-SA-3.0",
+      "name": "CC BY-SA 3.0",
+      "url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "high",
+    "source": "title+description",
+    "note": "Fetcher-proposed: 1992 is the leading token in both the Commons title ('1992 Bimota Tesi 1D 904SR, front right') and the description; it sits inside the blind ID's 1990-1994 range and inside catalogYears 1990-1998. The 2023 capture date and the '2023 Greenwich Concours' event year were ignored as non-model years. | blind: Bimota Tesi 1D 1990-1994 (high) | Variant naming: this is the rare 904SR (904cc Ducati engine, twenty built) being published under the family entry Tesi 1D - fine, but the answ",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

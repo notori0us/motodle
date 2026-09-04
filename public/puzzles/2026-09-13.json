@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "id": "mtd-0012",
+  "number": 12,
+  "date": "2026-09-13",
+  "answer": {
+    "makeId": "ducati",
+    "make": "Ducati",
+    "modelId": "ducati-monster-1200",
+    "model": "Monster 1200",
+    "year": 2017,
+    "acceptModelIds": [
+      "ducati-monster-1200"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.62,
+      "y": 0.58
+    },
+    "sourceCrop": null,
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0012/l1.webp",
+        "w": 543,
+        "h": 407,
+        "rect": {
+          "w": 543,
+          "h": 407
+        },
+        "bytes": 21834
+      },
+      {
+        "level": 2,
+        "src": "img/0012/l2.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 938,
+          "h": 704
+        },
+        "bytes": 58722
+      },
+      {
+        "level": 3,
+        "src": "img/0012/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1580,
+          "h": 1185
+        },
+        "bytes": 69936
+      },
+      {
+        "level": 4,
+        "src": "img/0012/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 2716,
+          "h": 2037
+        },
+        "bytes": 97120
+      },
+      {
+        "level": 5,
+        "src": "img/0012/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 4692,
+          "h": 3519
+        },
+        "bytes": 101896
+      }
+    ],
+    "full": {
+      "src": "img/0012/full.webp",
+      "w": 1400,
+      "h": 869,
+      "bytes": 219734
+    }
+  },
+  "credit": {
+    "fileTitle": "File:Sideview of Monster 1200S 2017 in Grey.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Sideview_of_Monster_1200S_2017_in_Grey.jpg",
+    "author": "Sergeantpepper",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title+description",
+    "note": "Fetcher-proposed 2017, not an override. Commons title \"Sideview of Monster 1200S 2017 in Grey\" and the description repeat 2017, while dateTimeOriginal is 2018-04-14 — so 2017 is an explicit model-year claim by the owner/uploader, not the capture date or an event year. 2017 sits inside the blind ID's 2017-2021 generation window and inside claim.catalogYears 2014-2021. | blind: Ducati Monster 1200 S (liquid-cooled Testastretta, Öhlins) 2017-2021 (medium) | Variant naming: blind calls it the 1200 S",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "id": "mtd-0016",
+  "number": 16,
+  "date": "2026-09-17",
+  "answer": {
+    "makeId": "ducati",
+    "make": "Ducati",
+    "modelId": "ducati-desmosedici-rr",
+    "model": "Desmosedici RR",
+    "year": 2008,
+    "acceptModelIds": [
+      "ducati-desmosedici-rr"
+    ]
+  },
+  "image": {
+    "aspect": "4:3",
+    "focus": {
+      "x": 0.242,
+      "y": 0.6
+    },
+    "sourceCrop": {
+      "x": 0.05,
+      "y": 0.05,
+      "w": 0.95,
+      "h": 0.95
+    },
+    "cropFractions": [
+      0.11,
+      0.19,
+      0.32,
+      0.55,
+      0.95
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "src": "img/0016/l1.webp",
+        "w": 369,
+        "h": 277,
+        "rect": {
+          "w": 369,
+          "h": 277
+        },
+        "bytes": 9448
+      },
+      {
+        "level": 2,
+        "src": "img/0016/l2.webp",
+        "w": 637,
+        "h": 478,
+        "rect": {
+          "w": 637,
+          "h": 478
+        },
+        "bytes": 25902
+      },
+      {
+        "level": 3,
+        "src": "img/0016/l3.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1072,
+          "h": 804
+        },
+        "bytes": 55250
+      },
+      {
+        "level": 4,
+        "src": "img/0016/l4.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 1843,
+          "h": 1382
+        },
+        "bytes": 95880
+      },
+      {
+        "level": 5,
+        "src": "img/0016/l5.webp",
+        "w": 900,
+        "h": 675,
+        "rect": {
+          "w": 3183,
+          "h": 2387
+        },
+        "bytes": 142592
+      }
+    ],
+    "full": {
+      "src": "img/0016/full.webp",
+      "w": 1400,
+      "h": 1219,
+      "bytes": 238598
+    }
+  },
+  "credit": {
+    "fileTitle": "File:2008 Ducati D-16 RR.jpg",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:2008_Ducati_D-16_RR.jpg",
+    "author": "Calreyn88",
+    "license": {
+      "id": "CC-BY-SA-4.0",
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "jurisdiction": null
+    },
+    "attributionRequired": true,
+    "modified": "cropped, resized, re-encoded to WebP",
+    "creditNote": "Own work"
+  },
+  "yearEvidence": {
+    "confidence": "medium",
+    "source": "title",
+    "note": "Fetcher-proposed and accepted as-is: 2008 comes from the file title 'File:2008 Ducati D-16 RR.jpg' (leading, high-confidence token), not from the capture date (Exif 30 June 2022, so the 2022 date is correctly ignored). 2008 falls inside the blind ID's 2007–2008 range and inside claim.catalogYears 2007–2010. No operator override. | blind: Ducati Desmosedici RR 2007-2008 (high) | Year rests solely on the uploader's title, not a plaque or description — 2008 vs 2007 is a ±1 risk, though both are ins",
+    "approvedBy": "operator",
+    "approvedOn": "2026-09-03"
+  }
+}

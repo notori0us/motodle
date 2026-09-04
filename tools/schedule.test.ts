@@ -13,6 +13,7 @@ import {
   needsYearRescue,
   scheduleApproved,
   type ScheduleOptions,
+  stripLicenseForCredit,
 } from './schedule';
 
 const SCRATCH_ROOT = os.tmpdir();
@@ -489,5 +490,17 @@ describe('scheduleApproved — review.schema.json validation', () => {
   it('refuses a review file that does not validate against the schema', async () => {
     await fs.writeFile(reviewPath, JSON.stringify({ schema: 1, batch: 'x' })); // missing required fields
     await expect(scheduleApproved(baseOpts())).rejects.toThrow(/does not validate/);
+  });
+});
+
+describe('stripLicenseForCredit', () => {
+  const base = { id: 'PD', name: 'Public domain', url: '', jurisdiction: null, sdcP275: [], attributionRequired: false };
+  it('falls back to the description page when Commons gives no licence URL', () => {
+    const c = { license: base, descriptionUrl: 'https://commons.wikimedia.org/wiki/File:X.jpg' } as unknown as Parameters<typeof stripLicenseForCredit>[0];
+    expect(stripLicenseForCredit(c)).toEqual({ id: 'PD', name: 'Public domain', url: 'https://commons.wikimedia.org/wiki/File:X.jpg', jurisdiction: null });
+  });
+  it('keeps a real licence URL verbatim', () => {
+    const c = { license: { ...base, url: 'https://creativecommons.org/licenses/by-sa/4.0/' }, descriptionUrl: 'https://x/' } as unknown as Parameters<typeof stripLicenseForCredit>[0];
+    expect(stripLicenseForCredit(c).url).toBe('https://creativecommons.org/licenses/by-sa/4.0/');
   });
 });
