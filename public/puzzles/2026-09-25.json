@@ -16,8 +16,8 @@
   "image": {
     "aspect": "4:3",
     "focus": {
-      "x": 0.02,
-      "y": 0.02
+      "x": 0.33,
+      "y": 0.53
     },
     "sourceCrop": null,
     "cropFractions": [
@@ -37,7 +37,7 @@
           "w": 289,
           "h": 217
         },
-        "bytes": 5100
+        "bytes": 7476
       },
       {
         "level": 2,
@@ -48,7 +48,7 @@
           "w": 500,
           "h": 375
         },
-        "bytes": 16744
+        "bytes": 20502
       },
       {
         "level": 3,
@@ -59,7 +59,7 @@
           "w": 842,
           "h": 632
         },
-        "bytes": 56528
+        "bytes": 53800
       },
       {
         "level": 4,
@@ -70,7 +70,7 @@
           "w": 1447,
           "h": 1085
         },
-        "bytes": 98846
+        "bytes": 94310
       },
       {
         "level": 5,
@@ -81,7 +81,7 @@
           "w": 2499,
           "h": 1874
         },
-        "bytes": 115892
+        "bytes": 124416
       }
     ],
     "full": {
@@ -108,7 +108,7 @@
   "yearEvidence": {
     "confidence": "medium",
     "source": "description",
-    "note": "Fetcher-proposed, no override. Commons description: \"A photo of the Kawasaki Vulcan S. The graphic pattern is for the 2025 model.\" Capture date 2024-12-23 is consistent with a 2025-model-year bike on a showroom floor in December 2024 (and is itself a capture date, not the model year). 2025 is inside catalogYears 2015-present and one year past the blind ID's 2015-2024 range, i.e. within the allowed +1. | blind: Kawasaki Vulcan S (Special Edition, red-pinstripe) 2015-2024 (high) | 2025 sits exactl",
+    "note": "crop-check 2026-09-03: focus set {\"x\":0.33,\"y\":0.53} | Fetcher-proposed, no override. Commons description: \"A photo of the Kawasaki Vulcan S. The graphic pattern is for the 2025 model.\" Capture date 2024-12-23 is consistent with a 2025-model-year bike on a showroom floor in December 2024 (and is itself a capture date, not the model year). 2025 is inside catalogYears 2015-present and one year past the blind ID's 2015-2024 range, i.e. within the allowed +1. | blind: Kawasaki Vulcan S (Special Edit",
     "approvedBy": "operator",
     "approvedOn": "2026-09-03"
   }

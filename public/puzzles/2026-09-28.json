@@ -16,8 +16,8 @@
   "image": {
     "aspect": "4:3",
     "focus": {
-      "x": 0.02,
-      "y": 0.02
+      "x": 0.41,
+      "y": 0.52
     },
     "sourceCrop": null,
     "cropFractions": [
@@ -37,7 +37,7 @@
           "w": 444,
           "h": 333
         },
-        "bytes": 11466
+        "bytes": 14984
       },
       {
         "level": 2,
@@ -48,7 +48,7 @@
           "w": 766,
           "h": 575
         },
-        "bytes": 25184
+        "bytes": 47400
       },
       {
         "level": 3,
@@ -59,7 +59,7 @@
           "w": 1290,
           "h": 968
         },
-        "bytes": 36916
+        "bytes": 73922
       },
       {
         "level": 4,
@@ -70,7 +70,7 @@
           "w": 2218,
           "h": 1664
         },
-        "bytes": 86672
+        "bytes": 96264
       },
       {
         "level": 5,
@@ -81,7 +81,7 @@
           "w": 3830,
           "h": 2873
         },
-        "bytes": 140226
+        "bytes": 115938
       }
     ],
     "full": {
@@ -108,7 +108,7 @@
   "yearEvidence": {
     "confidence": "medium",
     "source": "description",
-    "note": "Fetcher-proposed, no override. Commons description reads 'KTM Super Duke R 2017' (the only year token; the 2018-12-19 file date is a capture/upload date, not a model year). 2017 is the first year of the blind ID's 2017-2019 'Beast 2.0' generation range and inside catalogYears 2014-present. | blind: KTM 1290 Super Duke R (\"Beast 2.0\", 2017 facelift) 2017-2019 (high) | The level-2 window clips the edge of the dark-red 'READY TO RACE' stencil (brand slogan on bodywork - permitted, but worth a glanc",
+    "note": "crop-check 2026-09-03: focus set {\"x\":0.41,\"y\":0.52} | Fetcher-proposed, no override. Commons description reads 'KTM Super Duke R 2017' (the only year token; the 2018-12-19 file date is a capture/upload date, not a model year). 2017 is the first year of the blind ID's 2017-2019 'Beast 2.0' generation range and inside catalogYears 2014-present. | blind: KTM 1290 Super Duke R (\"Beast 2.0\", 2017 facelift) 2017-2019 (high) | The level-2 window clips the edge of the dark-red 'READY TO RACE' stencil (",
     "approvedBy": "operator",
     "approvedOn": "2026-09-03"
   }

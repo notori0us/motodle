@@ -16,10 +16,15 @@
   "image": {
     "aspect": "4:3",
     "focus": {
-      "x": 0.02,
-      "y": 0.02
+      "x": 0.4,
+      "y": 0.44
     },
-    "sourceCrop": null,
+    "sourceCrop": {
+      "x": 0,
+      "y": 0,
+      "w": 1,
+      "h": 0.93
+    },
     "cropFractions": [
       0.11,
       0.19,
@@ -31,24 +36,24 @@
       {
         "level": 1,
         "src": "img/0019/l1.webp",
-        "w": 444,
-        "h": 333,
+        "w": 412,
+        "h": 309,
         "rect": {
-          "w": 444,
-          "h": 333
+          "w": 412,
+          "h": 309
         },
-        "bytes": 16704
+        "bytes": 15928
       },
       {
         "level": 2,
         "src": "img/0019/l2.webp",
-        "w": 766,
-        "h": 575,
+        "w": 712,
+        "h": 534,
         "rect": {
-          "w": 766,
-          "h": 575
+          "w": 712,
+          "h": 534
         },
-        "bytes": 30714
+        "bytes": 41086
       },
       {
         "level": 3,
@@ -56,10 +61,10 @@
         "w": 900,
         "h": 675,
         "rect": {
-          "w": 1290,
-          "h": 968
+          "w": 1200,
+          "h": 900
         },
-        "bytes": 62288
+        "bytes": 78036
       },
       {
         "level": 4,
@@ -67,10 +72,10 @@
         "w": 900,
         "h": 675,
         "rect": {
-          "w": 2218,
-          "h": 1664
+          "w": 2062,
+          "h": 1547
         },
-        "bytes": 113010
+        "bytes": 106790
       },
       {
         "level": 5,
@@ -78,17 +83,17 @@
         "w": 900,
         "h": 675,
         "rect": {
-          "w": 3830,
-          "h": 2873
+          "w": 3562,
+          "h": 2672
         },
-        "bytes": 122850
+        "bytes": 101042
       }
     ],
     "full": {
       "src": "img/0019/full.webp",
       "w": 1400,
-      "h": 1050,
-      "bytes": 225366
+      "h": 976,
+      "bytes": 215418
     }
   },
   "credit": {
@@ -108,7 +113,7 @@
   "yearEvidence": {
     "confidence": "medium",
     "source": "title+description",
-    "note": "Fetcher-proposed, no override. Title and description both read 'Vincent Rapide (1951), musee automobile de Valencay'; 1951 falls inside the blind ID's Series C range 1949-1955 (and inside 1946-1955 even if the Girdraulic fork call is wrong) and inside catalogYears 1946-1955. | blind: Vincent Rapide (Series C, 998cc V-twin) 1949-1955 (medium) | The small yellow display card at the bottom edge (original x0.59-0.72, y0.89-1.00) names 'VINCENT ... RAPIDE' and survives the crop - it cannot be removed",
+    "note": "crop-check 2026-09-03: focus set {\"x\":0.4,\"y\":0.44} sourceCrop {\"x\":0,\"y\":0,\"w\":1,\"h\":0.93} | Fetcher-proposed, no override. Title and description both read 'Vincent Rapide (1951), musee automobile de Valencay'; 1951 falls inside the blind ID's Series C range 1949-1955 (and inside 1946-1955 even if the Girdraulic fork call is wrong) and inside catalogYears 1946-1955. | blind: Vincent Rapide (Series C, 998cc V-twin) 1949-1955 (medium) | The small yellow display card at the bottom edge (original x",
     "approvedBy": "operator",
     "approvedOn": "2026-09-03"
   }

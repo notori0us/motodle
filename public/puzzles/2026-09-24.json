@@ -108,7 +108,7 @@
   "yearEvidence": {
     "confidence": "medium",
     "source": "title+description",
-    "note": "HELD: five WebP levels exceed CROP_BUDGET_BYTES at q56 (crop.ts); needs a tighter sourceCrop or a different photo. Fetcher-proposed and accepted as-is: 1971 appears in both the Commons title ('Moto Guzzi V7 Sport Telaio Rosso 750cc 1971 a') and the description, it is the first year of claim.catalogYears 1971–1974, and it sits inside the blind ID's 1971–1974 window — the blind ID further narrows to the earliest 1971–72 cars on the red tubular frame plus drum front brake, which I can see. No opera",
+    "note": "",
     "approvedBy": "operator",
     "approvedOn": "2026-09-03"
   }

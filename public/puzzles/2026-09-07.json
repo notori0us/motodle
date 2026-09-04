@@ -16,8 +16,8 @@
   "image": {
     "aspect": "4:3",
     "focus": {
-      "x": 0.02,
-      "y": 0.02
+      "x": 0.71,
+      "y": 0.71
     },
     "sourceCrop": null,
     "cropFractions": [
@@ -37,7 +37,7 @@
           "w": 242,
           "h": 182
         },
-        "bytes": 2970
+        "bytes": 4610
       },
       {
         "level": 2,
@@ -48,7 +48,7 @@
           "w": 418,
           "h": 314
         },
-        "bytes": 7888
+        "bytes": 11050
       },
       {
         "level": 3,
@@ -59,7 +59,7 @@
           "w": 704,
           "h": 528
         },
-        "bytes": 19386
+        "bytes": 24350
       },
       {
         "level": 4,
@@ -70,7 +70,7 @@
           "w": 1209,
           "h": 907
         },
-        "bytes": 41312
+        "bytes": 41748
       },
       {
         "level": 5,
@@ -81,7 +81,7 @@
           "w": 2089,
           "h": 1567
         },
-        "bytes": 57110
+        "bytes": 56014
       }
     ],
     "full": {
@@ -108,7 +108,7 @@
   "yearEvidence": {
     "confidence": "medium",
     "source": "description",
-    "note": "Fetcher-proposed, no override. Commons description reads \"A 1986 Bimota DB1 custom with 900 cc engine\" (only year token in the file); 1986 sits inside the blind ID's DB1 range 1985-1989 and inside catalogYears 1985-1989. | blind: Bimota DB1 (Ducati 750 Pantah-engined) 1985-1989 (high) | Description calls it a \"custom with 900 cc engine\" - the stock DB1 used the 748cc Pantah unit, so this bike has a non-stock engine; the red-painted forks and carbon slip-on are also non-original. Bodywork is stoc",
+    "note": "crop-check 2026-09-03: focus set {\"x\":0.71,\"y\":0.71} | Fetcher-proposed, no override. Commons description reads \"A 1986 Bimota DB1 custom with 900 cc engine\" (only year token in the file); 1986 sits inside the blind ID's DB1 range 1985-1989 and inside catalogYears 1985-1989. | blind: Bimota DB1 (Ducati 750 Pantah-engined) 1985-1989 (high) | Description calls it a \"custom with 900 cc engine\" - the stock DB1 used the 748cc Pantah unit, so this bike has a non-stock engine; the red-painted forks and",
     "approvedBy": "operator",
     "approvedOn": "2026-09-03"
   }
