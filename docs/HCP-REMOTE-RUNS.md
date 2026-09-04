@@ -312,3 +312,36 @@ cd infra && terraform apply
 6. **`working-directory: infra` and lockfile provenance.** Remote runs honour the committed `infra/.terraform.lock.hcl` (`hashicorp/aws 5.100.0`). LAUNCH.md A.3 depends on that pin (the v6 registry render advertises a `region` argument that does not exist in 5.x). Keep the lockfile in git.
 
 **Sources:** [Dynamic credentials with the AWS provider](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/aws-configuration) · [Workload identity token claims](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/workload-identity-tokens) · [Specifying multiple configurations](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/specifying-multiple-configurations) · [Workspace VCS settings](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings/vcs) · [Apply not allowed for VCS-connected workspaces](https://support.hashicorp.com/hc/en-us/articles/4408827333395)
+
+## 2026-09-04 evening: repository moved to `notori0us/motodle` — VCS re-point PENDING
+
+The GitHub transfer `reenchree/motodle` → `notori0us/motodle` is done (repo id `1355164768`
+unchanged, owner id `2278744`). The deploy role trusted both owners before the move (commit
+84601cd, HCP run `run-JR8MowCdPArS7dD9`), and the first CI + deploy from the new owner succeeded.
+
+**Blocked on one browser step.** The workspace still points at `reenchree/motodle` via the
+`reenchree` org installation (`ghain-znnFHszW6frTYGv2`), which lost the repo on transfer. The
+`notori0us` account also has the HCP Terraform GitHub App installed (`ghain-1HEA9iqaoHGMwJjq`,
+GitHub installation `30559844`) but with *selected repositories* that do not include `motodle`,
+so `PATCH /workspaces/ws-AbRYmYGwq43YfTv1` with the new identifier is rejected with
+`422 Repository doesn't exist or isn't accessible`. The GitHub API refuses to add a repository to
+an installation with a `gh` OAuth token (403), so:
+
+1. Operator, in the browser: <https://github.com/settings/installations/30559844> → Repository
+   access → add `motodle` → Save.
+2. Then re-point the workspace (HCP token from `~/.terraform.d/credentials.tfrc.json`):
+   ```bash
+   curl -sS -X PATCH -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/vnd.api+json' \
+     -d '{"data":{"type":"workspaces","attributes":{"vcs-repo":{"identifier":"notori0us/motodle","github-app-installation-id":"ghain-1HEA9iqaoHGMwJjq","branch":""}}}}' \
+     https://app.terraform.io/api/v2/workspaces/ws-AbRYmYGwq43YfTv1
+   ```
+   Expect `vcs-repo.identifier = notori0us/motodle`; working directory `infra` and trigger
+   `infra/**` are untouched by the PATCH.
+3. Queue a run for the already-pushed owner flip (`github_repository`/`github_owner_id` →
+   `notori0us`, `github_transfer_to = null`): connecting the VCS usually starts one; otherwise
+   `POST /runs` for the workspace. Expected plan: **1 update** (`aws_iam_role.deploy`, the two
+   `reenchree` subjects dropped), 0 creates, 0 destroys. Confirm in the UI or via
+   `POST /runs/<id>/actions/apply`.
+
+Until step 3 applies, the deploy role keeps trusting the `reenchree` subjects too. That is
+harmless (the org no longer holds the repo) but it is drift from the committed config.

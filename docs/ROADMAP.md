@@ -42,8 +42,11 @@ inaccuracy report link (§1), and the repository transferred `reenchree` → `no
 deploy role trusting both owners through the move. **Still open:** A.6 Athena table + Step 0
 (create after the first log objects land, ~4 h after the apply; the primary workgroup has no
 results location, so pass one per query), B7 error visibility (needs `cloudfront:GetInvalidation`
-on the deploy role, applied through HCP), B6 the public flip (operator: `gh repo edit
-notori0us/motodle --visibility public --accept-visibility-change-consequences`). OG card has no wordmark yet (text rendering is not
+on the deploy role, applied through HCP), the HCP workspace VCS re-point (blocked on adding `motodle` to the GitHub App
+installation on `notori0us` in the browser — exact steps in `docs/HCP-REMOTE-RUNS.md`, last
+section), then the pushed owner-flip run (1 update, drops the `reenchree` subjects), B6 the public
+flip (operator: `gh repo edit notori0us/motodle --visibility public
+--accept-visibility-change-consequences`). OG card has no wordmark yet (text rendering is not
 byte-deterministic across machines) — a hand-made card or a bundled font is a small follow-up.
 
 In order: B1 deploy plumbing → B8 done (budget lives in terraform-core) → B2 OG image and head
