@@ -40,7 +40,24 @@ metadata → B3 robots/sitemap → B4 About page and contact → B9 runway alert
 visibility → A.3/A.6 logs and Athena → A.5 beacon (operator decision) → B5/B6 README and the
 public flip. Community drafts are in section C; posting is operator-only.
 
-## 3. Review desk (operator tooling)
+## 3. Manual add without AI, then the review desk (operator tooling)
+
+**Requirement (operator, 2026-09-04): new puzzles must be addable without any AI in the loop,
+straightforwardly.** Today that is possible but takes three commands and a JSON edit
+(docs/CONTENT-RUNBOOK.md, "Manual path"). Two steps close the gap:
+
+1. `npm run add -- --commons "File:…" --model <catalogId> --year <yyyy> --date <yyyy-mm-dd>
+   [--focus x,y] [--crop x,y,w,h]` — fetches the file's metadata through the existing client,
+   runs the same licence/author/width gates, downloads the original, crops, writes a one-page
+   preview of the five levels + full reveal to open in a browser, and schedules the date.
+   Also accepts `--file <local photo>` with `--author` for your own photographs.
+2. The review desk below, which is the same thing with a UI and a queue.
+
+The AI batch path (docs/CONTENT-RUNBOOK.md, "Batch path", scripts in `tools/batch/`) stays as
+the volume accelerator — a future agent can run a year's worth from those instructions — but
+nothing in the pipeline depends on it.
+
+### Review desk
 
 `npm run review` serving a local page: candidate queue with thumbnail, Commons text and both
 AI verdicts; approve / hold / reject; year override; click-to-set focus with a live preview of
