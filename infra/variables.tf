@@ -48,9 +48,3 @@ variable "github_repository_id" {
   type        = number
   default     = 1355164768
 }
-
-variable "alert_email" {
-  description = "Where AWS Budgets sends the cost alerts (LAUNCH.md B8). No default on purpose: pass it via infra/terraform.tfvars (git-ignored) or -var."
-  type        = string
-  sensitive   = true
-}
