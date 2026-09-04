@@ -1081,6 +1081,8 @@ aws sns list-subscriptions-by-topic --region us-east-1 \
 
 ## B8 — Cost guardrail (AWS Budget)
 
+> **DONE 2026-09-04, and moved.** The operator chose one account-wide budget in `terraform-core` (`budget.tf`: $20/month, ACTUAL and FORECASTED alerts at 100%, applied by HCP run `run-LMCK4SSiBfR6Y6rb`). `motodle/infra` carries **no** budget — the file below was reverted. Everything under this heading is kept as the design record only; do not add a second budget.
+
 **There is no budget, no billing alarm and no SNS topic anywhere in code today** — `grep -rniE 'budget|billing|aws_cloudwatch_metric_alarm|aws_sns_topic' --include='*.tf'` over `terraform-core` returns nothing, and `motodle/infra` has none either `[ops §3]`; independently re-verified during critique, along with `terraform-core/iam_github.tf:21`'s `"repo:reenchree/*:*"` (see B6's adjacent finding). A console-created budget cannot be ruled out (SSO expired during recon); `terraform plan` will say — **OPERATOR ACTION**.
 
 **Files:** new `/home/chris/workspace/motodle/infra/budget.tf`.
