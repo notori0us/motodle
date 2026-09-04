@@ -100,6 +100,13 @@ for a year. Small change; needed the first time item 1 produces a real photo pro
 
 ## 6. Player features (from community expectations, LAUNCH.md C)
 
+- **Yellow-tile explainer for new players (operator request 2026-09-04).** The first time a yellow
+  tile appears in a category, show a one-line hint under the scoreboard: year → "Yellow: within 10
+  years"; make → "Yellow: same country as the answer"; model → "Yellow: that model was on sale in
+  the answer's year". Once per category per device (a small `motodle:hints` localStorage key,
+  schema-versioned like the rest of storage), dismissible, never shown in practice mode after the
+  first real-day appearance. Copy lives with the help-modal rules so the two can't drift; the
+  hint must not leak the answer (no numbers, no country name).
 - Hard mode (no yellow hints). Revisit if completion rate from Athena Q3 is above ~70 %.
 - Result modal that can be reopened (`openResult()` currently has no caller, so closing it
   loses the answer photo and credits for the session).
