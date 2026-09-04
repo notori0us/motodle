@@ -8,6 +8,26 @@ import { closeHelpModal, DAY1, localTime } from './helpers';
 
 test.use({ viewport: { width: 360, height: 640 } });
 
+// K3: the first-run help modal's own dismiss control must not be below the fold at 360x640.
+test('360x640: the first-run help modal Got it button is above the fold, unscrolled', async ({ page }) => {
+  await page.clock.install({ time: localTime(DAY1) });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'How to play' })).toBeVisible();
+
+  const scrollY = await page.evaluate(() => window.scrollY);
+  expect(scrollY).toBe(0); // the app's own rAF focus lands on the fixed overlay, so the window never scrolls
+
+  await expect(page.getByRole('button', { name: 'Got it' })).toBeVisible();
+  // Plain literal, not the DOMRect itself (§5.8/known-fact-3 pattern above) -- DOMRect's fields
+  // are prototype accessors with no own enumerable keys, so Playwright's evaluate serializer
+  // would hand back `{}` and silently turn this into a no-op assertion.
+  const m = await page.evaluate(() => {
+    const r = document.querySelector('.help-cta')!.getBoundingClientRect();
+    return { bottom: r.bottom, innerHeight: window.innerHeight };
+  });
+  expect(m.bottom).toBeLessThanOrEqual(m.innerHeight);
+});
+
 test('360x640: submit button is above the fold unfocused, and pinch-zoom stays enabled', async ({ page }) => {
   await page.clock.install({ time: localTime(DAY1) });
   await page.goto('/');
@@ -19,7 +39,7 @@ test('360x640: submit button is above the fold unfocused, and pinch-zoom stays e
   expect(viewportContent).not.toContain('maximum-scale');
 
   const scrollY = await page.evaluate(() => window.scrollY);
-  expect(scrollY).toBe(0); // no focus call anywhere above this line
+  expect(scrollY).toBe(0); // the app's own rAF focus lands on the fixed overlay, so the window never scrolls
 
   const submit = page.locator('button[type="submit"]');
   await expect(submit).toBeVisible();

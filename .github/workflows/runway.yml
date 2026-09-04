@@ -1,0 +1,53 @@
+name: Content runway
+on:
+  schedule:
+    # Not on the hour: "The schedule event can be delayed during periods of high loads ... High load
+    # times include the start of every hour" -- and some queued jobs get dropped entirely.
+    #
+    # EVERY 6 HOURS, NOT DAILY. Still $0, still subject to the same 60-day auto-disable, but it cuts
+    # the blind window on a TOTAL outage (DNS, ACM renewal, disabled distribution) from 24h to 6h --
+    # and per B7(c) this curl is the ONLY detector for that class of failure.
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+
+# TWO JOBS, DELIBERATELY. GitHub's scheduled-workflow failure notification names the FAILED JOB.
+# As steps of one job the email reads identically for "the site is DOWN" and "content is running
+# OUT", and the operator has to open the run to tell which. Split, the subject line says it.
+#
+# NOTE: in a public repo, scheduled workflows auto-disable after 60 days with no repo activity
+# (the workflow's own runs don't count) -- re-enable with `gh workflow enable runway.yml`.
+jobs:
+  liveness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Site is answering
+        run: |
+          set -euo pipefail
+          # --retry: a runner-side blip must not produce a false red. The FIRST false alarm is what
+          # teaches an operator to ignore the mail, and this mail has no second channel.
+          curl -fsS -o /dev/null --max-time 20 \
+            --retry 3 --retry-delay 5 --retry-all-errors https://playmotodle.com/
+          echo "::notice::playmotodle.com answered 2xx"
+
+  runway:
+    needs: liveness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Days of runway
+        run: |
+          set -euo pipefail
+          # NOTE: PLAN 13.8's `jq -r .latest` prints a JSON OBJECT, not a date. `.latest.date` is
+          # the working expression (ops recon 4).
+          latest=$(curl -fsS --max-time 20 --retry 3 --retry-delay 5 --retry-all-errors \
+            https://playmotodle.com/puzzles/manifest.json | jq -r '.latest.date')
+          today=$(date -u +%F)
+          days=$(( ( $(date -u -d "$latest" +%s) - $(date -u -d "$today" +%s) ) / 86400 ))
+          echo "::notice::content runway: $days days (latest $latest)"
+          if [ "$days" -lt 7 ]; then
+            echo "::error::content runway is $days days (latest puzzle $latest) — schedule more puzzles"
+            exit 1
+          fi

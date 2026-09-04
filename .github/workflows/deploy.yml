@@ -43,7 +43,7 @@ jobs:
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'main'))
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       AWS_REGION: us-west-2
       SITE_BUCKET: ${{ vars.SITE_BUCKET }}
@@ -88,7 +88,10 @@ jobs:
             ! -path './assets/*' \
             ! -path './puzzles/img/*.webp' \
             ! -name '*.json' \
-            ! -name '*.html' -print)
+            ! -name '*.html' \
+            ! -path './robots.txt' \
+            ! -path './sitemap.xml' \
+            ! -path './og.png' -print)
           if [ -n "$unmatched" ]; then
             echo "::error::built files with no cache class (see PLAN 13.4):"
             echo "$unmatched"
@@ -120,7 +123,8 @@ jobs:
             --content-type "text/css; charset=utf-8" \
             --cache-control "public, max-age=31536000, immutable"
 
-      # Empty today. Content type is guessed from the extension (.svg, .woff2, .png all correct).
+      # Carries the analytics beacon pixel (assets/mtd.gif) and nothing else today. Content type is
+      # guessed from the extension (.gif, .svg, .woff2, .png all correct).
       - name: 'Sync C: any other hashed asset'
         run: |
           aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
@@ -145,6 +149,29 @@ jobs:
             --content-type "application/json" \
             --cache-control "public, max-age=300"
 
+      # ---- Pass E2-E4: root static files. Before Pass F, so index.html never references a
+      #      social image that is not in the bucket yet. ----
+      - name: 'Sync E2: robots.txt'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "robots.txt" \
+            --content-type "text/plain; charset=utf-8" \
+            --cache-control "public, max-age=3600"
+
+      - name: 'Sync E3: sitemap.xml'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "sitemap.xml" \
+            --content-type "application/xml; charset=utf-8" \
+            --cache-control "public, max-age=3600"
+
+      - name: 'Sync E4: social image'
+        run: |
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress \
+            --exclude "*" --include "og.png" \
+            --content-type "image/png" \
+            --cache-control "public, max-age=86400"
+
       # ---- Pass F: the entry point, LAST of the uploads ----
       - name: 'Sync F: index.html and 404.html'
         run: |
@@ -161,8 +188,12 @@ jobs:
           aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress --delete
 
       - name: Invalidate the mutable paths
+        id: invalidate
         run: |
-          aws cloudfront create-invalidation \
+          set -euo pipefail
+          id=$(aws cloudfront create-invalidation \
             --distribution-id "$DISTRIBUTION_ID" \
-            --paths "/" "/index.html" "/404.html" "/catalog.json" "/puzzles/*" \
-            --query 'Invalidation.Id' --output text
+            --paths "/*" \
+            --query 'Invalidation.Id' --output text)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          echo "::notice::invalidation $id"

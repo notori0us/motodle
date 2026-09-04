@@ -2,12 +2,12 @@
 // vite.config.ts's `preview.headers` (§13.5.2) serves the real CloudFront response-headers-policy
 // headers on this suite's webServer, so a `securitypolicyviolation` event here means the CSP is
 // wrong, not that the test is wrong (§13.9 DoD #5). Exercises the same verified winning sequence
-// as playthrough.spec.ts (make/model/year triples), plus the 404 page's own inline <style> element
-// (§13.5.1), since 'unsafe-inline' has to cover both the attribute and element cases.
+// as playthrough.spec.ts (make/model/year triples), plus the 404 and about pages' own inline
+// <style> element (§13.5.1), since 'unsafe-inline' has to cover both the attribute and element cases.
 import { expect, test } from '@playwright/test';
 import { closeHelpModal, DAY1, localTime, stubNavigatorShare } from './helpers';
 
-test('no CSP violations across a full winning round + 404 page', async ({ page, context }) => {
+test('no CSP violations across a full winning round + 404 and about pages', async ({ page, context }) => {
   const problems: string[] = [];
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.addInitScript(() => {
@@ -72,17 +72,23 @@ test('no CSP violations across a full winning round + 404 page', async ({ page, 
   await p2.addInitScript(() => {
     (window as any).__csp = [];
     document.addEventListener('securitypolicyviolation', (e: any) =>
-      (window as any).__csp.push(`404page: ${e.effectiveDirective || e.violatedDirective} blocked ${e.blockedURI}`),
+      (window as any).__csp.push(`${location.pathname}: ${e.effectiveDirective || e.violatedDirective} blocked ${e.blockedURI}`),
     );
   });
   p2.on('console', (m) => {
-    if (m.type() === 'error') v2.push('404page console: ' + m.text());
+    if (m.type() === 'error') v2.push('static page console: ' + m.text());
   });
   const r = await p2.goto('/404.html');
   expect(r?.status()).toBe(200);
   await expect(p2.getByRole('heading', { name: 'Nothing here' })).toBeVisible();
   v2.push(...(await p2.evaluate(() => (window as any).__csp ?? [])));
-  problems.push(...v2);
 
+  // B4: /about.html is the other standalone inline-<style> page (indexed, unlike 404.html).
+  const r3 = await p2.goto('/about.html');
+  expect(r3?.status()).toBe(200);
+  await expect(p2.getByRole('heading', { name: 'About Motodle' })).toBeVisible();
+  v2.push(...(await p2.evaluate(() => (window as any).__csp ?? [])));
+
+  problems.push(...v2);
   expect(problems, 'CSP / console problems:\n' + problems.join('\n')).toEqual([]);
 });

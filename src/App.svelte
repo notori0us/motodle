@@ -191,12 +191,15 @@
     </main>
 
     <footer class="app-footer">
-      © 2026 Chris Wallace · Photos: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
-        >Wikimedia Commons</a
-      >, Creative Commons licenses ·
-      <button type="button" id="mtd-credits-link" class="link-button" onclick={() => game.openCredits()}
-        >Photo credits</button
-      >
+      <div>
+        Photos: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"
+          >Wikimedia Commons</a
+        >, Creative Commons licenses ·
+        <button type="button" id="mtd-credits-link" class="link-button" onclick={() => game.openCredits()}
+          >Photo credits</button
+        >
+      </div>
+      <div>© 2026 Chris Wallace · <a href="/about.html">About &amp; privacy</a></div>
     </footer>
   </div>
 </div>
