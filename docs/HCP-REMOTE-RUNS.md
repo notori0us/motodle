@@ -1,5 +1,7 @@
 # Migrating `motodle` Terraform to HCP remote, VCS-driven runs with dynamic AWS credentials
 
+> **Status 2026-09-04:** steps 1–3 of §4 done (role `motodle-terraform-run` applied via terraform-core PR #1, run `run-vDqn67udX3KfU6hV`); §3 steps 0–2 done via the API (varset de-globalized and pinned to terraform-core, both vars now `env`, terraform-core plan-only `run-GMyTxU8ijMkdELt4` clean with zero warnings; `motodle` has its two env vars, execution mode `remote`, working directory `infra`). **Remaining: §3 step 3 (connect the GitHub App in the UI, trigger `infra/**`, auto-apply off) and the first plan-only run (§4 step 7), then §5 verification.**
+
 *Researched 2026-09-04 against the live HCP API, the live AWS account `051946164308`, and current HashiCorp docs. Nothing was changed by the research. Goal: nobody ever runs `terraform apply` from a laptop again — the same posture `terraform-core` already has.*
 
 ---
