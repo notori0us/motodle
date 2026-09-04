@@ -55,6 +55,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed: 2022 leads both the Commons title ('2022 CFMoto 700CL-X, front left') and the description; inside the blind ID's 2020-2025 range and inside catalogYears 2020-present. The 2023 capture/event date was not used. | blind: CFMoto 700CL-X (Heritage) 2020-2025 (high) | Variant naming: blind called it '700CL-X (Heritage)', the Commons description says '(base)'; the family entry 700CL-X covers both, so publish the family name. Year is a single-year claim on a model sold essentially unch"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:15:06.473Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -108,6 +113,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "1976 is fetcher-proposed and appears in both the Commons title and description; inside the blind 1974-1978 band and inside catalogYears 1972-1978. No override. | blind: Benelli 750 Sei (transverse air-cooled six, six pipes) 1974-1978 (high) | Derivative file — a cut-out/retouch of a Thesupermat photo, so attribution must credit both the source photographer and the retoucher (CC-BY-SA-4.0, share-alike is fine). The 1976 is asserted by the derivative's uploader, not by a museum placard (±1 tolerab"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:15:13.800Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -155,6 +165,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "crop-check 2026-09-03: focus set {\"x\":0.71,\"y\":0.71} | Fetcher-proposed, no override. Commons description reads \"A 1986 Bimota DB1 custom with 900 cc engine\" (only year token in the file); 1986 sits inside the blind ID's DB1 range 1985-1989 and inside catalogYears 1985-1989. | blind: Bimota DB1 (Ducati 750 Pantah-engined) 1985-1989 (high) | Description calls it a \"custom with 900 cc engine\" - the stock DB1 used the 748cc Pantah unit, so this bike has a non-stock engine; the red-painted forks and"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:15:16.144Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -225,6 +240,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "fetcher-proposed, from title + description ('DKW RT 350 S, Bj. 1956', 'Baujahr 1956', '5290 Stueck von 1955 bis 1956 gebaut'); 1956 sits inside claim.catalogYears 1953-1957 and inside the blind ID's 1955-1958 range. No override. | blind: DKW RT 350 S (two-stroke twin, chrome-panelled black tank, red/black dual seat) 1955-1958 (medium) | CHECK FIRST AT FULL RESOLUTION: two museum interpretive panels on the wall at original x 0.24-0.34, y 0.02-0.16. Both the blind agent (7x) and I (5x upscale) rea"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:15:24.135Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -278,6 +298,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed, title-leading: 'File:2001 Ducati 996 The Matrix Reloaded Petersen Automotive Museum.jpg' and the description 'A 2001 Ducati 996 as seen in The Matrix Reloaded'. 2001 sits inside the blind generation range 1999-2001 and inside claim.catalogYears 1999-2001. No operator override. | blind: Ducati 996 (monoposto, dark green) 1999-2001 (high) | Variant is not distinguished on Commons or in the blind read (996 vs 996S monoposto) — publish as the plain 996 family entry. 'Brembo' is cas"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:15:47.635Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -343,6 +368,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed, title-leading: 'File:1979 Bimota SB2 A. Berkel.jpg' plus the description 'A 1979 Bimota SB2 ... 140 were built between 1977 and 1979'. 1979 is inside claim.catalogYears 1977-1980 and at the +1 edge of the blind generation range 1977-1978, which the ±1 tolerance allows; the description's own build window 1977-1979 corroborates it. No operator override. | blind: Bimota SB2 (Suzuki GS750-engined) 1977-1978 (high) | Year 1979 is at the +1 edge of the blind range (1977-78) — glance "
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:15:54.583Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -390,6 +420,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1996, taken from the Commons description \"BMW R 1100 GS 1996\" (the only year token in the file). 1996 sits inside the blind ID's 1994-1999 generation window and inside claim.catalogYears 1994-1999. The EXIF capture date (2016-09-10) is the photo date, not the model year, and is not used. | blind: BMW R1100GS 1994-1999 (high) | 1) The R850GS carries identical bodywork and is not in the catalog - from this head-on angle nothing distinguishes them, so a small chance the physical bi"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:16:05.767Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -443,6 +478,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1935, accepted: the uploader's own title \"Indian Chief Bj. 1935\" (Bj. = Baujahr, year of construction) and the description \"Indian Chief Bj 1935 Hubraum 1200 ccm\" both state it as a build year, not a capture date (EXIF capture is 2009-01-11). 1935 falls inside the blind ID's 1934-1939 generation range and inside catalogYears 1922-1953. | blind: Indian Chief (74ci sidevalve V-twin, rigid frame) — possibly Sport Scout 45 1934-1939 (medium) | Year rests solely on the uploader's \"Bj"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:16:11.113Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -496,6 +536,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 2017, not an override. Commons title \"Sideview of Monster 1200S 2017 in Grey\" and the description repeat 2017, while dateTimeOriginal is 2018-04-14 — so 2017 is an explicit model-year claim by the owner/uploader, not the capture date or an event year. 2017 sits inside the blind ID's 2017-2021 generation window and inside claim.catalogYears 2014-2021. | blind: Ducati Monster 1200 S (liquid-cooled Testastretta, Öhlins) 2017-2021 (medium) | Variant naming: blind calls it the 1200 S"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:16:47.724Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -549,6 +594,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1976 (high confidence), not an override. Commons title \"1976 Honda CB550SuperSport 01\" plus description \"nice Bike from 1976\", against dateTimeOriginal 2017-06-25 — so 1976 is a model-year claim distinct from the capture year. Inside the blind ID's CB550F range 1975-1977 and inside claim.catalogYears 1974-1978. | blind: Honda CB550F Super Sport (SOHC four, 4-into-1) 1975-1977 (high) | Variant naming: it is the F (Super Sport, 4-into-1) on a family catalog entry honda-cb550 — pub"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:17:07.701Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -607,6 +657,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed: 1992 is the leading token in both the Commons title ('1992 Bimota Tesi 1D 904SR, front right') and the description; it sits inside the blind ID's 1990-1994 range and inside catalogYears 1990-1998. The 2023 capture date and the '2023 Greenwich Concours' event year were ignored as non-model years. | blind: Bimota Tesi 1D 1990-1994 (high) | Variant naming: this is the rare 904SR (904cc Ducati engine, twenty built) being published under the family entry Tesi 1D - fine, but the answ"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:17:19.041Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -660,6 +715,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1950, from the Commons title and description \"1950 Sunbeam S7\" (the rest of the description is only the venue, Classic Motor Hub; capture date 2021-07-21 plays no part). Inside blind range 1946-1956 and inside catalog 1946-1957. | blind: Sunbeam S7 (in-line twin; mist green, most likely the S7 De Luxe) 1946-1956 (high) | Variant naming: this mist-green machine is most likely an S7 De Luxe (1949-on) and the catalog entry is the family 'S7' — if the game displays the answer as pla"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:17:27.242Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -712,6 +772,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed and accepted as-is: 2008 comes from the file title 'File:2008 Ducati D-16 RR.jpg' (leading, high-confidence token), not from the capture date (Exif 30 June 2022, so the 2022 date is correctly ignored). 2008 falls inside the blind ID's 2007–2008 range and inside claim.catalogYears 2007–2010. No operator override. | blind: Ducati Desmosedici RR 2007-2008 (high) | Year rests solely on the uploader's title, not a plaque or description — 2008 vs 2007 is a ±1 risk, though both are ins"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:17:53.310Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -761,6 +826,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "fetcher-proposed, from the Commons description 'Jawa 350 typ 634-8, 1978'; 1978 sits inside claim.catalogYears 1973-1984 and inside the blind ID's 1973-1984 range. No override. | blind: Jawa 350 Type 634 (two-stroke twin, red tank with chrome panels, twin pipes) 1973-1984 (high) | Variant naming: blind ID calls type 634 from the panel shape and cites the later 638 as the alternative if misread; the description's '634-8' matches the claimed modelId, so this is low risk but the published answer sh"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:17:57.184Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -819,6 +889,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1993, accepted as-is: Commons title 'File:1993 Ducati 888, parked.jpg' plus description 'Ducati 888 Strada de 1993'. Not a capture-date artefact (DateTimeOriginal is 2026-06-07). 1993 sits inside the blind ID's 1993-1994 Strada-livery range and inside claim.catalogYears 1991-1994. | blind: Ducati 888 (Superbike 888 Strada, Desmoquattro) 1993-1994 (high) | The '888' and 'SUPERBIKE DESMOQUATTRO' decals become readable from roughly level 3 onward (intended badging, but it makes the"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:18:04.830Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -877,6 +952,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "crop-check 2026-09-03: focus set {\"x\":0.4,\"y\":0.44} sourceCrop {\"x\":0,\"y\":0,\"w\":1,\"h\":0.93} | Fetcher-proposed, no override. Title and description both read 'Vincent Rapide (1951), musee automobile de Valencay'; 1951 falls inside the blind ID's Series C range 1949-1955 (and inside 1946-1955 even if the Girdraulic fork call is wrong) and inside catalogYears 1946-1955. | blind: Vincent Rapide (Series C, 998cc V-twin) 1949-1955 (medium) | The small yellow display card at the bottom edge (original x"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:18:15.145Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -924,6 +1004,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 2015, not an override. The Commons description 'Harley-Davidson Street 750 2015 XG750' states a model year for this bike (and names the XG750 designation), it is not a capture date — dateTimeOriginal is 2017-02-19, comfortably after. 2015 is inside the blind ID's 2014-2020 XG window and inside catalogYears 2014-2020. | blind: Harley-Davidson Street 750 (XG750, liquid-cooled Revolution X V-twin) — visually identical to the Street 500 2014-2020 (medium) | 750 vs 500 is NOT visible"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:18:22.657Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -989,6 +1074,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1971, taken from the Commons title/description \"Laverda 750SF 1971-1972\" (the leading year of the uploader's two-year range). 1971 sits inside the blind ID's 1971-1974 early-SF generation and inside claim.catalogYears 1971-1977. I used my one allowed WebFetch on the file page: no year category, no longer description, no Flickr-side model year - only the same \"1971-1972\" range - so no override is warranted and yearProposed stands. | blind: Laverda 750 SF (early, drum front brake)"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:18:26.814Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1042,6 +1132,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1994, not an override. Both the file title ('Ducati Monster 900 1994 at QGOMA, Brisbane, 01') and the description assert 1994 for this specific machine, not a production span or a capture date (dateTimeOriginal is 2020-12-05). 1994 sits inside the blind ID's 1993-1999 window and inside catalogYears 1993-2002. | blind: Ducati Monster 900 (M900), air-cooled 2-valve desmo, red 1993-1999 (high) | Variant naming: the family entry ducati-monster would also fit; ducati-monster-900 is r"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:18:38.287Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1148,6 +1243,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": ""
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:18:55.619Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1242,6 +1342,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "crop-check 2026-09-03: focus set {\"x\":0.33,\"y\":0.53} | Fetcher-proposed, no override. Commons description: \"A photo of the Kawasaki Vulcan S. The graphic pattern is for the 2025 model.\" Capture date 2024-12-23 is consistent with a 2025-model-year bike on a showroom floor in December 2024 (and is itself a capture date, not the model year). 2025 is inside catalogYears 2015-present and one year past the blind ID's 2015-2024 range, i.e. within the allowed +1. | blind: Kawasaki Vulcan S (Special Edit"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:04.830Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1295,6 +1400,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "fetcher-proposed, from title + description ('MV Agusta 750 S 1974 noBG', 'MV Agusta 750 S Bj. 1974'); 1974 sits inside claim.catalogYears 1971-1975 and inside the blind ID's 1970-1975 range (and inside its narrower disc-braked 1973-75 read). No override. | blind: MV Agusta 750 S (750 Sport, four-cylinder, red/white/blue Sport livery, twin front discs) 1970-1975 (high) | Blind ID names the '750 S'; the catalog entry is '750 Sport' — the same machine, so treat as the family entry, not a mismatch. "
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:08.317Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1348,6 +1458,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1987, accepted: Commons title 'File:1987 Honda CBR600F Hurricane, front right.jpg' and description '1987 Honda CBR600F Hurricane at the 2021 Lime Rock Historic Festival'. The 2021 in the description is the event/capture year and was correctly not used. 1987 is the first year of the blind ID's 1987-1990 PC19/PC23 range and the first year of catalog 1987-2007. | blind: Honda CBR600F Hurricane (PC19/PC23) 1987-1990 (high) | The 'Hurricane' + 'HONDA' tank decal (x0.37-0.47, y0.24-0."
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:15.984Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1395,6 +1510,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "crop-check 2026-09-03: focus set {\"x\":0.41,\"y\":0.52} | Fetcher-proposed, no override. Commons description reads 'KTM Super Duke R 2017' (the only year token; the 2018-12-19 file date is a capture/upload date, not a model year). 2017 is the first year of the blind ID's 2017-2019 'Beast 2.0' generation range and inside catalogYears 2014-present. | blind: KTM 1290 Super Duke R (\"Beast 2.0\", 2017 facelift) 2017-2019 (high) | The level-2 window clips the edge of the dark-red 'READY TO RACE' stencil ("
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:25.059Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1448,6 +1568,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed, title-leading: 'File:1971 Norton 750 Commando Production Racer, front right (Greenwich 2025).jpg' and description '1971 Norton 750 Commando Production Racer at the 2025 Greenwich Concours d'Elegance'. 1971 is inside the blind range 1970-1973 and inside claim.catalogYears 1968-1977. The 2025 in the title and description is the event year and was correctly excluded as a model year. No operator override. | blind: Norton Commando 750 (Production Racer / 'Yellow Peril' style — fairi"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:33.082Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1542,6 +1667,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "2014 is fetcher-proposed and taken from the Commons description text, not from the 2024 capture date; inside the blind 2013-2016 band and inside catalogYears 2013-present. No override. | blind: KTM 390 Duke (first generation, orange trellis frame, white/orange bodywork) 2013-2016 (medium) | Displacement is not visible from this angle — the gen-1 125/200 Duke share this bodywork, so '390' rests on the ABS tone ring plus orange wheels plus the uploader's caption rather than a badge; glance at the "
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:41.582Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1659,6 +1789,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 2015, from the Commons title \"2015 KTM RC390 right\" and the description \"2015 KTM RC390 at the 2014-2015 Seattle International Motorcycle Show\" — the 2014-2015 there is the show season, the leading 2015 is the model year of a bike shown in November 2014 (EXIF 2014-11-22), which is exactly how a new model year is presented at a late-autumn show. Inside blind range 2014-2016 and inside catalog 2014-present. | blind: KTM RC 390 (first generation) 2014-2016 (high) | Smallest file in"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:45.766Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1706,6 +1841,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed, from the Commons description: 'MuZ Renn-Skorpion, Baujahr 1995' — an explicit build year for a museum exhibit (Motorradmuseum Schloss Augustusburg), not the 2024 capture/exhibition date, which the fetcher correctly did not propose. 1995 is inside the blind ID's 1994–1999 range and inside claim.catalogYears 1994–2000. No operator override. | blind: MZ Skorpion race bike (Skorpion Cup / Sport-based single-cylinder racer, #70) 1994-1999 (medium) | It is the racing version of a roa"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:19:51.136Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1759,6 +1899,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 2020, from title \"Moto Guzzi V85 TT, 2020 (2)\" and description \"Moto Guzzi V85 TT de 2020...\" — an explicit model year; the photo itself was taken 2022-05-28 at an Italian-bike day, so the capture year is not being mistaken for the model year. 2020 is inside the blind ID's 2019-2024 range and inside catalogYears 2019–present. | blind: Moto Guzzi V85 TT (with factory panniers — Travel/Adventure spec) 2019-2024 (high) | Operator should glance at the background figure (white cap, b"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:20:06.783Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1811,6 +1956,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 1986, from the Japanese description '1986年型スズキRG250Γ ウォルターウルフ・シルバーカラー' — '1986年型' literally means '1986 model year'. Capture date is 2024-10-11, so this is a model-year statement, not a photo date. Inside blind range 1986-1987 and inside catalog 1983-1987. | blind: Suzuki RG250 Gamma 'Walter Wolf' (RG250 Gamma WW) 1986-1987 (medium) | Verify the crop before publish — it is the only thing keeping the misleading 'NS400R' out of the reveal. A red wheel from another exhibit still in"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:20:14.529Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -1917,6 +2067,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed, title-leading: 'File:1985 Yamaha FZ750 noBG.jpg' with the description '1985 Yamaha FZ750 in the Yamaha Communication Plaza'. 1985 is the first year of the blind range 1985-1986 and the first year of claim.catalogYears 1985-1991. The 2011 EXIF capture date was correctly ignored. No operator override. | blind: Yamaha FZ750 (1FN 'Genesis', 20-valve, first generation) 1985-1986 (high) | The 'FZ750' tail decal at 0.72-0.78x/0.39-0.43y is the definitive capacity giveaway and comes in"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:20:18.270Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -2017,6 +2172,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed and accepted: 1991 appears in both the title ('File:YAMAHA FZR1000 1991.JPG') and the description ('ヤマハFZR1000(3GM)'1991年モデル' — literally '1991 model'), which is an explicit model-year statement, not the 2010 capture date. 1991 is at the bottom edge of the blind ID's 1991–1995 range and inside claim.catalogYears 1987–1995. No operator override. | blind: Yamaha FZR1000 EXUP (3LE-generation Genesis/Deltabox) 1991-1995 (medium) | The Commons description says model code 3GM while th"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:20:22.430Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
@@ -2070,6 +2230,11 @@
         "cropFractions": null,
         "modelIdOverride": null,
         "note": "Fetcher-proposed 2019, accepted: Commons title and description both read '2019 Triumph Scrambler 1200 XE Guy Martin custom built' (capture date 2023-01-28, correctly ignored; no event year in the title). 2019 is the first year of the blind ID's 2019-2023 Scrambler 1200 range and inside catalog 2006-present. | blind: Triumph Scrambler 1200 XE (off-road/desert-spec show build) 2019-2023 (high) | Two things the operator should knowingly accept. (1) Naming: the catalog entry is the generic 'Scramble"
+      },
+      "check": {
+        "ranAt": "2026-09-04T20:20:28.562Z",
+        "ocr": [],
+        "faces": null
       }
     },
     {
