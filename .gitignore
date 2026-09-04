@@ -15,3 +15,4 @@ infra/.terraform/
 infra/tfplan
 *.tfstate
 *.tfstate.backup
+infra/*.tfvars
