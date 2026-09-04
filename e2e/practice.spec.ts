@@ -5,6 +5,7 @@
 //
 // Clock pinned to NO_PUZZLE_DAY -- well past the last fixture (2026-09-04) -- so "today" has no
 // puzzle file, and every fixture date is a valid `date < today` practice entry in the archive.
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { closeHelpModal, localTime, NO_PUZZLE_DAY } from './helpers';
 
@@ -94,20 +95,41 @@ test('practice mode: a full win against an archived puzzle never touches motodle
   expect(JSON.parse(practiceRecord as string).status).toBe('won');
 
   // ---- The credits view (§5.10.4), second (cheaper) leg -----------------------------------------
-  // "Today" is still NO_PUZZLE_DAY, well past every fixture, so all three committed puzzles are
-  // eligible -- newest first, and 3 < CREDITS_PAGE_SIZE means no "Show more". Also exercises
-  // fixture #3's real, non-null creditNote (the only fixture that has one).
+  // "Today" is still NO_PUZZLE_DAY, well past every committed puzzle, so EVERY puzzle in the
+  // manifest is eligible -- newest first, CREDITS_PAGE_SIZE (20) per batch. Expectations are
+  // derived from the committed manifest so scheduling more content never breaks this spec, and
+  // paging through with "Show more" until it disappears exercises the batching for real.
+  // Also exercises fixture #3's real, non-null creditNote (the only fixture that has one).
   await page.getByRole('button', { name: 'Close' }).click(); // close ResultModal
   await page.locator('#mtd-credits-link').click(); // footer entry point
   await expect(page.getByRole('heading', { name: 'Photo credits' })).toBeVisible();
 
+  const manifest = JSON.parse(readFileSync(new URL('../public/puzzles/manifest.json', import.meta.url), 'utf8')) as {
+    puzzles: { date: string }[];
+  };
+  const eligible = manifest.puzzles
+    .map((p) => p.date)
+    .filter((d) => d < NO_PUZZLE_DAY)
+    .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0)); // newest first, as eligibleCreditDates() orders them
+  const PAGE = 20; // CREDITS_PAGE_SIZE
+
   const creditRows = page.locator('[data-mtd-credit-row]');
-  await expect(creditRows).toHaveCount(3);
-  await expect(creditRows.nth(0)).toHaveAttribute('data-date', '2026-09-04'); // #3, newest
-  await expect(creditRows.nth(1)).toHaveAttribute('data-date', '2026-09-03'); // #2
-  await expect(creditRows.nth(2)).toHaveAttribute('data-date', '2026-09-02'); // #1, oldest
-  await expect(creditRows.nth(0)).toContainText('Motodle #3');
-  await expect(creditRows.nth(0)).toContainText('1995 Ducati 916');
-  await expect(page.getByText('Przemysław Jahr / Wikimedia Commons')).toBeVisible(); // fixture #3's creditNote
+  await expect(creditRows).toHaveCount(Math.min(PAGE, eligible.length));
+  await expect(creditRows.nth(0)).toHaveAttribute('data-date', eligible[0]); // newest first
+  await expect(creditRows.nth(1)).toHaveAttribute('data-date', eligible[1]);
+
+  // Page through: "Show more" is present iff something is still unloaded, and vanishes at the end.
+  for (let loaded = PAGE; loaded < eligible.length; loaded += PAGE) {
+    await expect(page.locator('#mtd-credits-more')).toBeVisible();
+    await page.locator('#mtd-credits-more').click();
+    await expect(creditRows).toHaveCount(Math.min(loaded + PAGE, eligible.length));
+  }
   await expect(page.locator('#mtd-credits-more')).toHaveCount(0);
+  await expect(creditRows).toHaveCount(eligible.length);
+  await expect(creditRows.last()).toHaveAttribute('data-date', '2026-09-02'); // #1, oldest
+
+  const fixture3 = page.locator('[data-mtd-credit-row][data-date="2026-09-04"]');
+  await expect(fixture3).toContainText('Motodle #3');
+  await expect(fixture3).toContainText('1995 Ducati 916');
+  await expect(page.getByText('Przemysław Jahr / Wikimedia Commons')).toBeVisible(); // fixture #3's creditNote
 });

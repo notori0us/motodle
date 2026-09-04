@@ -81,6 +81,9 @@ function toCreditRow(puzzle: Puzzle): CreditRow {
   };
 }
 
+/** Credits are fetched in bursts this wide (see fetchCreditsBatch). */
+const CREDITS_FETCH_CONCURRENCY = 4;
+
 export class GameStore {
   screen = $state<Screen>('loading');
 
@@ -422,7 +425,17 @@ export class GameStore {
       return;
     }
 
-    const results = await Promise.all(batch.map((date) => this.loadPuzzleCached(date)));
+    // Small chunks, not 20 fetches at once: a browser that has just played a round (images still
+    // streaming) drops some of a 20-wide burst as 'load-failed', and a dropped row is invisible to
+    // the player. One retry per date covers the transient case; genuine 404s are not retried.
+    const results: PuzzleLoadResult[] = [];
+    for (let i = 0; i < batch.length; i += CREDITS_FETCH_CONCURRENCY) {
+      const chunk = batch.slice(i, i + CREDITS_FETCH_CONCURRENCY);
+      const first = await Promise.all(chunk.map((date) => this.loadPuzzleCached(date)));
+      for (let j = 0; j < chunk.length; j++) {
+        results.push(first[j].status === 'load-failed' ? await this.loadPuzzleCached(chunk[j]) : first[j]);
+      }
+    }
     const newRows: CreditRow[] = [];
     let sawLoadFailed = false;
     for (const result of results) {
@@ -450,7 +463,8 @@ export class GameStore {
       return result;
     }
     const result = await loadPuzzle(date);
-    this.puzzleCache.set(date, result);
+    // A transient failure must not stick for the whole session — only settled outcomes are cached.
+    if (result.status !== 'load-failed') this.puzzleCache.set(date, result);
     return result;
   }
 
