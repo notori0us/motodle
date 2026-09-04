@@ -68,6 +68,19 @@ candidates from the first batch, nine of which only need a tighter crop to fit t
 
 ## 4. Content
 
+**Pipeline direction (measured, see docs/CONTENT-WITHOUT-AI.md):** eight deterministic gates in
+`tools/fetch.ts` (mime, catalog-year window, capture-date year, second make in title, sidecar in
+title, production-span prose, detail and event tokens in the filename) remove 35 % of bad candidates
+at 93 % precision for free; a new `tools/check.ts` (tesseract OCR for year text on every rendered
+level, YuNet face detection, optional COCO detector for sole-subject) turns the placard and faces
+rules into build-time tests; then ONE identity-only vision pass over the ~half nothing flags; then
+the operator's skim. Wrong-bike (21 % of reviewed candidates) has no metadata or classic-CV handle,
+so a fully model-free batch is possible only at ~80 operator-minutes per 125 candidates. Also: fix
+`dateTimeOriginalYear()` (reads only a leading token; Commons returns free-text HTML), add
+`prop=categories` to the fetch query, use `filew:>2182` in searches, and fetch
+`Category:Motorcycles on white background` (299 files, 5/5 passed) as the first tier.
+
+
 - Next batch by ~2026-09-25 so the runway never drops under two weeks (fetch → blind ID →
   adjudication → crop check, ~1 evening of agent time per 30 puzzles).
 - Catalog gaps the first batch exposed: a vintage Indian Scout (the current entry is the 2015+
