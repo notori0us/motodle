@@ -6331,6 +6331,8 @@ output "gh_variable_commands" {
 
 ### 13.3 State — HCP Terraform, workspace `motodle`, execution mode **local**
 
+> **Superseded 2026-09-04:** the workspace is now VCS-driven with remote execution and dynamic AWS credentials (role `motodle-terraform-run`, auto-apply off). See `docs/HCP-REMOTE-RUNS.md`. The D9 decision below is kept as history.
+
 The brief's original S3 state bucket is **withdrawn** (D9). There is **no state bucket, no bootstrap
 `aws s3api` command, no DynamoDB table and no `use_lockfile`**. If any of those words appear in an
 implementation, it is wrong.
