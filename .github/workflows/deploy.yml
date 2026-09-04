@@ -7,7 +7,7 @@ on:
     workflows: ["CI"]
     types: [completed]
   # SECURITY-CRITIC B1 / OPS-CRITIC B1 correction: the deploy role's OIDC trust policy
-  # (infra/iam.tf) admits ONLY sub "repo:reenchree/motodle:ref:refs/heads/main" (§13.2.8).
+  # (infra/iam.tf) admits ONLY sub "repo:notori0us/motodle:ref:refs/heads/main" (§13.2.8).
   # `gh workflow run deploy.yml --ref <branch-or-tag>` mints a token with that ref in the
   # sub and AssumeRoleWithWebIdentity fails; a raw SHA isn't even a legal --ref value. So
   # rollback dispatches stay on `main` (sub keeps refs/heads/main) and pass the target

@@ -4717,7 +4717,7 @@ D5 stays a one-line change.
 
 ## 11. Revision log
 
-> **R7 (2026-09-03, first deploy):** the first `deploy.yml` run failed `AssumeRoleWithWebIdentity`. CloudTrail showed GitHub issuing the *immutable* OIDC subject `repo:reenchree@213154582/motodle@1355164768:ref:refs/heads/main` (owner and repo numeric ids) rather than the classic `repo:reenchree/motodle:ref:refs/heads/main`. The trust policy now lists both forms (`local.github_subs`, ids in `variables.tf`). terraform-core's `GitHubOIDCECRPushRole` (`repo:reenchree/*:*`) has the same exposure.
+> **R7 (2026-09-03, first deploy):** the first `deploy.yml` run failed `AssumeRoleWithWebIdentity`. CloudTrail showed GitHub issuing the *immutable* OIDC subject `repo:reenchree@213154582/motodle@1355164768:ref:refs/heads/main` (owner and repo numeric ids) rather than the classic `repo:notori0us/motodle:ref:refs/heads/main`. The trust policy now lists both forms (`local.github_subs`, ids in `variables.tf`). terraform-core's `GitHubOIDCECRPushRole` (`repo:reenchree/*:*`) has the same exposure.
 
 
 This revision applied every BLOCKER from both critics, the cheap-and-clearly-right IMPROVEMENTS, the
@@ -5333,7 +5333,7 @@ Everything else — rows 2, 3, 4, 6, 8 — is the *same command* locally and in 
 Immediately under the `# Motodle` H1, before the description paragraph:
 
 ```markdown
-[![CI](https://github.com/reenchree/motodle/actions/workflows/ci.yml/badge.svg)](https://github.com/reenchree/motodle/actions/workflows/ci.yml)
+[![CI](https://github.com/notori0us/motodle/actions/workflows/ci.yml/badge.svg)](https://github.com/notori0us/motodle/actions/workflows/ci.yml)
 ```
 
 - The path segment is the **workflow file name** (`ci.yml`), not the `name:` field — GitHub accepts
@@ -5544,7 +5544,7 @@ variable "domain_name" {
 variable "github_repository" {
   description = "owner/repo allowed to assume the deploy role."
   type        = string
-  default     = "reenchree/motodle"
+  default     = "notori0us/motodle"
 }
 
 variable "github_branch" {
@@ -6247,7 +6247,7 @@ The rendered trust policy — this is the shape to eyeball in the plan output:
       "Condition": {
         "StringEquals": {
           "token.actions.githubusercontent.com:sub": [
-            "repo:reenchree/motodle:ref:refs/heads/main",
+            "repo:notori0us/motodle:ref:refs/heads/main",
             "repo:reenchree@213154582/motodle@1355164768:ref:refs/heads/main"
           ],
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
@@ -6389,7 +6389,7 @@ on:
     workflows: ["CI"]
     types: [completed]
   # SECURITY-CRITIC B1 / OPS-CRITIC B1 correction: the deploy role's OIDC trust policy
-  # (infra/iam.tf) admits ONLY sub "repo:reenchree/motodle:ref:refs/heads/main" (§13.2.8).
+  # (infra/iam.tf) admits ONLY sub "repo:notori0us/motodle:ref:refs/heads/main" (§13.2.8).
   # `gh workflow run deploy.yml --ref <branch-or-tag>` mints a token with that ref in the
   # sub and AssumeRoleWithWebIdentity fails; a raw SHA isn't even a legal --ref value. So
   # rollback dispatches stay on `main` (sub keeps refs/heads/main) and pass the target
@@ -6907,7 +6907,7 @@ gh run watch
 `gh workflow run deploy.yml --ref <branch>` fails at the AssumeRole step by design — the trust
 policy is `StringEquals` on `refs/heads/main` only (`infra/iam.tf`, §13.2.8); `--ref` also cannot
 take a SHA. The commit to deploy is an **input** (`inputs.ref`), never a ref: the dispatch itself
-always runs from `main` (so the OIDC `sub` stays `repo:reenchree/motodle:ref:refs/heads/main`), and
+always runs from `main` (so the OIDC `sub` stays `repo:notori0us/motodle:ref:refs/heads/main`), and
 the workflow's checkout step resolves `inputs.ref || github.event.workflow_run.head_sha ||
 github.sha` (§13.4 note 2) to pick the commit it actually builds. Expect the same ~3 minutes plus
 ~60 s of invalidation. Two caveats: hashed `/assets/*` files from the newer build are deleted, so

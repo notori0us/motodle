@@ -1,7 +1,7 @@
 import type { Puzzle } from '../../schema/types';
 
 /** owner/repo the "report an inaccuracy" link files against (ROADMAP §1). */
-export const GITHUB_REPOSITORY = 'reenchree/motodle';
+export const GITHUB_REPOSITORY = 'notori0us/motodle';
 export const ISSUE_TEMPLATE = 'inaccuracy.yml';
 
 /**

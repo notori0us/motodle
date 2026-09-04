@@ -759,7 +759,7 @@ curl -sI https://playmotodle.com/sitemap.xml | sed -n '/^content-type/Ip'
 **Files**
 - `public/about.html` — **new.** Modelled on `public/404.html`: standalone document, self-contained inline `<style>` **element** (which is exactly what `style-src 'self' 'unsafe-inline'` already permits — 404.html is the only thing in the repo depending on that half of the directive `[repo-readiness §3]`), no external requests, no JS. **No `noindex`** — unlike 404.html, this page is meant to be indexed and is in the sitemap. A root `*.html` needs **no deploy change at all**: it passes today's cache-class assertion via `! -name '*.html'` and is uploaded by Sync F with `text/html; charset=utf-8` and the html cache class. Head: `<title>About — Motodle</title>`, the same charset/viewport/color-scheme metas as 404.html, plus `<link rel="canonical" href="https://playmotodle.com/about.html">`. Sections, in order: `<h1>About Motodle</h1>`; a short "what it is" paragraph; `<h2 id="privacy">Privacy</h2>` carrying **the A.7 text verbatim**; `<h2>Photos and licensing</h2>` carrying the three-part paragraph above, in prose, with a link to `https://commons.wikimedia.org/`; `<h2>Feedback</h2>` carrying the contact affordance; and a closing line `© 2026 Chris Wallace · <a href="/">Motodle</a>`.
 - `src/App.svelte` — footer edit, below.
-- `package.json` — set `"author": "Chris Wallace"`; add `"repository": { "type": "git", "url": "git+https://github.com/reenchree/motodle.git" }` and `"homepage": "https://playmotodle.com"`. Anchor on the existing `"author": ""` string, not a line number.
+- `package.json` — set `"author": "Chris Wallace"`; add `"repository": { "type": "git", "url": "git+https://github.com/notori0us/motodle.git" }` and `"homepage": "https://playmotodle.com"`. Anchor on the existing `"author": ""` string, not a line number.
 - `README.md` — see B5.
 - `index.html` — `<meta name="author" content="Chris Wallace">` (already listed in B2).
 
@@ -801,7 +801,7 @@ If it still fails, drop the `© 2026 Chris Wallace ·` prefix from the footer (i
 
 ```html
       <p>Found a wrong answer, a bad crop, or a bug?
-        <a href="https://github.com/reenchree/motodle/issues">Open an issue on GitHub</a>.</p>
+        <a href="https://github.com/notori0us/motodle/issues">Open an issue on GitHub</a>.</p>
 ```
 
 No personal email, because a `mailto:` on a page a Reddit thread points at is a spam magnet and the address cannot be rotated. **Sequencing constraint: this link 404s for anonymous visitors until the repo is public (B6).** Either land B4 and B6 together, or ship `about.html` at launch with the Feedback section's link omitted and add it in the same push as the flip. See operator decision D6.
@@ -841,7 +841,7 @@ curl -s https://playmotodle.com/ | grep -o 'meta name="author"[^>]*'
 
 **Definition of done.** No occurrence of `repo is private` remains: `grep -rn 'repo is private' README.md` returns nothing. `grep -c 'Chris Wallace' README.md` ≥ 1.
 
-**Verify live.** N/A (not deployed). After B6: `curl -s https://raw.githubusercontent.com/reenchree/motodle/main/README.md | head -20`.
+**Verify live.** N/A (not deployed). After B6: `curl -s https://raw.githubusercontent.com/notori0us/motodle/main/README.md | head -20`.
 
 ---
 
@@ -865,13 +865,13 @@ Agents describe; **the operator performs every step**. Do these in order, all be
    The operator's address is on every commit's author *and* committer metadata. On the flip that becomes public, and it cannot be removed without a history rewrite. Record this as a **knowing decision, not an oversight** — alongside D7's note that untracking `.claude/` leaves its blobs reachable.
 3. **Re-run the secret scan over `git rev-list --all` before the flip — do not inherit recon's.** The recon scan of all reachable blobs for `AKIA…`, `BEGIN … PRIVATE KEY`, `ghp_…` and `xox[baprs]-` matched **0 files** `[repo-readiness §7]`, but it recorded the history as **15** commits when the repo has **16** (`git rev-list --all --count` → 16, verified during critique). The scope claim is off by one, so re-run rather than trust it. Note step 1 does not rewrite history — the `.claude/` blobs stay reachable; see D7.
 4. **Decide on the AWS account id.** `docs/PLAN.md` carries `051946164308` on **15** lines, including the OIDC provider ARN, the bucket name, the deploy role ARN, and a local filesystem path `/home/chris/workspace/motodle/.claude/skills/impeccable` `[repo-readiness §7]`. No IPs, no homelab hostnames, no email addresses. See operator decision D8 (default: leave).
-5. **Flip:** `gh repo edit reenchree/motodle --visibility public --accept-visibility-change-consequences` (or the Settings → General → Danger Zone toggle).
+5. **Flip:** `gh repo edit notori0us/motodle --visibility public --accept-visibility-change-consequences` (or the Settings → General → Danger Zone toggle).
 6. **Immediately after:** confirm the CI badge renders anonymously, and confirm the `runway.yml` workflow from B9 is enabled (`gh workflow list`) — scheduled workflows behave differently on public repos (B9).
 7. **Do not touch the deploy path.** The OIDC trust policy is `StringEquals` over `local.github_subs` = the legacy *and* immutable subject forms, built from `var.github_owner_id = 213154582` / `var.github_repository_id = 1355164768` (`infra/locals.tf`, `infra/iam.tf`) `[ops §9]` — visibility does not affect it.
 
 **Adjacent finding, not blocking this launch.** `terraform-core`'s `GitHubOIDCECRPushRole` trusts `repo:reenchree/*:*` only. Live `gh api …/actions/oidc/customization/sub` shows `dyndns` and `maitre-d` still issue the **legacy** subject form, so **it is not broken today** — contradicting the memory note that says it will break on next use `[ops §9]`. It breaks for any newly created `reenchree` repo. Cheap forward-safe fix, at the operator's convenience: add `"repo:reenchree@213154582/*:*"` to that role's `values` list and apply in `terraform-core`. **Motodle is unaffected.**
 
-**Definition of done.** `gh repo view reenchree/motodle --json visibility` returns `"public"`; `git ls-files .claude | wc -l` returns `0`; an anonymous `curl` of the README raw URL succeeds.
+**Definition of done.** `gh repo view notori0us/motodle --json visibility` returns `"public"`; `git ls-files .claude | wc -l` returns `0`; an anonymous `curl` of the README raw URL succeeds.
 
 ---
 
@@ -1235,7 +1235,7 @@ jobs:
 **Verify live.**
 ```bash
 curl -s https://playmotodle.com/puzzles/manifest.json | jq -r '.latest.date'
-gh workflow list --repo reenchree/motodle | grep -i runway
+gh workflow list --repo notori0us/motodle | grep -i runway
 gh run list --workflow runway.yml --limit 5
 ```
 
@@ -1294,7 +1294,7 @@ curl -sI "https://playmotodle.com/assets/mtd.gif?e=w&n=1&c=test" | sed -n '1p;/^
 # 4. The card renders: paste https://playmotodle.com/?r=test into a Discord DM to yourself.
 # 5. Play one full round on a real phone (PLAN 7.5 row 10 keeps this a manual gate).
 # 6. Repo is public and the README no longer says it is private.
-gh repo view reenchree/motodle --json visibility
+gh repo view notori0us/motodle --json visibility
 ```
 
 **One further OPERATOR ACTION before the first post — the only end-to-end proof the beacon works.** Play one *real* (non-practice) round to completion, then run Q5 (A.6) restricted to that date and confirm a non-zero row. Step 3 proves the pixel is *reachable*; only this proves it is *fired and logged*. Allow for the ~4 h standard-logging delivery lag before expecting the row, and do this during the 24 h baseline window C.6 requires anyway.
@@ -1367,7 +1367,7 @@ Some notes since this sub asks direct questions:
 - There's an archive — the icon in the header — so you can play past days without waiting.
 - Every photo is from Wikimedia Commons under a CC or public-domain licence, credited in the
   app (footer → Photo credits) with a link to the file and the licence deed.
-- It's free and it stays free; source is at github.com/reenchree/motodle.
+- It's free and it stays free; source is at github.com/notori0us/motodle.
 
 Feedback very welcome, especially on the year hint — that's the rule people find least
 obvious. Please don't post today's answer in the thread; spoiler tags are fine for a past day.

@@ -1,6 +1,6 @@
 # Migrating `motodle` Terraform to HCP remote, VCS-driven runs with dynamic AWS credentials
 
-> **Status 2026-09-04: COMPLETE.** Role `motodle-terraform-run` applied via terraform-core PRs #1 and #2 (two data-source read permissions added after the first remote plan hit AccessDenied). Varset de-globalized and pinned to terraform-core, vars `env`. Workspace `motodle`: remote execution, VCS `reenchree/motodle`, working directory `infra`, trigger `infra/**`, auto-apply off. First clean plan-only: `run-rQM8zZXwhgToi566`, 0 changes, assumed role `motodle-terraform-run`. From here, `infra/` changes are plan-on-push with a manual Confirm & Apply in HCP; `terraform apply` from a laptop is refused.
+> **Status 2026-09-04: COMPLETE.** Role `motodle-terraform-run` applied via terraform-core PRs #1 and #2 (two data-source read permissions added after the first remote plan hit AccessDenied). Varset de-globalized and pinned to terraform-core, vars `env`. Workspace `motodle`: remote execution, VCS `notori0us/motodle`, working directory `infra`, trigger `infra/**`, auto-apply off. First clean plan-only: `run-rQM8zZXwhgToi566`, 0 changes, assumed role `motodle-terraform-run`. From here, `infra/` changes are plan-on-push with a manual Confirm & Apply in HCP; `terraform apply` from a laptop is refused.
 
 *Researched 2026-09-04 against the live HCP API, the live AWS account `051946164308`, and current HashiCorp docs. Nothing was changed by the research. Goal: nobody ever runs `terraform apply` from a laptop again — the same posture `terraform-core` already has.*
 
@@ -215,14 +215,14 @@ curl -sS --request PATCH \
   https://app.terraform.io/api/v2/workspaces/ws-AbRYmYGwq43YfTv1
 ```
 
-**3. Connect VCS — UI only.** The VCS provider is a GitHub App installation (`ghain-znnFHszW6frTYGv2`); the API token cannot enumerate or attach it (`GET /api/v2/github-app/installations` → `400 no github app oauth token for user`). *Workspace → Settings → Version Control → Connect to version control → GitHub App →* `reenchree/motodle`. Set:
+**3. Connect VCS — UI only.** The VCS provider is a GitHub App installation (`ghain-znnFHszW6frTYGv2`); the API token cannot enumerate or attach it (`GET /api/v2/github-app/installations` → `400 no github app oauth token for user`). *Workspace → Settings → Version Control → Connect to version control → GitHub App →* `notori0us/motodle`. Set:
 - **Branch**: `main`
 - **Terraform Working Directory**: `infra`
 - **Automatic Run Triggering**: *Only trigger runs when files in specified paths change* → **Trigger patterns**: `infra/**` (patterns, not prefixes)
 - **Auto apply**: **off** — see below.
 - Leave *Include submodules on clone* off.
 
-**4. Auto-apply — recommend OFF.** `reenchree/motodle` pushes straight to `main` with no PR gate, so there are no speculative plans; auto-apply would take a `.tf` typo from `git push` to a mutated CloudFront distribution with no human ever seeing a plan. Infra changes here are rare and the confirm click costs seconds. Turn it on only if PR-required branch protection lands first.
+**4. Auto-apply — recommend OFF.** `notori0us/motodle` pushes straight to `main` with no PR gate, so there are no speculative plans; auto-apply would take a `.tf` typo from `git push` to a mutated CloudFront distribution with no human ever seeing a plan. Infra changes here are rare and the confirm click costs seconds. Turn it on only if PR-required branch protection lands first.
 
 **5. `infra/backend.tf` — keep the `cloud {}` block unchanged.** It identifies the workspace and stays correct for VCS-driven runs. Local behaviour after the switch: `terraform output` / `state list` still work; `terraform plan` becomes a speculative remote plan; `terraform apply` is **rejected** with *"Apply not allowed for workspaces with a VCS connection"* — that rejection is the whole point. ([support KB](https://support.hashicorp.com/hc/en-us/articles/4408827333395), [VCS settings](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings/vcs))
 
@@ -271,7 +271,7 @@ curl -sS -H "Authorization: Bearer $TOKEN" \
 | jq '{exec: .data.attributes."execution-mode", vcs: .data.attributes."vcs-repo".identifier,
        branch: .data.attributes."vcs-repo".branch, wd: .data.attributes."working-directory",
        patterns: .data.attributes."trigger-patterns", auto_apply: .data.attributes."auto-apply"}'
-# expect: exec "remote", vcs "reenchree/motodle", branch "main", wd "infra", patterns ["infra/**"], auto_apply false
+# expect: exec "remote", vcs "notori0us/motodle", branch "main", wd "infra", patterns ["infra/**"], auto_apply false
 
 # (b) env variables are present and env-category
 curl -sS -H "Authorization: Bearer $TOKEN" https://app.terraform.io/api/v2/workspaces/ws-AbRYmYGwq43YfTv1/vars \
@@ -305,7 +305,7 @@ cd infra && terraform apply
 ## 6. Risks
 
 1. **OIDC subject drift.** This account already hit GitHub's immutable-subject change for the deploy role (commit `23330a5`). HCP's subject format is a different, stable contract, but the failure mode is the same: a trust condition that silently stops matching yields `AccessDenied` on `AssumeRoleWithWebIdentity`, not a clear error. The project is literally named "Default Project" and is renameable; wildcarding `project:*` while pinning `workspace:motodle` avoids that without loosening anything meaningful.
-2. **The VCS connection cannot be scripted.** GitHub App installation; the operator must do it in the browser, and `reenchree/motodle` (private, under the `reenchree` org) must be inside the App installation's repository selection — if the App was installed with "only select repositories", edit the install on GitHub first.
+2. **The VCS connection cannot be scripted.** GitHub App installation; the operator must do it in the browser, and `notori0us/motodle` (private, under the `reenchree` org) must be inside the App installation's repository selection — if the App was installed with "only select repositories", edit the install on GitHub first.
 3. **Global varset admin exposure (pre-existing).** Until step 0, every workspace in `reenchree` inherits `TerraformRunnerRole` (trust `workspace:*`, policy `AdministratorAccess`). Anyone who can create a workspace in the org has admin on the account. Separately, `TerraformRunnerRole` and the `app.terraform.io` OIDC provider are unmanaged — a future `import {}` into `terraform-core` is worth doing but carries a self-lockout trap (terraform-core would be editing the trust policy of the role it runs as).
 4. **Concurrent runs on the same push.** A push touching both `src/` and `infra/` triggers GitHub Actions `deploy.yml` and an HCP run; they share no lock and barely share resources (the deploy role only puts objects and creates invalidations; Terraform touches distribution config). With auto-apply off it cannot happen unattended.
 5. **Terraform version skew.** Motodle pinned to 1.16.1, terraform-core to 1.12.1. Remote runs use the workspace pin; do not let it drift to `latest`.

@@ -13,19 +13,16 @@ lacks: every answer is verified by two vision passes and one human skim, but rea
 still know things the reviewers did not (a 1996 vs 1997 fairing, a model sold under another name
 in their market).
 
-**Design, no backend.** Two tiers, both free:
+**Shipped 2026-09-04 (commit a9fb64f), decision D6.** "Something wrong? Report it"
+(`#mtd-report-link`) on the result screen opens a prefilled GitHub issue form
+(`.github/ISSUE_TEMPLATE/inaccuracy.yml`, label `inaccuracy`): puzzle number, date and answer in
+the `puzzle` field, the answer kept out of the title, kind as a dropdown, free-text details. The
+URL is built by `src/lib/report.ts`. It shows only after the round ends, so it never leaks the
+answer. The link 404s for anonymous visitors until the repo is public (LAUNCH.md B6).
 
-1. *One-click count.* The link fires the same first-party image request the analytics beacon
-   uses (`/assets/mtd.gif?e=r&n=<puzzle>&k=<kind>`), where `kind` is one of `make`, `model`,
-   `year`, `photo`. It lands in the CloudFront access log; an Athena query lists puzzles by
-   report count per kind. No free text, no PII, no CSP change, and it works even before the
-   repo is public. Requires LAUNCH.md A.3 (logs) and the beacon plumbing from A.5.
-2. *Tell us more.* Under the buttons, a link to a prefilled GitHub issue
-   (`.github/ISSUE_TEMPLATE/inaccuracy.yml`: puzzle number, what is wrong, source). Only live
-   once the repo is public (LAUNCH.md B6). Until then, the About page's contact link.
-
-**What it costs.** ~40 lines of Svelte in `ResultModal`, one issue template, one Athena query.
-Show the control only after the round ends, so it never leaks the answer.
+**Dropped.** The one-click count tier (an image request per report, tallied in the access log)
+depended on the analytics beacon, and decision D1 (2026-09-04) is logs only, no beacon. If
+report volume ever justifies it, the beacon design in LAUNCH.md A.5 still applies.
 
 **How a report gets acted on.** The puzzle JSON is served with a 5-minute TTL, so a wrong year
 is a one-line edit to `docs/content-review/<batch>.json` (`operator.year`), then
@@ -38,9 +35,15 @@ implemented yet (see 5).
 **Done 2026-09-04 (commit 3bf1cd1):** B1 deploy plumbing + `/*` invalidation, B2 OG card + head
 metadata, B3 robots/sitemap, B4 About page (privacy text is the logs-only variant — update it in
 the same push as A.3), B5 README, B9 runway alert (`runway.yml`, verified green on dispatch), K3
-pinned by e2e. **Still open:** A.3/A.6 logs + Athena and the beacon (decisions A/B), B7 error
-visibility (needs `cloudfront:GetInvalidation` on the deploy role, applied through HCP), B6 the
-public flip (after the `.claude/` decision). OG card has no wordmark yet (text rendering is not
+pinned by e2e. **Done 2026-09-04 evening, decisions D1/D2/D6/D7:** A.3 CloudFront access logs v2 → S3
+(`infra/logs.tf`, no client IPs, 90-day expiry; HCP run `run-JR8MowCdPArS7dD9` applied after
+plan review), About page privacy text updated in the same push, `.claude/` untracked, the
+inaccuracy report link (§1), and the repository transferred `reenchree` → `notori0us` with the
+deploy role trusting both owners through the move. **Still open:** A.6 Athena table + Step 0
+(create after the first log objects land, ~4 h after the apply; the primary workgroup has no
+results location, so pass one per query), B7 error visibility (needs `cloudfront:GetInvalidation`
+on the deploy role, applied through HCP), B6 the public flip (operator: `gh repo edit
+notori0us/motodle --visibility public --accept-visibility-change-consequences`). OG card has no wordmark yet (text rendering is not
 byte-deterministic across machines) — a hand-made card or a bundled font is a small follow-up.
 
 In order: B1 deploy plumbing → B8 done (budget lives in terraform-core) → B2 OG image and head

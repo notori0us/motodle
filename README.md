@@ -1,6 +1,6 @@
 # Motodle
 
-[![CI](https://github.com/reenchree/motodle/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/reenchree/motodle/actions/workflows/ci.yml)
+[![CI](https://github.com/notori0us/motodle/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/notori0us/motodle/actions/workflows/ci.yml)
 
 A daily motorbike-guessing game, in the shape of Wordle/Cardle. Guess the motorbike in 5 tries.
 A new motorbike is available each day. Fully static — Vite + TypeScript + Svelte 5,
