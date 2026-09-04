@@ -127,7 +127,7 @@ resource "aws_iam_role_policy" "motodle_run" {
       { Sid = "Acm", Effect = "Allow", Action = "acm:*", Resource = "*" },
 
       { Sid = "Route53Zone", Effect = "Allow",
-        Action   = ["route53:ChangeResourceRecordSets", "route53:ListResourceRecordSets", "route53:GetHostedZone"],
+        Action   = ["route53:ChangeResourceRecordSets", "route53:ListResourceRecordSets", "route53:GetHostedZone", "route53:ListTagsForResource"],
         Resource = "arn:aws:route53:::hostedzone/Z068366433JSADZ25QFLX" },
       { Sid = "Route53Change", Effect = "Allow", Action = "route53:GetChange",
         Resource = "arn:aws:route53:::change/*" },
@@ -142,8 +142,10 @@ resource "aws_iam_role_policy" "motodle_run" {
         "iam:ListAttachedRolePolicies"],
         Resource = "arn:aws:iam::051946164308:role/motodle-github-deploy" },
       # data.aws_iam_openid_connect_provider in infra/data.tf
-      { Sid = "ReadGithubOidcProvider", Effect = "Allow", Action = "iam:GetOpenIDConnectProvider",
-        Resource = "arn:aws:iam::051946164308:oidc-provider/token.actions.githubusercontent.com" },
+      { Sid = "ReadGithubOidcProvider", Effect = "Allow",
+        # the by-URL lookup lists all providers first
+        Action   = ["iam:GetOpenIDConnectProvider", "iam:ListOpenIDConnectProviders"],
+        Resource = "arn:aws:iam::051946164308:oidc-provider/*" },
 
       # LAUNCH.md A.3 (CloudFront standard logs v2, us-east-1 only) -- add when A.3 lands.
       { Sid = "LogDelivery", Effect = "Allow", Action = ["logs:PutDeliverySource", "logs:GetDeliverySource",
