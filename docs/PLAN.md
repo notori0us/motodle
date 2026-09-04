@@ -7028,7 +7028,7 @@ the rest.
 | Not built | Why | Revisit when |
 |---|---|---|
 | AWS WAF | ~$5–8/month floor — more than 10× the rest of the stack — to protect a bucket of public static files with no origin logic and no write path | Never, for this site |
-| CloudFront standard/real-time logging | Costs S3 storage and buys nothing at hobby traffic; there is no dashboard to feed it | A real traffic question exists (e.g. "did the launch land?") |
+| CloudFront standard logging v2 → S3 (**built 2026-09-04**: `infra/logs.tf`, no `c-ip`, 90-day expiry, Athena reads it — LAUNCH.md A.3/A.6) | The trigger fired at launch. Real-time logging stays unbuilt: a Kinesis stream's floor is many times the whole stack | Built; revisit only the retention or the field list |
 | Origin Shield | An extra per-request charge for a single-region origin with a tiny working set | Never |
 | S3 versioning on the site bucket | Every deploy is `--delete`; versions would accumulate for a site whose true source of truth is git | Never |
 | Amplify / S3 website hosting / any PaaS | Website endpoints cannot use OAC, and the bucket must stay private | Never |

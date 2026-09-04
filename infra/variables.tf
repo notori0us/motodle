@@ -48,3 +48,18 @@ variable "github_repository_id" {
   type        = number
   default     = 1355164768
 }
+
+# Ownership transfer in flight (reenchree -> notori0us, 2026-09-04): the deploy role must trust
+# BOTH owners' subjects until the transfer is done; then github_repository/github_owner_id move
+# to the new owner and this goes back to null.
+variable "github_transfer_to" {
+  description = "Owner the repository is being transferred to; null once the transfer is complete."
+  type = object({
+    owner    = string
+    owner_id = number
+  })
+  default = {
+    owner    = "notori0us"
+    owner_id = 2278744
+  }
+}

@@ -26,3 +26,8 @@ output "gh_variable_commands" {
     "gh variable set CLOUDFRONT_DISTRIBUTION_ID --body '${aws_cloudfront_distribution.site.id}'",
   ])
 }
+
+output "logs_bucket" {
+  description = "S3 bucket receiving CloudFront standard access logs v2 (LAUNCH.md A.3/A.6)."
+  value       = aws_s3_bucket.logs.bucket
+}
