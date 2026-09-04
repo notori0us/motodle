@@ -180,12 +180,15 @@ jobs:
             --content-type "text/html; charset=utf-8" \
             --cache-control "public, max-age=0, must-revalidate, s-maxage=60"
 
-      # ---- Pass G: the reaper. Unfiltered, because --delete ignores filtered-out keys. ----
+      # ---- Pass G: the reaper. --delete ignores filtered-out keys, so it is otherwise unfiltered. ----
       # Every object was uploaded above with a LastModified newer than its source mtime, so this
       # pass uploads nothing; it only deletes objects that are no longer in dist/.
-      - name: 'Sync G: delete objects no longer in the build'
+      # assets/* is DELIBERATELY never reaped (LAUNCH.md B7a): an edge PoP can serve the previous
+      # index.html for up to ~60 s after the invalidation, and its hashed bundle must still resolve
+      # or the viewer gets a blank page. Old bundles cost ~120 KB per deploy that changed them.
+      - name: 'Sync G: delete objects no longer in the build (except hashed assets)'
         run: |
-          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress --delete
+          aws s3 sync dist/ "s3://$SITE_BUCKET/" --no-progress --delete --exclude "assets/*"
 
       - name: Invalidate the mutable paths
         id: invalidate
@@ -197,3 +200,27 @@ jobs:
             --query 'Invalidation.Id' --output text)
           echo "id=$id" >> "$GITHUB_OUTPUT"
           echo "::notice::invalidation $id"
+
+      # LAUNCH.md B7b. The waiter is NON-FATAL by design: a still-propagating invalidation is not a
+      # broken deploy, and (until the deploy role's GetInvalidation grant is applied) neither is an
+      # AccessDenied from the poll. Safe because Sync G never reaps assets/*, so a stale edge
+      # index.html still resolves its bundle. What IS fatal: the entry page, its bundle, the catalog
+      # or TODAY's puzzle failing to load -- the reaper race, a half-finished sync, a dead
+      # distribution, or an exhausted runway.
+      - name: Smoke test the deployed site
+        run: |
+          set -euo pipefail
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --id "${{ steps.invalidate.outputs.id }}" \
+            || echo "::warning::invalidation still in flight (or GetInvalidation denied); smoke may see stale edge content"
+          html=$(curl -fsS https://playmotodle.com/)
+          # grep -om1, not `grep -o | head -1`: under pipefail head's early close SIGPIPEs grep.
+          bundle=$(printf '%s' "$html" | grep -om1 'assets/index-[A-Za-z0-9_-]*\.js')
+          test -n "$bundle"
+          curl -fsS -o /dev/null "https://playmotodle.com/$bundle"
+          curl -fsS -o /dev/null https://playmotodle.com/catalog.json
+          # Today, never manifest.latest: only today answers the liveness question.
+          today=$(date -u +%F)
+          curl -fsS -o /dev/null "https://playmotodle.com/puzzles/$today.json"
+          echo "::notice::smoke ok -- bundle=$bundle today=$today"

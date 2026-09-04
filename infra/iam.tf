@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "deploy" {
   statement {
     sid       = "InvalidateThisDistribution"
     effect    = "Allow"
-    actions   = ["cloudfront:CreateInvalidation"]
+    actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"] # Get: deploy.yml waits on completion
     resources = [aws_cloudfront_distribution.site.arn]
   }
 }

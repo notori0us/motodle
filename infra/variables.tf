@@ -60,3 +60,14 @@ variable "github_transfer_to" {
   })
   default = null
 }
+
+# Null by default, deliberately: this repo goes public and the tree must carry no email address.
+# Set as a SENSITIVE Terraform variable on the HCP workspace (LAUNCH.md B7); until then the topic
+# and alarms exist but nothing is subscribed, and the plan still succeeds.
+variable "alert_email" {
+  description = "Address that receives the CloudFront CloudWatch alarm notifications; null = no subscription yet."
+  type        = string
+  sensitive   = true
+  nullable    = true
+  default     = null
+}
