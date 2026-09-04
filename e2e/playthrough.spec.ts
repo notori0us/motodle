@@ -181,6 +181,8 @@ test.describe('win playthrough', () => {
     await expect(page.getByRole('heading', { name: 'You got it!' })).toBeVisible(); // resultOpen restored
 
     // ---- 14. The credits view (§5.10.4). --------------------------------------------------------
+    // ROADMAP §1: the report link lives on the result screen only, prefilled for this puzzle.
+    await expect(page.locator('#mtd-report-link')).toHaveAttribute('href', /\/issues\/new\?template=inaccuracy\.yml&title=Motodle\+%231\+/);
     await page.locator('#mtd-credits-link-result').click(); // closes ResultModal, opens CreditsModal
     await expect(page.getByRole('heading', { name: 'Photo credits' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'You got it!' })).not.toBeVisible(); // never two dialogs at once

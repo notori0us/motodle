@@ -1,0 +1,38 @@
+# Prefilled from the result screen (src/lib/report.ts): field ids below are URL query parameters.
+name: Report an inaccuracy
+description: A wrong make, model or year, a bad crop, or a photo that gives the answer away.
+title: "Motodle #?: possible inaccuracy"
+labels: ["inaccuracy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks. Every puzzle is checked twice before it runs, but riders know things reviewers miss.
+        Puzzles that already ran stay as they were; corrections land in the credits and in future puzzles.
+  - type: input
+    id: puzzle
+    attributes:
+      label: Puzzle
+      description: Number, date and the answer shown on the result screen (prefilled if you came from the game).
+      placeholder: "#42 · 2026-10-13 · 1969 Honda CB750"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is wrong?
+      options:
+        - Make
+        - Model
+        - Year
+        - Photo (bad crop, spoiler in frame, wrong bike)
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What should it be, and how do you know? A source (brochure, manual, registry, Commons file talk) helps most.
+    validations:
+      required: true

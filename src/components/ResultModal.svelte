@@ -7,6 +7,7 @@
 <script lang="ts">
   import type { Puzzle, TodayState } from '../../schema/types';
   import { resolveAssetUrl } from '../lib/puzzle';
+  import { reportIssueUrl } from '../lib/report';
   import { multiplier, pointsFromLocks } from '../lib/score';
   import Modal from './Modal.svelte';
 
@@ -27,6 +28,7 @@
   const points = $derived(pointsFromLocks(today.locks));
   const mult = $derived(multiplier(won, today.endedAtGuess ?? 5));
   const fullSrc = $derived(resolveAssetUrl(puzzle.image.full.src));
+  const reportUrl = $derived(reportIssueUrl(puzzle));
 
   function openCredits(): void {
     onclose();
@@ -67,6 +69,10 @@
   {#if puzzle.credit.creditNote}
     <p class="result-credit-note">{puzzle.credit.creditNote}</p>
   {/if}
+  <!-- ROADMAP §1: only reachable once the round is over, so it never leaks the answer. -->
+  <p class="result-report">
+    <a id="mtd-report-link" href={reportUrl} target="_blank" rel="noopener noreferrer">Something wrong? Report it</a>
+  </p>
 
   <div class="result-actions">
     <button type="button" class="button button--primary" onclick={onshare}>Share</button>
@@ -187,6 +193,12 @@
   .result-credit-note {
     font-size: 0.75rem;
     font-style: italic;
+    color: var(--color-muted);
+    margin-top: var(--space-1);
+  }
+
+  .result-report {
+    font-size: 0.75rem;
     color: var(--color-muted);
     margin-top: var(--space-1);
   }

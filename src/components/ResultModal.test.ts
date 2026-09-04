@@ -149,4 +149,18 @@ describe('ResultModal', () => {
     // Never two dialogs open at once: onclose must fire before oncredits opens the next one.
     expect(onclose.mock.invocationCallOrder[0]).toBeLessThan(oncredits.mock.invocationCallOrder[0]);
   });
+
+  it('offers a "report an inaccuracy" link (#mtd-report-link) to the prefilled GitHub issue form (ROADMAP §1)', () => {
+    const { container } = render(ResultModal, {
+      props: { open: true, puzzle: testPuzzle(), today: wonToday(), onclose: vi.fn(), onshare: vi.fn(), oncredits: vi.fn() },
+    });
+    const link = container.querySelector('#mtd-report-link') as HTMLAnchorElement;
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    const url = new URL(link.getAttribute('href') ?? '');
+    expect(url.pathname).toMatch(/\/issues\/new$/);
+    expect(url.searchParams.get('template')).toBe('inaccuracy.yml');
+    expect(url.searchParams.get('puzzle')).toBe('#1 · 2026-09-02 · 2004 Suzuki GSX-R750');
+  });
 });
