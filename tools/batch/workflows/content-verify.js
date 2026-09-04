@@ -7,7 +7,7 @@ export const meta = {
   ],
 }
 
-const REPO = '/home/chris/workspace/motodle'
+const REPO = '.' // agents run with the repository root as their working directory
 const thumbsDir = args.thumbsDir
 const poolPath = args.poolPath
 const ids = args.ids
@@ -68,7 +68,7 @@ const ADJ_SCHEMA = {
   required: ['results'],
 }
 
-const RAILS = `RAILS: you modify nothing — no edits under ${REPO}, no git, no downloads of originals, no network except where this prompt explicitly allows. Return raw structured data only.`
+const RAILS = `RAILS: you modify nothing — no edits anywhere in the repository, no git, no downloads of originals, no network except where this prompt explicitly allows. Return raw structured data only.`
 
 const blindPrompt = (batch, idx) => `You are an expert motorcycle identifier doing a BLIND identification pass for a daily guessing game (players must name make, model and year from a zooming crop of the photo).
 ${RAILS}

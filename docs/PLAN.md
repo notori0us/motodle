@@ -2560,7 +2560,7 @@ required by this revision.
 
 Operator ask, 2026-09-03: *"add impeccable style to the project."* This section is the **design
 brief** the implementing agent builds from. It is written by the Impeccable `init` + `document` pass
-(skill v4.1.3, `/home/chris/workspace/motodle/.claude/skills/impeccable`) and it changes **look, not
+(skill v4.1.3, `.claude/skills/impeccable`) and it changes **look, not
 law**: every rule in §3, §4, §5.3.1, §5.8's fold rule, §5.9's budgets, §5.10's spoiler rule, §5.12's
 tagline and §5.13's US English is untouched and binding. Where this section and any frozen contract
 disagree, **the frozen contract wins and the design is wrong**.

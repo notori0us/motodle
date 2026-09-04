@@ -3,7 +3,7 @@ export const meta = {
   description: 'Vision check of every scheduled puzzle\'s rendered crops for spoilers, faces, blank first clues and bad crops',
   phases: [{ title: 'Crop check', detail: 'view l1/l2/l4/full per puzzle', model: 'opus' }],
 }
-const REPO = '/home/chris/workspace/motodle'
+const REPO = '.' // agents run with the repository root as their working directory
 const puzzles = args.puzzles
 const BATCH = 6
 const batches = []

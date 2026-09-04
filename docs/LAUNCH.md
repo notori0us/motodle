@@ -1,6 +1,6 @@
 # Motodle launch plan
 
-**Repo:** `/home/chris/workspace/motodle` · **Live:** https://playmotodle.com · **Date:** 2026-09-03
+**Repo:** `the repo root` · **Live:** https://playmotodle.com · **Date:** 2026-09-03
 
 Produced by a recon → plan → critique workflow: four recon reports, one consolidated plan, then two
 adversarial critiques (privacy/CSP/correctness, and ops/cost). Every blocker and every improvement those
@@ -53,7 +53,7 @@ is a **completion rate available from logs alone**, and on launch day it is also
 
 **Consent.** ePrivacy Art 5(3) governs *storing information on, or accessing information already stored on, terminal equipment*. Reading `Referer`, `User-Agent` and `cs-uri-query` off a request the browser sends anyway is neither — **no banner is triggered** `[analytics, "Consent"]`. Dropping `c-ip` from `record_fields` removes the only field that would be personal data under GDPR (CJEU C-582/14 *Breyer*), so no legitimate-interest analysis is needed at all. The app's existing `localStorage` game state is "strictly necessary … to provide the service explicitly requested" and is unaffected.
 
-## A.3 Terraform contracts — new file `/home/chris/workspace/motodle/infra/logs.tf`
+## A.3 Terraform contracts — new file `infra/logs.tf`
 
 Every resource below is new. **All three `aws_cloudwatch_log_delivery*` resources MUST carry `provider = aws.us_east_1`** — the CloudWatch delivery API for CloudFront is us-east-1 only `[analytics §b1]`. The alias already exists at `infra/versions.tf:20-23`. The public registry now renders the **v6** schema, which advertises a per-resource `region` argument that **does not exist in the pinned 5.x provider** (`infra/.terraform.lock.hcl` pins `hashicorp/aws 5.100.0`); an implementer copying the registry example verbatim gets `Unsupported argument: region` `[analytics §b1]`. No provider bump is needed — these resources landed in v5.83.0 `[analytics §0]`.
 
@@ -224,7 +224,7 @@ resource "aws_cloudwatch_log_delivery" "cf_to_s3" {
 }
 ```
 
-Append to `/home/chris/workspace/motodle/infra/outputs.tf`:
+Append to `infra/outputs.tf`:
 
 ```hcl
 output "logs_bucket" {
@@ -236,7 +236,7 @@ output "logs_bucket" {
 **OPERATOR ACTION — this applies to every `terraform init`, `terraform validate`, `terraform plan` and `terraform apply` in this document (A.3, B7, B8), not only to this block.** `infra/backend.tf` carries a `cloud {}` block (org `reenchree`, workspace `motodle`), so `init` needs an HCP Terraform token and `plan` needs a live AWS session — and the SSO session on this machine is expired. **An implementer agent cannot run any of them.** The implementer's only gate is:
 
 ```bash
-terraform fmt -check -diff /home/chris/workspace/motodle/infra
+terraform fmt -check -diff infra
 ```
 
 No init, no credentials, no network. Until the operator plans, treat every HCL block in this document as **well-formed but unvalidated**; if an argument is rejected, fix it against the **pinned 5.100.0** provider docs, never the v6 registry render.
@@ -262,7 +262,7 @@ No init, no credentials, no network. Until the operator plans, treat every HCL b
 
 ## A.5 The beacon — literal contract
 
-`/home/chris/workspace/motodle/src/lib/beacon.ts`, new file, complete:
+`src/lib/beacon.ts`, new file, complete:
 
 ```ts
 /**
@@ -528,7 +528,7 @@ Every one of these queries scans one month of partitions at most; at this site's
 
 ## A.7 Privacy statement — exact text, and where it goes
 
-Lives in `/home/chris/workspace/motodle/public/about.html` (workstream B4) under `<h2 id="privacy">Privacy</h2>`, verbatim:
+Lives in `public/about.html` (workstream B4) under `<h2 id="privacy">Privacy</h2>`, verbatim:
 
 > Motodle has no accounts, no cookies, no third-party trackers and no third-party scripts. Your guesses, statistics and settings are stored only in your own browser. Two things do leave your device: the CDN that serves this site keeps an access log of the requests it receives — the page requested, its query string, the referring site, the browser's user-agent and the country — for 90 days; and when you finish or share a round the game fetches a tiny image whose address carries the puzzle number, whether you won, lost or gave up, which guess you finished on, your score, and whether it was a practice round. Nothing in either is tied to you: visitor IP addresses are excluded from the log, and no identifier of any kind is sent or stored.
 
@@ -864,7 +864,7 @@ Agents describe; **the operator performs every step**. Do these in order, all be
    ```
    The operator's address is on every commit's author *and* committer metadata. On the flip that becomes public, and it cannot be removed without a history rewrite. Record this as a **knowing decision, not an oversight** — alongside D7's note that untracking `.claude/` leaves its blobs reachable.
 3. **Re-run the secret scan over `git rev-list --all` before the flip — do not inherit recon's.** The recon scan of all reachable blobs for `AKIA…`, `BEGIN … PRIVATE KEY`, `ghp_…` and `xox[baprs]-` matched **0 files** `[repo-readiness §7]`, but it recorded the history as **15** commits when the repo has **16** (`git rev-list --all --count` → 16, verified during critique). The scope claim is off by one, so re-run rather than trust it. Note step 1 does not rewrite history — the `.claude/` blobs stay reachable; see D7.
-4. **Decide on the AWS account id.** `docs/PLAN.md` carries `051946164308` on **15** lines, including the OIDC provider ARN, the bucket name, the deploy role ARN, and a local filesystem path `/home/chris/workspace/motodle/.claude/skills/impeccable` `[repo-readiness §7]`. No IPs, no homelab hostnames, no email addresses. See operator decision D8 (default: leave).
+4. **Decide on the AWS account id.** `docs/PLAN.md` carries `051946164308` on **15** lines, including the OIDC provider ARN, the bucket name, the deploy role ARN, and a local filesystem path `.claude/skills/impeccable` `[repo-readiness §7]`. No IPs, no homelab hostnames, no email addresses. See operator decision D8 (default: leave).
 5. **Flip:** `gh repo edit notori0us/motodle --visibility public --accept-visibility-change-consequences` (or the Settings → General → Danger Zone toggle).
 6. **Immediately after:** confirm the CI badge renders anonymously, and confirm the `runway.yml` workflow from B9 is enabled (`gh workflow list`) — scheduled workflows behave differently on public repos (B9).
 7. **Do not touch the deploy path.** The OIDC trust policy is `StringEquals` over `local.github_subs` = the legacy *and* immutable subject forms, built from `var.github_owner_id = 213154582` / `var.github_repository_id = 1355164768` (`infra/locals.tf`, `infra/iam.tf`) `[ops §9]` — visibility does not affect it.
@@ -879,7 +879,7 @@ Agents describe; **the operator performs every step**. Do these in order, all be
 
 Four changes. **(a′) is an OPERATOR ACTION prerequisite for (b)**, and (a) and (b) are the ones that actually matter.
 
-**(a′) Grant the deploy role `cloudfront:GetInvalidation` — OPERATOR ACTION, and it must land before (b) does.** Verified in `/home/chris/workspace/motodle/infra/iam.tf:51-56`: the `InvalidateThisDistribution` statement grants `actions = ["cloudfront:CreateInvalidation"]` and nothing else. `aws cloudfront wait invalidation-completed` polls `GetInvalidation` → `AccessDenied` → the step exits non-zero → **every deploy goes red**, on a step that runs *after* the bucket has already been mutated and invalidated. A permanently-red deploy that is not a deploy failure is precisely the alert fatigue B7 exists to prevent. In `data "aws_iam_policy_document" "deploy"`:
+**(a′) Grant the deploy role `cloudfront:GetInvalidation` — OPERATOR ACTION, and it must land before (b) does.** Verified in `infra/iam.tf:51-56`: the `InvalidateThisDistribution` statement grants `actions = ["cloudfront:CreateInvalidation"]` and nothing else. `aws cloudfront wait invalidation-completed` polls `GetInvalidation` → `AccessDenied` → the step exits non-zero → **every deploy goes red**, on a step that runs *after* the bucket has already been mutated and invalidated. A permanently-red deploy that is not a deploy failure is precisely the alert fatigue B7 exists to prevent. In `data "aws_iam_policy_document" "deploy"`:
 
 ```hcl
   statement {
@@ -947,7 +947,7 @@ gh workflow run deploy.yml --ref main -f ref=<last-good-sha>
 
 **(c) CloudWatch alarms on the free CloudFront metrics.** `Requests`, `BytesDownloaded`, `4xxErrorRate`, `5xxErrorRate` and `TotalErrorRate` are published free for every distribution, into **us-east-1** `[ops §5]`. CloudWatch's always-free tier covers 10 alarm metrics `[ops §3]`, so two alarms cost **$0** provided the account is under that ceiling — **UNVERIFIED**, recon could not run `describe-alarms` (SSO expired). Do **not** enable CloudFront's eight "additional metrics" (cache hit ratio, per-status rates): they publish as custom metrics at up to ~$2.40/month per distribution and buy nothing here `[ops §5]`.
 
-New file `/home/chris/workspace/motodle/infra/alarms.tf`. **`provider = aws.us_east_1` on every resource here** — CloudFront metrics live in us-east-1, and an alarm's action must target a topic in the alarm's own region (**the same-region-topic requirement is provider/AWS knowledge, UNVERIFIED by any recon report; prove it with a `terraform validate` plus one test notification — OPERATOR ACTION — before relying on it**). The implementer's gate on this file is `terraform fmt -check -diff /home/chris/workspace/motodle/infra`, and nothing more.
+New file `infra/alarms.tf`. **`provider = aws.us_east_1` on every resource here** — CloudFront metrics live in us-east-1, and an alarm's action must target a topic in the alarm's own region (**the same-region-topic requirement is provider/AWS knowledge, UNVERIFIED by any recon report; prove it with a `terraform validate` plus one test notification — OPERATOR ACTION — before relying on it**). The implementer's gate on this file is `terraform fmt -check -diff infra`, and nothing more.
 
 ```hcl
 resource "aws_sns_topic" "alerts" {
@@ -1055,10 +1055,10 @@ The HCP Terraform workspace runs in **local** execution mode (plan/apply on the 
 
 ```bash
 export TF_VAR_alert_email='<the address>'   # add to the shell profile, or a gitignored .envrc
-terraform -chdir=/home/chris/workspace/motodle/infra plan
+terraform -chdir=infra plan
 ```
 
-The implementer's gate on everything in B7 remains `terraform fmt -check -diff /home/chris/workspace/motodle/infra`.
+The implementer's gate on everything in B7 remains `terraform fmt -check -diff infra`.
 
 An unset `TF_VAR_alert_email` makes Terraform prompt interactively rather than fail silently. **B6's pre-flip checklist must confirm `grep -rn '@' infra/*.tf` finds no address.**
 
@@ -1068,7 +1068,7 @@ An unset `TF_VAR_alert_email` makes Terraform prompt interactively rather than f
 
 **Tests to update.** None (`.tf` and workflow changes only). `schema/csp-contract.test.ts` must stay green, which it will, unchanged — **and here is *why*, so that no implementer panics at adding a `variable` block to a file a contract test reads:** the test splits `infra/variables.tf` on `^variable ` and matches only the `content_security_policy` block, so a new `variable "alert_email"` is invisible to it.
 
-**Definition of done.** *Implementer gate:* `terraform fmt -check -diff /home/chris/workspace/motodle/infra` clean — and the HCL stays **unverified** until the operator plans. *Operator gates, all OPERATOR ACTION:* `terraform validate` and `terraform plan` clean in `infra/`; **(a′)'s `cloudfront:GetInvalidation` IAM change applied BEFORE the commit carrying (b) reaches `main`**; the SNS email subscription confirmed by clicking through the confirmation mail (an apply leaves it "pending confirmation" — expected, not a failed apply); and a deliberately broken smoke step (temporarily curl a nonexistent path in a scratch branch) fails the run — or, less invasively, confirm the smoke step's `::notice::` line in the first real deploy's log.
+**Definition of done.** *Implementer gate:* `terraform fmt -check -diff infra` clean — and the HCL stays **unverified** until the operator plans. *Operator gates, all OPERATOR ACTION:* `terraform validate` and `terraform plan` clean in `infra/`; **(a′)'s `cloudfront:GetInvalidation` IAM change applied BEFORE the commit carrying (b) reaches `main`**; the SNS email subscription confirmed by clicking through the confirmation mail (an apply leaves it "pending confirmation" — expected, not a failed apply); and a deliberately broken smoke step (temporarily curl a nonexistent path in a scratch branch) fails the run — or, less invasively, confirm the smoke step's `::notice::` line in the first real deploy's log.
 
 **Verify live.**
 ```bash
@@ -1087,7 +1087,7 @@ aws sns list-subscriptions-by-topic --region us-east-1 \
 
 **There is no budget, no billing alarm and no SNS topic anywhere in code today** — `grep -rniE 'budget|billing|aws_cloudwatch_metric_alarm|aws_sns_topic' --include='*.tf'` over `terraform-core` returns nothing, and `motodle/infra` has none either `[ops §3]`; independently re-verified during critique, along with `terraform-core/iam_github.tf:21`'s `"repo:reenchree/*:*"` (see B6's adjacent finding). A console-created budget cannot be ruled out (SSO expired during recon); `terraform plan` will say — **OPERATOR ACTION**.
 
-**Files:** new `/home/chris/workspace/motodle/infra/budget.tf`.
+**Files:** new `infra/budget.tf`.
 
 **Scope decision:** account-wide, not service-filtered. A cost filter that names CloudFront/S3/Route53 would miss exactly the surprise — a service nobody expected — which is what a guardrail is for. `motodle/infra` owns it because motodle is the only thing in `051946164308` with public traffic; add a comment so a future `terraform-core` change does not create a duplicate.
 
@@ -1143,11 +1143,11 @@ Today's spend is ~$0.50/month (the Route53 zone); beyond free tier it is ~$3.00 
 
 **A $10 cap alerts at roughly 350k visits beyond free tier — comfortably above any plausible Reddit spike. But do not read that as "no mail during a successful launch."** AWS forecasts from month-to-date, so a single 30–50k-visit launch day early in the month projects well past $10 and the **FORECASTED** notification mails the operator *during a launch that is working*. Two options: expect that mail and treat it as informational, or move the FORECASTED threshold onto a second $25 budget and leave the $10 budget's two ACTUAL thresholds alone. **Default: expect the mail** — one informational email in launch week is cheaper than a second budget resource to maintain.
 
-**Uncertainty, stated — and it is the operator who resolves it, not the implementer.** No recon report covers `aws_budgets_budget`; every argument above is from provider memory. **UNVERIFIED.** A reviewer did confirm against the pinned provider binary (`infra/.terraform/providers/registry.terraform.io/hashicorp/aws/5.100.0/linux_amd64/terraform-provider-aws_v5.100.0_x5`) that `aws_budgets_budget` — along with `aws_cloudwatch_log_delivery_source`, `aws_cloudwatch_log_delivery_destination`, `aws_cloudwatch_log_delivery`, `s3_delivery_configuration`, `suffix_path`, `enable_hive_compatible_path`, `record_fields`, `delivery_destination_configuration` and `destination_resource_arn` — is **present** in 5.100.0, so A.3's core claim holds. Present is not the same as valid. **The implementer's step 1 is `terraform fmt -check -diff /home/chris/workspace/motodle/infra`, and that is the only gate it can run:** `infra/backend.tf`'s `cloud {}` block means `init` needs an HCP token and `plan` needs a live AWS session. **OPERATOR ACTION:** run `terraform plan`; if `aws_budgets_budget` argument names are rejected, fix them against the **5.100.0** docs, not the v6 registry render. Budgets email directly (no SNS), so this costs $0. Whether `FORECASTED` notifications fire without billing history is **UNVERIFIED**; if AWS refuses to forecast for a young account, the two ACTUAL thresholds still work.
+**Uncertainty, stated — and it is the operator who resolves it, not the implementer.** No recon report covers `aws_budgets_budget`; every argument above is from provider memory. **UNVERIFIED.** A reviewer did confirm against the pinned provider binary (`infra/.terraform/providers/registry.terraform.io/hashicorp/aws/5.100.0/linux_amd64/terraform-provider-aws_v5.100.0_x5`) that `aws_budgets_budget` — along with `aws_cloudwatch_log_delivery_source`, `aws_cloudwatch_log_delivery_destination`, `aws_cloudwatch_log_delivery`, `s3_delivery_configuration`, `suffix_path`, `enable_hive_compatible_path`, `record_fields`, `delivery_destination_configuration` and `destination_resource_arn` — is **present** in 5.100.0, so A.3's core claim holds. Present is not the same as valid. **The implementer's step 1 is `terraform fmt -check -diff infra`, and that is the only gate it can run:** `infra/backend.tf`'s `cloud {}` block means `init` needs an HCP token and `plan` needs a live AWS session. **OPERATOR ACTION:** run `terraform plan`; if `aws_budgets_budget` argument names are rejected, fix them against the **5.100.0** docs, not the v6 registry render. Budgets email directly (no SNS), so this costs $0. Whether `FORECASTED` notifications fire without billing history is **UNVERIFIED**; if AWS refuses to forecast for a young account, the two ACTUAL thresholds still work.
 
 **Tests to update.** None.
 
-**Definition of done.** *Implementer:* `terraform fmt -check -diff /home/chris/workspace/motodle/infra` clean. *Operator gate (OPERATOR ACTION):* `terraform plan` in `infra/` shows exactly one `aws_budgets_budget` to add and no other unexpected change — and if any argument name is rejected, it is fixed against the **5.100.0** provider docs, not the v6 registry render; after apply, the budget appears in Billing → Budgets with three alerts.
+**Definition of done.** *Implementer:* `terraform fmt -check -diff infra` clean. *Operator gate (OPERATOR ACTION):* `terraform plan` in `infra/` shows exactly one `aws_budgets_budget` to add and no other unexpected change — and if any argument name is rejected, it is fixed against the **5.100.0** provider docs, not the v6 registry render; after apply, the budget appears in Billing → Budgets with three alerts.
 
 **Verify live.**
 ```bash
@@ -1161,7 +1161,7 @@ aws budgets describe-budgets --account-id 051946164308 \
 
 **Pattern chosen: `[ops §4(i)]`, the scheduled workflow.** Rejected: `[ops §4(ii)]`, a Prometheus blackbox/json_exporter probe on sea-k3s — it needs a **new `json_exporter` HelmRelease that does not exist in `sea-k8s-flux`** plus a **new numeric field in `manifest.json`**, which means editing `Manifest` in `schema/types.ts`, `buildManifest` in `tools/lib/puzzle-build.ts:104-113`, the manifest contract test, and regenerating so CI's byte-identical gate stays green; and it produces **no alert at all while the home WAN is down** — the same gap already recorded for BLR `[ops §4]`. Blackbox alone cannot do it: its `fail_if_body_not_matches_regexp` is static config and cannot be compared against "today".
 
-**Files:** new `/home/chris/workspace/motodle/.github/workflows/runway.yml`, complete:
+**Files:** new `.github/workflows/runway.yml`, complete:
 
 ```yaml
 name: Content runway
@@ -1561,7 +1561,7 @@ Two adversarial critiques were run against the plan above: **Critique 1 — priv
 |---|---|
 | **BL1** — B7(b) fails every deploy: the deploy role has no `cloudfront:GetInvalidation` | All five sub-corrections applied together. **(a)** A new sub-workstream **B7(a′)** carries the `infra/iam.tf` change to `actions = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]`, verified against `infra/iam.tf:51-56`. **(b)** The ordering constraint — operator applies the IAM change *before* the B7(b) commit reaches `main` — is stated in B7(a′), in B7's DoD **and** in B1's ordering note, as the critic asked. **(c)** B7(b)'s heading now names "B1 edit 3" as a prerequisite, with the empty-`--id` failure spelled out. **(d)** `timeout-minutes: 30` and the `\|\| echo "::warning::…"` non-fatal waiter, verbatim. **(e)** `grep -om1` replaces `grep -o … \| head -1`, with the `feedback_pipefail_grep_sigpipe` memory cited. |
 | **BL2** — Q5's share count is structurally zero | Same defect as Critique 1 BL1; applied once, at the source. The critic's "no change to `beacon.test.ts` assertion 2" is honoured exactly — the share case is **added** as assertion 2b and the win assertion is untouched. |
-| **BL3** — every `terraform validate`/`plan` is written as implementer work but is operator-only | Applied throughout. **A.3** gains a standing OPERATOR ACTION paragraph covering every `terraform` invocation in the document, with the `cloud {}`-block and expired-SSO reasoning. The implementer's gate `terraform fmt -check -diff /home/chris/workspace/motodle/infra` is stated in **A.3, B7 (twice) and B8**, and every HCL block is declared "well-formed but unvalidated" until the operator plans. **B7**'s alarms paragraph, its `terraform -chdir … plan` block and its DoD are all relabelled; **B8**'s "implementer's step 1" and its DoD are restated as operator gates against the **5.100.0** docs, and the critic's provider-binary confirmation is recorded with its own caveat ("present is not valid"). The document's **reading key** is corrected too — B7(b) is no longer "independently executable". |
+| **BL3** — every `terraform validate`/`plan` is written as implementer work but is operator-only | Applied throughout. **A.3** gains a standing OPERATOR ACTION paragraph covering every `terraform` invocation in the document, with the `cloud {}`-block and expired-SSO reasoning. The implementer's gate `terraform fmt -check -diff infra` is stated in **A.3, B7 (twice) and B8**, and every HCL block is declared "well-formed but unvalidated" until the operator plans. **B7**'s alarms paragraph, its `terraform -chdir … plan` block and its DoD are all relabelled; **B8**'s "implementer's step 1" and its DoD are restated as operator gates against the **5.100.0** docs, and the critic's provider-binary confirmation is recorded with its own caveat ("present is not valid"). The document's **reading key** is corrected too — B7(b) is no longer "independently executable". |
 | **I1** — the vended-log delivery charge is not ambiguous | A.3's hedging paragraph replaced: charges apply, AWS's sentence quoted verbatim, cents/month at 1k–10k and a few dollars at 100k, and the previously-unstated point that `output_format = "json"` roughly **doubles** delivered bytes versus `plain` — named as a real cost lever, with the reason the doubling is accepted. |
 | **I2** — add AWS's `AWSLogDeliveryAclCheck` statement | Statement appended to `data "aws_iam_policy_document" "logs_bucket"`; `depends_on = [aws_s3_bucket_public_access_block.logs]` added to `aws_s3_bucket_policy.logs`, mirroring the verified pattern at `infra/s3.tf:83`; A.3's operator-IAM list extended with all six extra `logs:` actions plus `s3:GetBucketPolicy`/`s3:PutBucketPolicy`. **One deliberate deviation from the critic's literal snippet:** it puts two arguments on one line inside `principals {}` and `condition {}`; HCL2 requires a newline after each argument, and `terraform fmt -check` — the implementer's own stated gate — would reject it. The block is expanded to one argument per line. Same tokens, same semantics. |
 | **I3** — the "two unrelated runway detectors" claim only holds if the launch worked | Floor lowered to `expression = "IF(reqs >= 20, rate4xx, 0)"` with the ~5-requests-per-cold-visit and `evaluation_periods = 3` arithmetic written into the HCL comment. B9's mitigation paragraph rewritten: the honest arming figure is **roughly 100 visits/day sustained**, the detector count drops to one if the launch flops, and the monthly `gh workflow list` check is therefore **not optional at low traffic**. |
