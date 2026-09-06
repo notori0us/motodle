@@ -313,7 +313,10 @@ cd infra && terraform apply
 
 **Sources:** [Dynamic credentials with the AWS provider](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/aws-configuration) · [Workload identity token claims](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/workload-identity-tokens) · [Specifying multiple configurations](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/specifying-multiple-configurations) · [Workspace VCS settings](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings/vcs) · [Apply not allowed for VCS-connected workspaces](https://support.hashicorp.com/hc/en-us/articles/4408827333395)
 
-## 2026-09-04 evening: repository moved to `notori0us/motodle` — VCS re-point PENDING
+## 2026-09-04 evening: repository moved to `notori0us/motodle` — VCS re-point DONE 2026-09-06
+
+> **Resolved 2026-09-06.** The operator added `motodle` to the GitHub App installation on `notori0us`; the workspace now reads `notori0us/motodle` via `ghain-1HEA9iqaoHGMwJjq`. The pending run needed three terraform-core follow-ups first (PRs #4 SNS/CloudWatch, #5 `logs:*TagResource`, #6 `iam:UpdateRoleDescription` — the deploy role's description embeds the repo name). Runs: `run-28KXaJkiivNgQW4C` created the SNS topic and both alarms, then failed on the description; `run-WrpNDWECNwKfodw6` finished the deploy role (trust now `notori0us` only, policy gains `GetInvalidation`). **Only `alert_email` remains** (sensitive Terraform variable in the workspace UI, then one more run: 1 create, the email subscription). The section below is kept as the record of the blocked state.
+
 
 The GitHub transfer `reenchree/motodle` → `notori0us/motodle` is done (repo id `1355164768`
 unchanged, owner id `2278744`). The deploy role trusted both owners before the move (commit
