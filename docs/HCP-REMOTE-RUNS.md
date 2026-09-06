@@ -17,7 +17,7 @@
 | Auto-apply | `false` | **`true`** |
 | Working directory | `null` | `null` |
 | Trigger patterns/prefixes | `[]` / `[]`, `file-triggers-enabled: true` | `[]` / `[]` |
-| Terraform version | **1.16.1** | 1.12.1 |
+| Terraform version | **1.16.1** | **1.16.1** (1.12.1 until 2026-09-06) |
 | Workspace variables | none | none |
 | `queue-all-runs` | `false` | — |
 | Resources / runs | 28 resources, **0 runs** (local exec writes state versions only; latest `sv-sWwu3d1Zuo7CTaFZ`, serial 14, 2026-09-03T00:43Z) | 35 resources, last run `run-LMCK4SSiBfR6Y6rb` applied 2026-09-04T17:45Z |
@@ -52,7 +52,7 @@ One **global** variable set, `varset-NvJQF8yQ2ucpJ4ie` "AWS Settings" (`global=t
 
 ### Repo files
 
-`infra/backend.tf` is a bare `cloud {}` block (org `reenchree`, workspace `motodle`). `infra/versions.tf` declares `required_version >= 1.16`, `hashicorp/aws ~> 5.0`, a default provider on `var.aws_region` (`us-west-2`) and an alias `aws.us_east_1`. `docs/PLAN.md` §13.3 fixes local execution as a deliberate D9 decision and names this migration as a documented later upgrade. **Nothing in `infra/` needs to change for this migration.**
+`infra/backend.tf` is a bare `cloud {}` block (org `reenchree`, workspace `motodle`). `infra/versions.tf` declares `required_version >= 1.16`, `hashicorp/aws ~> 6.0` (since 2026-09-06; was `~> 5.0`), a default provider on `var.aws_region` (`us-west-2`) and an alias `aws.us_east_1`. `docs/PLAN.md` §13.3 fixes local execution as a deliberate D9 decision and names this migration as a documented later upgrade. **Nothing in `infra/` needs to change for this migration.**
 
 **HEAD is in sync with applied state.** The live `motodle-github-deploy` role already carries both OIDC subject forms (commit `23330a5` was applied), and the budget commit `b6603f2` was reverted before ever being applied (budgets live in `terraform-core/budget.tf`). **So the first remote plan should be 0 changes.**
 
@@ -308,8 +308,8 @@ cd infra && terraform apply
 2. **The VCS connection cannot be scripted.** GitHub App installation; the operator must do it in the browser, and `notori0us/motodle` (private, under the `reenchree` org) must be inside the App installation's repository selection — if the App was installed with "only select repositories", edit the install on GitHub first.
 3. **Global varset admin exposure (pre-existing).** Until step 0, every workspace in `reenchree` inherits `TerraformRunnerRole` (trust `workspace:*`, policy `AdministratorAccess`). Anyone who can create a workspace in the org has admin on the account. Separately, `TerraformRunnerRole` and the `app.terraform.io` OIDC provider are unmanaged — a future `import {}` into `terraform-core` is worth doing but carries a self-lockout trap (terraform-core would be editing the trust policy of the role it runs as).
 4. **Concurrent runs on the same push.** A push touching both `src/` and `infra/` triggers GitHub Actions `deploy.yml` and an HCP run; they share no lock and barely share resources (the deploy role only puts objects and creates invalidations; Terraform touches distribution config). With auto-apply off it cannot happen unattended.
-5. **Terraform version skew.** Motodle pinned to 1.16.1, terraform-core to 1.12.1. Remote runs use the workspace pin; do not let it drift to `latest`.
-6. **`working-directory: infra` and lockfile provenance.** Remote runs honour the committed `infra/.terraform.lock.hcl` (`hashicorp/aws 5.100.0`). LAUNCH.md A.3 depends on that pin (the v6 registry render advertises a `region` argument that does not exist in 5.x). Keep the lockfile in git.
+5. **Terraform version skew.** Both workspaces pinned to 1.16.1 since 2026-09-06 (terraform-core was 1.12.1). Remote runs use the workspace pin; do not let it drift to `latest`.
+6. **`working-directory: infra` and lockfile provenance.** Remote runs honour the committed `infra/.terraform.lock.hcl` (`hashicorp/aws 6.63.0` since 2026-09-06; LAUNCH.md A.3's 5.x caveat is historical). Keep the lockfile in git.
 
 **Sources:** [Dynamic credentials with the AWS provider](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/aws-configuration) · [Workload identity token claims](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/workload-identity-tokens) · [Specifying multiple configurations](https://developer.hashicorp.com/terraform/cloud-docs/dynamic-provider-credentials/specifying-multiple-configurations) · [Workspace VCS settings](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings/vcs) · [Apply not allowed for VCS-connected workspaces](https://support.hashicorp.com/hc/en-us/articles/4408827333395)
 

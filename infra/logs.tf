@@ -109,7 +109,7 @@ resource "aws_s3_bucket_policy" "logs" {
 }
 
 # The CloudWatch delivery API for CloudFront is us-east-1 only: all three resources below carry
-# provider = aws.us_east_1. (The 5.x provider has no per-resource `region` argument.)
+# provider = aws.us_east_1. (v6 adds a per-resource `region` argument; the alias is kept as-is.)
 resource "aws_cloudwatch_log_delivery_source" "cf" {
   provider     = aws.us_east_1
   name         = "${var.name_prefix}-cf-access-logs"
@@ -159,9 +159,10 @@ resource "aws_cloudwatch_log_delivery" "cf_to_s3" {
     suffix_path = "{DistributionId}/{yyyy}/{MM}/{dd}/{HH}"
   }
 
-  # Provider 5.100.0 has two known defects here, fixed only in v6: a spurious
-  # "Provided delivery configuration is invalid for the destination type" on an unchanged block,
-  # and suffix_path losing the AWS-added prefix on update. Expect a bad diff on the SECOND apply.
+  # Provider 5.100.0 had two defects here (spurious "Provided delivery configuration is invalid
+  # for the destination type" on an unchanged block; suffix_path losing the AWS-added prefix on
+  # update), fixed in the v6 line (6.32.1 / 6.52.0). ignore_changes stays until a post-bump plan
+  # proves the block clean.
   lifecycle {
     ignore_changes = [s3_delivery_configuration]
   }
