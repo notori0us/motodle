@@ -39,7 +39,7 @@ pinned by e2e. **Done 2026-09-04 evening, decisions D1/D2/D6/D7:** A.3 CloudFron
 (`infra/logs.tf`, no client IPs, 90-day expiry; HCP run `run-JR8MowCdPArS7dD9` applied after
 plan review), About page privacy text updated in the same push, `.claude/` untracked, the
 inaccuracy report link (§1), and the repository transferred `reenchree` → `notori0us` with the
-deploy role trusting both owners through the move. **Applied 2026-09-06:** the owner flip and B7's infra half (HCP runs `run-28KXaJkiivNgQW4C` + `run-WrpNDWECNwKfodw6`, after terraform-core PRs #4–#6 widened the run role): deploy role trusts `notori0us` only and may poll invalidations; SNS topic `motodle-alerts` and both CloudFront alarms exist. **Still open:** `alert_email` (sensitive HCP workspace variable → one run creates the subscription → click the confirmation mail), A.6 Athena table + Step 0
+deploy role trusting both owners through the move. **Applied 2026-09-06:** the owner flip and B7's infra half (HCP runs `run-28KXaJkiivNgQW4C` + `run-WrpNDWECNwKfodw6`, after terraform-core PRs #4–#6 widened the run role): deploy role trusts `notori0us` only and may poll invalidations; SNS topic `motodle-alerts` and both CloudFront alarms exist. `alert_email` set 2026-09-06 and the email subscription applied (`run-SEhPMXTai7rV467M`); it stays *PendingConfirmation* until the operator clicks AWS's confirmation mail. **Still open:** A.6 Athena table + Step 0
 (create after the first log objects land, ~4 h after the apply; the primary workgroup has no
 results location, so pass one per query), B7 error visibility is BUILT (`infra/alarms.tf`, `GetInvalidation` on the deploy role, the
 `assets/*` reaper exclusion and the post-deploy smoke test in `deploy.yml`); its infra half
