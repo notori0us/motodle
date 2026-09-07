@@ -34,18 +34,17 @@ resource "aws_cloudwatch_metric_alarm" "cf_5xx" {
   ok_actions          = [aws_sns_topic.alerts.arn]
 }
 
-# 4xx is the runway-exhaustion and OAC-loss signal: with no puzzle for today the app makes ~5
-# requests of which 1 is a 404, so the rate jumps to 20-33%. A bare rate threshold false-alarms
-# on a single overnight scanner, so it is gated on a request floor with metric math.
-# Period 3600 (a 5-minute floor would never arm at this traffic); floor 20 requests/hour (arms
-# from ~100 visits/day sustained); 3 consecutive hours; threshold 25 because Average over 3600 s
-# is the unweighted mean of 60 per-minute rates, and one 404 in a quiet minute drags it up.
-# The residual false-positive rate is accepted, not eliminated.
+# 4xx is catastrophic-only: OAC loss turns every non-redirect request into a 404 (~87 % of an
+# hour's requests in the median hour). It cannot see runway exhaustion (one 404 in ~5 requests):
+# bots are 30-60 % of hourly requests by count, and the hourly Average is count-weighted, so the
+# original 25 % paged on scanner noise (2026-09-06). Threshold 60 for 3 h had zero trips over two
+# days of logs (longest bot breach 1 h). Floor 20 stays: 11 of 48 hours had under 50 requests,
+# so a higher floor only delays detection.
 resource "aws_cloudwatch_metric_alarm" "cf_4xx" {
   provider            = aws.us_east_1
   alarm_name          = "${var.name_prefix}-cloudfront-4xx"
   evaluation_periods  = 3 # 3 hours of sustained breach before it pages
-  threshold           = 25
+  threshold           = 60
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_sns_topic.alerts.arn]

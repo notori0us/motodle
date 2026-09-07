@@ -1039,6 +1039,8 @@ resource "aws_cloudwatch_metric_alarm" "cf_4xx" {
 }
 ```
 
+**Revised 2026-09-06 (live data; `infra/alarms.tf` is the source of truth):** the threshold rationale above is wrong on two counts. Two days of access logs show CloudWatch's hourly `Average` of `4xxErrorRate` matches the request-weighted hourly rate (66 requests, 38 4xx: logs 58 %, CloudWatch 57.6), not an unweighted per-minute mean. And bots (WordPress probes, contact-discovery scrapers hitting /contact, /about, /team) alone are 30-60 % of every hour's requests by count and clear the 20-request floor, so 25 paged five times in its first seven hours. The alarm is now catastrophic-only: threshold 60, floor 20, 3 h (zero trips over the two days; an OAC loss reads ~87 % in a median hour, worst case 6 h to page). Runway exhaustion is no longer detectable by this alarm; `runway.yml`'s manifest check is the runway detector.
+
 **One more false-fire path, worth knowing before the first page:** a 404ing `/assets/mtd.gif` — the beacon pixel never reached the bucket — inflates `4xxErrorRate` on exactly the traffic that makes this alarm arm, and reads identically to runway exhaustion. B11's pre-post gate curls that path for this reason.
 
 Add to `infra/variables.tf`. **No `default`, deliberately** — this repo goes public (F3), and recon counted "no email addresses anywhere in the tree" as one of the flip's clean properties `[repo-readiness §7]`. Hard-coding the operator's address here would undo that:
