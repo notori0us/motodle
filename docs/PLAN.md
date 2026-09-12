@@ -4030,7 +4030,8 @@ image weight ≈ 1.9 MB of source JPEG + ~450 KB of generated WebP.
 `country` and `years` fields decide two of the three tile colours (§4.2), so authoring them is a
 first-class task, not a nicety.
 
-**Target size: 40–60 makes and 300–500 models**, covering the well-known bikes of **every decade since
+**Target size: 40–60 makes and 300–1,200 models** (the original seed was 333 models; the 2026-09-12
+expansion, §11.16, took it to 816), covering the well-known bikes of **every decade since
 1950** — the 50s/60s British twins and Japanese two-strokes, the 70s UJMs and superbikes, the 80s
 race-replicas, the 90s sportbikes, the 2000s litre-bikes, and the modern adventure/naked era. Start
 from the ~12 manufacturers recon resolved (Honda, Kawasaki, Triumph, Ducati, BMW, Harley-Davidson,
@@ -5051,6 +5052,33 @@ changes.** This is a presentation-layer revision.
 `theme-color` / favicon change (§5.14.7 item 17); decide the operator-gated countdown (R10-9); and
 decide whether the wide-viewport two-column composition (§5.14.7 item 4, P2) ships or the pass keeps
 the single column with a larger photo.
+
+### 11.16 Revision 11 — catalog expansion 2026-09-12
+
+Operator ask: deepen the allowed-guess list (`docs/CATALOG-EXPANSION.md`). The seed catalog had 55
+makes / 333 models but 31 makes carried ≤ 2 models and 40 carried ≤ 4, so a rider whose bike was a
+Norton Atlas, a Honda CBR600RR, an MV Agusta Brutale 800 or a Husqvarna 701 could not enter it at
+all. Wordle's allowed-guess list is far broader than its answer list; ours now is too.
+
+**No new makes** (operator decision; 55 stays 55), **no rule, score, lock, storage or DOM change**,
+and **no existing id, name or year range touched** — every one of the original 333 entries is
+byte-identical, because the §7.2 contract test derives `id = normalizeId(make.name + " " + model.name)`
+and 36 scheduled puzzles reference ids by value. `KTM 990 Adventure` stays absent (C9).
+
+| # | Change | Sections |
+|---|---|---|
+| R11-1 | **`public/catalog.json`: 333 → 816 models (+483)**, hand-authored from general knowledge in §6.10 style by an Opus author pass and fact-checked by an independent Opus review pass (every range and name; disagreement or unconfirmed `medium` confidence → `years: null`). Appended grouped by make after the existing models; `generatedAt: "2026-09-12"`, `source: "seed"`. Merge script refused any id that already existed or repeated within the additions: 0 collisions. | §3.2, §6.10 |
+| R11-2 | **Per-make depth after the change**: Honda 71, Yamaha 65, Suzuki 55, Kawasaki 53, Ducati 48, BMW / Harley-Davidson / Triumph 32, Moto Guzzi / KTM 22, Aprilia / Royal Enfield 19, and every remaining make at 5–13 (previously 31 makes at ≤ 2). Largest make is 71, under the ~100 at which the native `<select>` would want a typeahead (ROADMAP). | §5.3, §6.10 |
+| R11-3 | **`aliases` are unused and ship empty** on every new entry — nothing under `src/` reads them since the combobox was removed; they stay in the schema only so the shape is unchanged. | §3.2 |
+| R11-4 | **Contract bound `has 300-500 models` → `300-1200`** in `schema/catalog-contracts.test.ts`, so the next expansion needs no test change; make bound 40–60 unchanged. §6.10's target sentence updated; the other "300–500" mentions in this plan (§1.1 C7, §3.2 size budget, §6.10's D4 note, the W1 work package, §11.7) now read as history of the original seed and are left as written. | §6.10, §7.2 |
+| R11-5 | **Future puzzles' `acceptModelIds` checked, none changed.** For each scheduled puzzle 2026-09-13 → 2026-10-07 the additions for the answer's make were compared against the D4 rule (a `Monster 1200 S` next to `Monster 1200` is a variant; a `Commando 850` next to `Commando 750` is not). Every near-neighbour the expansion added is a different displacement, generation or model (Sunbeam S8 vs S7, Laverda 750 SFC vs 750 SF, MV Agusta 750 S America vs 750 Sport, KTM 1290 Super Duke GT vs R, Jawa 350/638 vs 350/634, Bimota Tesi H2 vs Tesi 1D, Honda CBR600RR vs CBR600F, Suzuki RGV250 vs RG250 Gamma, Yamaha YZF1000R vs FZR1000), so each puzzle still accepts exactly its one id — with one exception found in review: the Jawa `350 Californian` is the 634.7/634.8 export variant of the same 350/634 type, so 2026-09-18 (`File:Jawa 634 8.jpg`) also accepts `jawa-350-californian`. Note also that the existing `norton-commando-750` range [1968, 1977] really ends ~1973 (the new `commando-850` starts 1973); left as-is because 2026-09-29 answers on it. Played days untouched. | §1.3 D4, §3.1 |
+| R11-6 | **Downstream docs**: `docs/CATALOG-REVIEW.md` regenerated (byte-equality test), `PRODUCT.md` counts, ROADMAP catalog-gap bullet closed (vintage Indian Scout as `Scout 101` + `Sport Scout`, NSU Sportmax, Triumph TR6 Trophy; Norton Manx was already present) plus a typeahead watch item, CONTENT-RUNBOOK note that a full `npm run fetch` now walks ~800 categories and that new guess-list entries without a Commons category are expected. Catalog is 15.23 KB gzipped (build budget check) against the 150 KB budget. | §6.10, §7.5 |
+
+**Follow-ups this revision leaves open:** the Commons walk in `tools/catalog.ts` is still not a usable
+source for `years` (§6.10 stands: hand-authored only); a typeahead for the model select if any make
+passes ~100 entries; and the `null`-year entries (a reviewer could not confirm a range) are candidates
+for later correction in `public/catalog.json` — corrections are edits to that file plus a re-render of
+`docs/CATALOG-REVIEW.md`, never edits to the review file.
 
 ---
 

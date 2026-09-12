@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-09-02",
+  "generatedAt": "2026-09-12",
   "source": "seed",
   "makes": [
     {
@@ -3694,6 +3694,4452 @@
         1958,
         1966
       ]
+    },
+    {
+      "id": "honda-cbr600rr",
+      "makeId": "honda",
+      "name": "CBR600RR",
+      "aliases": [],
+      "years": [
+        2003,
+        null
+      ]
+    },
+    {
+      "id": "honda-cbr500r",
+      "makeId": "honda",
+      "name": "CBR500R",
+      "aliases": [],
+      "years": [
+        2013,
+        null
+      ]
+    },
+    {
+      "id": "honda-cb500x",
+      "makeId": "honda",
+      "name": "CB500X",
+      "aliases": [],
+      "years": [
+        2013,
+        2023
+      ]
+    },
+    {
+      "id": "honda-cb650r",
+      "makeId": "honda",
+      "name": "CB650R",
+      "aliases": [],
+      "years": [
+        2019,
+        null
+      ]
+    },
+    {
+      "id": "honda-cbr650r",
+      "makeId": "honda",
+      "name": "CBR650R",
+      "aliases": [],
+      "years": [
+        2019,
+        null
+      ]
+    },
+    {
+      "id": "honda-cb1100",
+      "makeId": "honda",
+      "name": "CB1100",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "honda-super-blackbird-cbr1100xx",
+      "makeId": "honda",
+      "name": "Super Blackbird (CBR1100XX)",
+      "aliases": [],
+      "years": [
+        1997,
+        2007
+      ]
+    },
+    {
+      "id": "honda-nsr250r",
+      "makeId": "honda",
+      "name": "NSR250R",
+      "aliases": [],
+      "years": [
+        1986,
+        1999
+      ]
+    },
+    {
+      "id": "honda-rc51rvt1000r",
+      "makeId": "honda",
+      "name": "RC51 (RVT1000R)",
+      "aliases": [],
+      "years": [
+        2000,
+        2006
+      ]
+    },
+    {
+      "id": "honda-vtr1000f-firestorm",
+      "makeId": "honda",
+      "name": "VTR1000F (Firestorm)",
+      "aliases": [],
+      "years": [
+        1997,
+        2005
+      ]
+    },
+    {
+      "id": "honda-vfr1200f",
+      "makeId": "honda",
+      "name": "VFR1200F",
+      "aliases": [],
+      "years": [
+        2010,
+        2016
+      ]
+    },
+    {
+      "id": "honda-nc750x",
+      "makeId": "honda",
+      "name": "NC750X",
+      "aliases": [],
+      "years": [
+        2014,
+        null
+      ]
+    },
+    {
+      "id": "honda-crf250r",
+      "makeId": "honda",
+      "name": "CRF250R",
+      "aliases": [],
+      "years": [
+        2004,
+        null
+      ]
+    },
+    {
+      "id": "honda-xr650l",
+      "makeId": "honda",
+      "name": "XR650L",
+      "aliases": [],
+      "years": [
+        1993,
+        null
+      ]
+    },
+    {
+      "id": "honda-xr250r",
+      "makeId": "honda",
+      "name": "XR250R",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "honda-xr600r",
+      "makeId": "honda",
+      "name": "XR600R",
+      "aliases": [],
+      "years": [
+        1985,
+        2000
+      ]
+    },
+    {
+      "id": "honda-cr250m-elsinore",
+      "makeId": "honda",
+      "name": "CR250M Elsinore",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "honda-xl250",
+      "makeId": "honda",
+      "name": "XL250",
+      "aliases": [],
+      "years": [
+        1972,
+        1987
+      ]
+    },
+    {
+      "id": "honda-dominator-nx650",
+      "makeId": "honda",
+      "name": "Dominator (NX650)",
+      "aliases": [],
+      "years": [
+        1988,
+        2002
+      ]
+    },
+    {
+      "id": "honda-valkyrie-gl1500c",
+      "makeId": "honda",
+      "name": "Valkyrie (GL1500C)",
+      "aliases": [],
+      "years": [
+        1997,
+        2003
+      ]
+    },
+    {
+      "id": "honda-magna-v45v65",
+      "makeId": "honda",
+      "name": "Magna (V45/V65)",
+      "aliases": [],
+      "years": [
+        1982,
+        2003
+      ]
+    },
+    {
+      "id": "honda-pacific-coast-pc800",
+      "makeId": "honda",
+      "name": "Pacific Coast (PC800)",
+      "aliases": [],
+      "years": [
+        1989,
+        1998
+      ]
+    },
+    {
+      "id": "honda-nr750",
+      "makeId": "honda",
+      "name": "NR750",
+      "aliases": [],
+      "years": [
+        1992,
+        1992
+      ]
+    },
+    {
+      "id": "honda-dream-ca77",
+      "makeId": "honda",
+      "name": "Dream (CA77)",
+      "aliases": [],
+      "years": [
+        1960,
+        1969
+      ]
+    },
+    {
+      "id": "honda-pan-european-st1100st1300",
+      "makeId": "honda",
+      "name": "Pan European (ST1100/ST1300)",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "honda-cl350-scrambler",
+      "makeId": "honda",
+      "name": "CL350 Scrambler",
+      "aliases": [],
+      "years": [
+        1968,
+        1973
+      ]
+    },
+    {
+      "id": "honda-vtx1800",
+      "makeId": "honda",
+      "name": "VTX1800",
+      "aliases": [],
+      "years": [
+        2002,
+        2008
+      ]
+    },
+    {
+      "id": "honda-cb900fboldor",
+      "makeId": "honda",
+      "name": "CB900F (Bol d'Or)",
+      "aliases": [],
+      "years": [
+        1979,
+        1983
+      ]
+    },
+    {
+      "id": "honda-gb500-tourist-trophy",
+      "makeId": "honda",
+      "name": "GB500 Tourist Trophy",
+      "aliases": [],
+      "years": [
+        1989,
+        1990
+      ]
+    },
+    {
+      "id": "honda-rune-nrx1800",
+      "makeId": "honda",
+      "name": "Rune (NRX1800)",
+      "aliases": [],
+      "years": [
+        2004,
+        2005
+      ]
+    },
+    {
+      "id": "honda-forza",
+      "makeId": "honda",
+      "name": "Forza",
+      "aliases": [],
+      "years": [
+        2000,
+        null
+      ]
+    },
+    {
+      "id": "honda-trail-125ct125",
+      "makeId": "honda",
+      "name": "Trail 125 (CT125)",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "honda-hornet-cb750",
+      "makeId": "honda",
+      "name": "Hornet (CB750)",
+      "aliases": [],
+      "years": [
+        2023,
+        null
+      ]
+    },
+    {
+      "id": "honda-transalp-xl750",
+      "makeId": "honda",
+      "name": "Transalp (XL750)",
+      "aliases": [],
+      "years": [
+        2023,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-rd500lcrz500",
+      "makeId": "yamaha",
+      "name": "RD500LC (RZ500)",
+      "aliases": [],
+      "years": [
+        1984,
+        1986
+      ]
+    },
+    {
+      "id": "yamaha-rd350lc",
+      "makeId": "yamaha",
+      "name": "RD350LC",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "yamaha-xs1100",
+      "makeId": "yamaha",
+      "name": "XS1100",
+      "aliases": [],
+      "years": [
+        1978,
+        1981
+      ]
+    },
+    {
+      "id": "yamaha-xs750",
+      "makeId": "yamaha",
+      "name": "XS750",
+      "aliases": [],
+      "years": [
+        1976,
+        1979
+      ]
+    },
+    {
+      "id": "yamaha-fz1",
+      "makeId": "yamaha",
+      "name": "FZ1",
+      "aliases": [],
+      "years": [
+        2001,
+        2015
+      ]
+    },
+    {
+      "id": "yamaha-fz6",
+      "makeId": "yamaha",
+      "name": "FZ6",
+      "aliases": [],
+      "years": [
+        2004,
+        2009
+      ]
+    },
+    {
+      "id": "yamaha-mt10",
+      "makeId": "yamaha",
+      "name": "MT-10",
+      "aliases": [],
+      "years": [
+        2016,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-mt03",
+      "makeId": "yamaha",
+      "name": "MT-03",
+      "aliases": [],
+      "years": [
+        2016,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-yzfr3",
+      "makeId": "yamaha",
+      "name": "YZF-R3",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-yzfr9",
+      "makeId": "yamaha",
+      "name": "YZF-R9",
+      "aliases": [],
+      "years": [
+        2025,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-yzfr125",
+      "makeId": "yamaha",
+      "name": "YZF-R125",
+      "aliases": [],
+      "years": [
+        2008,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-fzr600",
+      "makeId": "yamaha",
+      "name": "FZR600",
+      "aliases": [],
+      "years": [
+        1989,
+        1999
+      ]
+    },
+    {
+      "id": "yamaha-yzf600r-thundercat",
+      "makeId": "yamaha",
+      "name": "YZF600R (Thundercat)",
+      "aliases": [],
+      "years": [
+        1996,
+        2007
+      ]
+    },
+    {
+      "id": "yamaha-yzf1000r-thunderace",
+      "makeId": "yamaha",
+      "name": "YZF1000R (Thunderace)",
+      "aliases": [],
+      "years": [
+        1996,
+        2003
+      ]
+    },
+    {
+      "id": "yamaha-royal-star",
+      "makeId": "yamaha",
+      "name": "Royal Star",
+      "aliases": [],
+      "years": [
+        1996,
+        2013
+      ]
+    },
+    {
+      "id": "yamaha-v-star-650-dragstar",
+      "makeId": "yamaha",
+      "name": "V Star 650 (Dragstar)",
+      "aliases": [],
+      "years": [
+        1998,
+        2017
+      ]
+    },
+    {
+      "id": "yamaha-v-star-1100",
+      "makeId": "yamaha",
+      "name": "V Star 1100",
+      "aliases": [],
+      "years": [
+        1999,
+        2009
+      ]
+    },
+    {
+      "id": "yamaha-road-star",
+      "makeId": "yamaha",
+      "name": "Road Star",
+      "aliases": [],
+      "years": [
+        1999,
+        2014
+      ]
+    },
+    {
+      "id": "yamaha-bolt-xv950",
+      "makeId": "yamaha",
+      "name": "Bolt (XV950)",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "yamaha-xt600",
+      "makeId": "yamaha",
+      "name": "XT600",
+      "aliases": [],
+      "years": [
+        1984,
+        2003
+      ]
+    },
+    {
+      "id": "yamaha-serow-xt225",
+      "makeId": "yamaha",
+      "name": "Serow (XT225)",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "yamaha-tw200",
+      "makeId": "yamaha",
+      "name": "TW200",
+      "aliases": [],
+      "years": [
+        1987,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-wr450f",
+      "makeId": "yamaha",
+      "name": "WR450F",
+      "aliases": [],
+      "years": [
+        2003,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-yz250",
+      "makeId": "yamaha",
+      "name": "YZ250",
+      "aliases": [],
+      "years": [
+        1974,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-yz125",
+      "makeId": "yamaha",
+      "name": "YZ125",
+      "aliases": [],
+      "years": [
+        1974,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-xsr700",
+      "makeId": "yamaha",
+      "name": "XSR700",
+      "aliases": [],
+      "years": [
+        2016,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-xsr900",
+      "makeId": "yamaha",
+      "name": "XSR900",
+      "aliases": [],
+      "years": [
+        2016,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-tracer-9-tracer-900",
+      "makeId": "yamaha",
+      "name": "Tracer 9 (Tracer 900)",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "yamaha-gts1000",
+      "makeId": "yamaha",
+      "name": "GTS1000",
+      "aliases": [],
+      "years": [
+        1993,
+        1999
+      ]
+    },
+    {
+      "id": "yamaha-sr400",
+      "makeId": "yamaha",
+      "name": "SR400",
+      "aliases": [],
+      "years": [
+        1978,
+        2021
+      ]
+    },
+    {
+      "id": "yamaha-rx100",
+      "makeId": "yamaha",
+      "name": "RX100",
+      "aliases": [],
+      "years": [
+        1985,
+        1996
+      ]
+    },
+    {
+      "id": "suzuki-t20x6-hustler",
+      "makeId": "suzuki",
+      "name": "T20 (X6 Hustler)",
+      "aliases": [],
+      "years": [
+        1965,
+        1968
+      ]
+    },
+    {
+      "id": "suzuki-gt550",
+      "makeId": "suzuki",
+      "name": "GT550",
+      "aliases": [],
+      "years": [
+        1972,
+        1977
+      ]
+    },
+    {
+      "id": "suzuki-re5",
+      "makeId": "suzuki",
+      "name": "RE5",
+      "aliases": [],
+      "years": [
+        1974,
+        1976
+      ]
+    },
+    {
+      "id": "suzuki-gs550",
+      "makeId": "suzuki",
+      "name": "GS550",
+      "aliases": [],
+      "years": [
+        1977,
+        1986
+      ]
+    },
+    {
+      "id": "suzuki-gs1100e",
+      "makeId": "suzuki",
+      "name": "GS1100E",
+      "aliases": [],
+      "years": [
+        1980,
+        1983
+      ]
+    },
+    {
+      "id": "suzuki-gs500",
+      "makeId": "suzuki",
+      "name": "GS500",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "suzuki-xn85-turbo",
+      "makeId": "suzuki",
+      "name": "XN85 Turbo",
+      "aliases": [],
+      "years": [
+        1983,
+        1983
+      ]
+    },
+    {
+      "id": "suzuki-rgv250-gamma",
+      "makeId": "suzuki",
+      "name": "RGV250 Gamma",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "suzuki-drbigdr750s800s",
+      "makeId": "suzuki",
+      "name": "DR Big (DR750S/800S)",
+      "aliases": [],
+      "years": [
+        1988,
+        1997
+      ]
+    },
+    {
+      "id": "suzuki-tl1000s",
+      "makeId": "suzuki",
+      "name": "TL1000S",
+      "aliases": [],
+      "years": [
+        1997,
+        2001
+      ]
+    },
+    {
+      "id": "suzuki-tl1000r",
+      "makeId": "suzuki",
+      "name": "TL1000R",
+      "aliases": [],
+      "years": [
+        1998,
+        2003
+      ]
+    },
+    {
+      "id": "suzuki-gsx600f",
+      "makeId": "suzuki",
+      "name": "GSX600F",
+      "aliases": [],
+      "years": [
+        1988,
+        2006
+      ]
+    },
+    {
+      "id": "suzuki-gsx750f",
+      "makeId": "suzuki",
+      "name": "GSX750F",
+      "aliases": [],
+      "years": [
+        1989,
+        2006
+      ]
+    },
+    {
+      "id": "suzuki-dr350",
+      "makeId": "suzuki",
+      "name": "DR350",
+      "aliases": [],
+      "years": [
+        1990,
+        1999
+      ]
+    },
+    {
+      "id": "suzuki-gsxr1000",
+      "makeId": "suzuki",
+      "name": "GSX-R1000",
+      "aliases": [],
+      "years": [
+        2001,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-gsx1400",
+      "makeId": "suzuki",
+      "name": "GSX1400",
+      "aliases": [],
+      "years": [
+        2001,
+        2008
+      ]
+    },
+    {
+      "id": "suzuki-b-king",
+      "makeId": "suzuki",
+      "name": "B-King",
+      "aliases": [],
+      "years": [
+        2008,
+        2011
+      ]
+    },
+    {
+      "id": "suzuki-gladius-sfv650",
+      "makeId": "suzuki",
+      "name": "Gladius (SFV650)",
+      "aliases": [],
+      "years": [
+        2009,
+        2015
+      ]
+    },
+    {
+      "id": "suzuki-boulevard-s40-savage-ls650",
+      "makeId": "suzuki",
+      "name": "Boulevard S40 (Savage LS650)",
+      "aliases": [],
+      "years": [
+        1986,
+        2020
+      ]
+    },
+    {
+      "id": "suzuki-boulevard-s83-intruder-1400",
+      "makeId": "suzuki",
+      "name": "Boulevard S83 (Intruder 1400)",
+      "aliases": [],
+      "years": [
+        1987,
+        2009
+      ]
+    },
+    {
+      "id": "suzuki-gsxs750",
+      "makeId": "suzuki",
+      "name": "GSX-S750",
+      "aliases": [],
+      "years": [
+        2015,
+        2022
+      ]
+    },
+    {
+      "id": "suzuki-gsxs1000gt",
+      "makeId": "suzuki",
+      "name": "GSX-S1000GT",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-gsx8s",
+      "makeId": "suzuki",
+      "name": "GSX-8S",
+      "aliases": [],
+      "years": [
+        2023,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-gsx8r",
+      "makeId": "suzuki",
+      "name": "GSX-8R",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-v-strom-800de",
+      "makeId": "suzuki",
+      "name": "V-Strom 800DE",
+      "aliases": [],
+      "years": [
+        2023,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-v-strom-1050",
+      "makeId": "suzuki",
+      "name": "V-Strom 1050",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-katana-gsxs1000s",
+      "makeId": "suzuki",
+      "name": "Katana (GSX-S1000S)",
+      "aliases": [],
+      "years": [
+        2019,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-rmz250",
+      "makeId": "suzuki",
+      "name": "RM-Z250",
+      "aliases": [],
+      "years": [
+        2004,
+        null
+      ]
+    },
+    {
+      "id": "suzuki-rm125",
+      "makeId": "suzuki",
+      "name": "RM125",
+      "aliases": [],
+      "years": [
+        1975,
+        2008
+      ]
+    },
+    {
+      "id": "kawasaki-a1-samurai",
+      "makeId": "kawasaki",
+      "name": "A1 Samurai",
+      "aliases": [],
+      "years": [
+        1966,
+        1971
+      ]
+    },
+    {
+      "id": "kawasaki-h2-mach-iv",
+      "makeId": "kawasaki",
+      "name": "H2 Mach IV",
+      "aliases": [],
+      "years": [
+        1972,
+        1975
+      ]
+    },
+    {
+      "id": "kawasaki-kz750",
+      "makeId": "kawasaki",
+      "name": "KZ750",
+      "aliases": [],
+      "years": [
+        1976,
+        1983
+      ]
+    },
+    {
+      "id": "kawasaki-z1r",
+      "makeId": "kawasaki",
+      "name": "Z1-R",
+      "aliases": [],
+      "years": [
+        1978,
+        1980
+      ]
+    },
+    {
+      "id": "kawasaki-z1300",
+      "makeId": "kawasaki",
+      "name": "Z1300",
+      "aliases": [],
+      "years": [
+        1979,
+        1989
+      ]
+    },
+    {
+      "id": "kawasaki-kx250",
+      "makeId": "kawasaki",
+      "name": "KX250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "kawasaki-kx500",
+      "makeId": "kawasaki",
+      "name": "KX500",
+      "aliases": [],
+      "years": [
+        1983,
+        2004
+      ]
+    },
+    {
+      "id": "kawasaki-gpz550",
+      "makeId": "kawasaki",
+      "name": "GPz550",
+      "aliases": [],
+      "years": [
+        1981,
+        1985
+      ]
+    },
+    {
+      "id": "kawasaki-gpz750-turbo",
+      "makeId": "kawasaki",
+      "name": "GPz750 Turbo",
+      "aliases": [],
+      "years": [
+        1984,
+        1985
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-500",
+      "makeId": "kawasaki",
+      "name": "Ninja 500",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-kdx200",
+      "makeId": "kawasaki",
+      "name": "KDX200",
+      "aliases": [],
+      "years": [
+        1983,
+        2006
+      ]
+    },
+    {
+      "id": "kawasaki-vulcan-1500",
+      "makeId": "kawasaki",
+      "name": "Vulcan 1500",
+      "aliases": [],
+      "years": [
+        1987,
+        2008
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-500rex500",
+      "makeId": "kawasaki",
+      "name": "Ninja 500R (EX500)",
+      "aliases": [],
+      "years": [
+        1987,
+        2009
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-zx7rzxr750",
+      "makeId": "kawasaki",
+      "name": "Ninja ZX-7R (ZXR750)",
+      "aliases": [],
+      "years": [
+        1989,
+        2003
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-zx12r",
+      "makeId": "kawasaki",
+      "name": "Ninja ZX-12R",
+      "aliases": [],
+      "years": [
+        2000,
+        2006
+      ]
+    },
+    {
+      "id": "kawasaki-w650",
+      "makeId": "kawasaki",
+      "name": "W650",
+      "aliases": [],
+      "years": [
+        1999,
+        2007
+      ]
+    },
+    {
+      "id": "kawasaki-z1000",
+      "makeId": "kawasaki",
+      "name": "Z1000",
+      "aliases": [],
+      "years": [
+        2003,
+        2020
+      ]
+    },
+    {
+      "id": "kawasaki-z750",
+      "makeId": "kawasaki",
+      "name": "Z750",
+      "aliases": [],
+      "years": [
+        2004,
+        2012
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-650er6f",
+      "makeId": "kawasaki",
+      "name": "Ninja 650 (ER-6f)",
+      "aliases": [],
+      "years": [
+        2006,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-1000sxz1000sx",
+      "makeId": "kawasaki",
+      "name": "Ninja 1000SX (Z1000SX)",
+      "aliases": [],
+      "years": [
+        2011,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-h2",
+      "makeId": "kawasaki",
+      "name": "Ninja H2",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-h2sx",
+      "makeId": "kawasaki",
+      "name": "Ninja H2 SX",
+      "aliases": [],
+      "years": [
+        2018,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-zh2",
+      "makeId": "kawasaki",
+      "name": "Z H2",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-z900rs",
+      "makeId": "kawasaki",
+      "name": "Z900RS",
+      "aliases": [],
+      "years": [
+        2018,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-300",
+      "makeId": "kawasaki",
+      "name": "Ninja 300",
+      "aliases": [],
+      "years": [
+        2013,
+        2017
+      ]
+    },
+    {
+      "id": "kawasaki-z400",
+      "makeId": "kawasaki",
+      "name": "Z400",
+      "aliases": [],
+      "years": [
+        2019,
+        2023
+      ]
+    },
+    {
+      "id": "kawasaki-ninja-zx4rr",
+      "makeId": "kawasaki",
+      "name": "Ninja ZX-4RR",
+      "aliases": [],
+      "years": [
+        2023,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-versys-1000",
+      "makeId": "kawasaki",
+      "name": "Versys 1000",
+      "aliases": [],
+      "years": [
+        2012,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-z6502017",
+      "makeId": "kawasaki",
+      "name": "Z650 (2017)",
+      "aliases": [],
+      "years": [
+        2017,
+        null
+      ]
+    },
+    {
+      "id": "kawasaki-eliminator-400450",
+      "makeId": "kawasaki",
+      "name": "Eliminator 400/450",
+      "aliases": [],
+      "years": [
+        2023,
+        null
+      ]
+    },
+    {
+      "id": "triumph-model-h",
+      "makeId": "triumph",
+      "name": "Model H",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "triumph-speed-twin-5t",
+      "makeId": "triumph",
+      "name": "Speed Twin (5T)",
+      "aliases": [],
+      "years": [
+        1938,
+        1966
+      ]
+    },
+    {
+      "id": "triumph-tiger-cubt20",
+      "makeId": "triumph",
+      "name": "Tiger Cub (T20)",
+      "aliases": [],
+      "years": [
+        1954,
+        1968
+      ]
+    },
+    {
+      "id": "triumph-tr6-trophy",
+      "makeId": "triumph",
+      "name": "TR6 Trophy",
+      "aliases": [],
+      "years": [
+        1956,
+        1973
+      ]
+    },
+    {
+      "id": "triumph-trident-900",
+      "makeId": "triumph",
+      "name": "Trident 900",
+      "aliases": [],
+      "years": [
+        1991,
+        1998
+      ]
+    },
+    {
+      "id": "triumph-trophy-1200",
+      "makeId": "triumph",
+      "name": "Trophy 1200",
+      "aliases": [],
+      "years": [
+        1991,
+        2003
+      ]
+    },
+    {
+      "id": "triumph-daytona-955it595",
+      "makeId": "triumph",
+      "name": "Daytona 955i (T595)",
+      "aliases": [],
+      "years": [
+        1997,
+        2006
+      ]
+    },
+    {
+      "id": "triumph-tiger-1050",
+      "makeId": "triumph",
+      "name": "Tiger 1050",
+      "aliases": [],
+      "years": [
+        2007,
+        2012
+      ]
+    },
+    {
+      "id": "triumph-tiger-1200-explorer",
+      "makeId": "triumph",
+      "name": "Tiger 1200 (Explorer)",
+      "aliases": [],
+      "years": [
+        2012,
+        null
+      ]
+    },
+    {
+      "id": "triumph-speed-twin-1200",
+      "makeId": "triumph",
+      "name": "Speed Twin 1200",
+      "aliases": [],
+      "years": [
+        2019,
+        null
+      ]
+    },
+    {
+      "id": "triumph-bonneville-bobber",
+      "makeId": "triumph",
+      "name": "Bonneville Bobber",
+      "aliases": [],
+      "years": [
+        2017,
+        null
+      ]
+    },
+    {
+      "id": "triumph-tiger-sport-660",
+      "makeId": "triumph",
+      "name": "Tiger Sport 660",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "triumph-speed-400",
+      "makeId": "triumph",
+      "name": "Speed 400",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "triumph-daytona-660",
+      "makeId": "triumph",
+      "name": "Daytona 660",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "norton-16h",
+      "makeId": "norton",
+      "name": "16H",
+      "aliases": [],
+      "years": [
+        1911,
+        1954
+      ]
+    },
+    {
+      "id": "norton-model-18",
+      "makeId": "norton",
+      "name": "Model 18",
+      "aliases": [],
+      "years": [
+        1923,
+        1954
+      ]
+    },
+    {
+      "id": "norton-es2",
+      "makeId": "norton",
+      "name": "ES2",
+      "aliases": [],
+      "years": [
+        1927,
+        1963
+      ]
+    },
+    {
+      "id": "norton-international",
+      "makeId": "norton",
+      "name": "International",
+      "aliases": [],
+      "years": [
+        1932,
+        1958
+      ]
+    },
+    {
+      "id": "norton-jubilee",
+      "makeId": "norton",
+      "name": "Jubilee",
+      "aliases": [],
+      "years": [
+        1958,
+        1966
+      ]
+    },
+    {
+      "id": "norton-atlas",
+      "makeId": "norton",
+      "name": "Atlas",
+      "aliases": [],
+      "years": [
+        1962,
+        1968
+      ]
+    },
+    {
+      "id": "norton-commando-850",
+      "makeId": "norton",
+      "name": "Commando 850",
+      "aliases": [],
+      "years": [
+        1973,
+        1977
+      ]
+    },
+    {
+      "id": "norton-f1",
+      "makeId": "norton",
+      "name": "F1",
+      "aliases": [],
+      "years": [
+        1990,
+        1992
+      ]
+    },
+    {
+      "id": "norton-v4sv",
+      "makeId": "norton",
+      "name": "V4SV",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bsa-sloper",
+      "makeId": "bsa",
+      "name": "Sloper",
+      "aliases": [],
+      "years": [
+        1927,
+        1935
+      ]
+    },
+    {
+      "id": "bsam20",
+      "makeId": "bsa",
+      "name": "M20",
+      "aliases": [],
+      "years": [
+        1937,
+        1955
+      ]
+    },
+    {
+      "id": "bsab31",
+      "makeId": "bsa",
+      "name": "B31",
+      "aliases": [],
+      "years": [
+        1945,
+        1959
+      ]
+    },
+    {
+      "id": "bsaa7",
+      "makeId": "bsa",
+      "name": "A7",
+      "aliases": [],
+      "years": [
+        1946,
+        1962
+      ]
+    },
+    {
+      "id": "bsa-rocket-gold-star",
+      "makeId": "bsa",
+      "name": "Rocket Gold Star",
+      "aliases": [],
+      "years": [
+        1962,
+        1963
+      ]
+    },
+    {
+      "id": "bsaa50-royal-star",
+      "makeId": "bsa",
+      "name": "A50 Royal Star",
+      "aliases": [],
+      "years": [
+        1965,
+        1970
+      ]
+    },
+    {
+      "id": "bsaa65-lightning",
+      "makeId": "bsa",
+      "name": "A65 Lightning",
+      "aliases": [],
+      "years": [
+        1965,
+        1972
+      ]
+    },
+    {
+      "id": "bsab44-victor",
+      "makeId": "bsa",
+      "name": "B44 Victor",
+      "aliases": [],
+      "years": [
+        1966,
+        1971
+      ]
+    },
+    {
+      "id": "bsa-gold-star-650",
+      "makeId": "bsa",
+      "name": "Gold Star 650",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "ariel-vb600",
+      "makeId": "ariel",
+      "name": "VB 600",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ariel-wng350",
+      "makeId": "ariel",
+      "name": "W/NG 350",
+      "aliases": [],
+      "years": [
+        1939,
+        1945
+      ]
+    },
+    {
+      "id": "ariel-huntmaster",
+      "makeId": "ariel",
+      "name": "Huntmaster",
+      "aliases": [],
+      "years": [
+        1954,
+        1959
+      ]
+    },
+    {
+      "id": "ariel-leader",
+      "makeId": "ariel",
+      "name": "Leader",
+      "aliases": [],
+      "years": [
+        1958,
+        1965
+      ]
+    },
+    {
+      "id": "ariel-arrow",
+      "makeId": "ariel",
+      "name": "Arrow",
+      "aliases": [],
+      "years": [
+        1960,
+        1965
+      ]
+    },
+    {
+      "id": "vincent-meteor",
+      "makeId": "vincent",
+      "name": "Meteor",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "vincent-black-lightning",
+      "makeId": "vincent",
+      "name": "Black Lightning",
+      "aliases": [],
+      "years": [
+        1948,
+        1952
+      ]
+    },
+    {
+      "id": "vincent-comet",
+      "makeId": "vincent",
+      "name": "Comet",
+      "aliases": [],
+      "years": [
+        1948,
+        1954
+      ]
+    },
+    {
+      "id": "vincent-black-prince",
+      "makeId": "vincent",
+      "name": "Black Prince",
+      "aliases": [],
+      "years": [
+        1954,
+        1955
+      ]
+    },
+    {
+      "id": "matchless-silver-hawk",
+      "makeId": "matchless",
+      "name": "Silver Hawk",
+      "aliases": [],
+      "years": [
+        1931,
+        1935
+      ]
+    },
+    {
+      "id": "matchless-g3l",
+      "makeId": "matchless",
+      "name": "G3L",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "matchless-g9",
+      "makeId": "matchless",
+      "name": "G9",
+      "aliases": [],
+      "years": [
+        1948,
+        1961
+      ]
+    },
+    {
+      "id": "matchless-g11",
+      "makeId": "matchless",
+      "name": "G11",
+      "aliases": [],
+      "years": [
+        1956,
+        1958
+      ]
+    },
+    {
+      "id": "matchless-g50",
+      "makeId": "matchless",
+      "name": "G50",
+      "aliases": [],
+      "years": [
+        1958,
+        1963
+      ]
+    },
+    {
+      "id": "matchless-g15",
+      "makeId": "matchless",
+      "name": "G15",
+      "aliases": [],
+      "years": [
+        1963,
+        1969
+      ]
+    },
+    {
+      "id": "sunbeam-model-8",
+      "makeId": "sunbeam",
+      "name": "Model 8",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sunbeam-model-9",
+      "makeId": "sunbeam",
+      "name": "Model 9",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sunbeam-model-90",
+      "makeId": "sunbeam",
+      "name": "Model 90",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sunbeam-s8",
+      "makeId": "sunbeam",
+      "name": "S8",
+      "aliases": [],
+      "years": [
+        1949,
+        1956
+      ]
+    },
+    {
+      "id": "velocette-kss",
+      "makeId": "velocette",
+      "name": "KSS",
+      "aliases": [],
+      "years": [
+        1925,
+        1948
+      ]
+    },
+    {
+      "id": "velocette-ktt",
+      "makeId": "velocette",
+      "name": "KTT",
+      "aliases": [],
+      "years": [
+        1928,
+        1950
+      ]
+    },
+    {
+      "id": "velocette-mac",
+      "makeId": "velocette",
+      "name": "MAC",
+      "aliases": [],
+      "years": [
+        1933,
+        1960
+      ]
+    },
+    {
+      "id": "velocette-mss",
+      "makeId": "velocette",
+      "name": "MSS",
+      "aliases": [],
+      "years": [
+        1935,
+        1968
+      ]
+    },
+    {
+      "id": "velocette-le",
+      "makeId": "velocette",
+      "name": "LE",
+      "aliases": [],
+      "years": [
+        1948,
+        1971
+      ]
+    },
+    {
+      "id": "velocette-viper",
+      "makeId": "velocette",
+      "name": "Viper",
+      "aliases": [],
+      "years": [
+        1956,
+        1968
+      ]
+    },
+    {
+      "id": "royal-enfield-flying-flea",
+      "makeId": "royal-enfield",
+      "name": "Flying Flea",
+      "aliases": [],
+      "years": [
+        1942,
+        1945
+      ]
+    },
+    {
+      "id": "royal-enfield-crusader-250",
+      "makeId": "royal-enfield",
+      "name": "Crusader 250",
+      "aliases": [],
+      "years": [
+        1956,
+        1966
+      ]
+    },
+    {
+      "id": "royal-enfield-constellation",
+      "makeId": "royal-enfield",
+      "name": "Constellation",
+      "aliases": [],
+      "years": [
+        1958,
+        1963
+      ]
+    },
+    {
+      "id": "royal-enfield-interceptor-750",
+      "makeId": "royal-enfield",
+      "name": "Interceptor 750",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "royal-enfield-bullet-500",
+      "makeId": "royal-enfield",
+      "name": "Bullet 500",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "royal-enfield-thunderbird",
+      "makeId": "royal-enfield",
+      "name": "Thunderbird",
+      "aliases": [],
+      "years": [
+        2002,
+        2020
+      ]
+    },
+    {
+      "id": "royal-enfield-classic-500",
+      "makeId": "royal-enfield",
+      "name": "Classic 500",
+      "aliases": [],
+      "years": [
+        2009,
+        2020
+      ]
+    },
+    {
+      "id": "royal-enfield-shotgun-650",
+      "makeId": "royal-enfield",
+      "name": "Shotgun 650",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "royal-enfield-guerrilla-450",
+      "makeId": "royal-enfield",
+      "name": "Guerrilla 450",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "ducati-200-elite",
+      "makeId": "ducati",
+      "name": "200 Elite",
+      "aliases": [],
+      "years": [
+        1959,
+        1965
+      ]
+    },
+    {
+      "id": "ducati-mach-1",
+      "makeId": "ducati",
+      "name": "Mach 1",
+      "aliases": [],
+      "years": [
+        1964,
+        1966
+      ]
+    },
+    {
+      "id": "ducati-scrambler-250350450",
+      "makeId": "ducati",
+      "name": "Scrambler (250/350/450)",
+      "aliases": [],
+      "years": [
+        1962,
+        1975
+      ]
+    },
+    {
+      "id": "ducati-750gt",
+      "makeId": "ducati",
+      "name": "750 GT",
+      "aliases": [],
+      "years": [
+        1971,
+        1974
+      ]
+    },
+    {
+      "id": "ducati-darmah-900sd",
+      "makeId": "ducati",
+      "name": "Darmah (900SD)",
+      "aliases": [],
+      "years": [
+        1977,
+        1983
+      ]
+    },
+    {
+      "id": "ducati-mike-hailwood-replica-mhr",
+      "makeId": "ducati",
+      "name": "Mike Hailwood Replica (MHR)",
+      "aliases": [],
+      "years": [
+        1979,
+        1986
+      ]
+    },
+    {
+      "id": "ducati-748",
+      "makeId": "ducati",
+      "name": "748",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ducati-749",
+      "makeId": "ducati",
+      "name": "749",
+      "aliases": [],
+      "years": [
+        2003,
+        2006
+      ]
+    },
+    {
+      "id": "ducati-999",
+      "makeId": "ducati",
+      "name": "999",
+      "aliases": [],
+      "years": [
+        2003,
+        2006
+      ]
+    },
+    {
+      "id": "ducati-1098",
+      "makeId": "ducati",
+      "name": "1098",
+      "aliases": [],
+      "years": [
+        2007,
+        2009
+      ]
+    },
+    {
+      "id": "ducati-1198",
+      "makeId": "ducati",
+      "name": "1198",
+      "aliases": [],
+      "years": [
+        2009,
+        2011
+      ]
+    },
+    {
+      "id": "ducati-848",
+      "makeId": "ducati",
+      "name": "848",
+      "aliases": [],
+      "years": [
+        2008,
+        2013
+      ]
+    },
+    {
+      "id": "ducati-panigale-899",
+      "makeId": "ducati",
+      "name": "Panigale 899",
+      "aliases": [],
+      "years": [
+        2014,
+        2015
+      ]
+    },
+    {
+      "id": "ducati-panigale-959",
+      "makeId": "ducati",
+      "name": "Panigale 959",
+      "aliases": [],
+      "years": [
+        2016,
+        2019
+      ]
+    },
+    {
+      "id": "ducati-panigale-1299",
+      "makeId": "ducati",
+      "name": "Panigale 1299",
+      "aliases": [],
+      "years": [
+        2015,
+        2018
+      ]
+    },
+    {
+      "id": "ducati-panigale-v2",
+      "makeId": "ducati",
+      "name": "Panigale V2",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "ducati-streetfighter-v4",
+      "makeId": "ducati",
+      "name": "Streetfighter V4",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "ducati-multistrada-1200",
+      "makeId": "ducati",
+      "name": "Multistrada 1200",
+      "aliases": [],
+      "years": [
+        2010,
+        2017
+      ]
+    },
+    {
+      "id": "ducati-multistrada-v4",
+      "makeId": "ducati",
+      "name": "Multistrada V4",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "ducati-hypermotard-1100",
+      "makeId": "ducati",
+      "name": "Hypermotard 1100",
+      "aliases": [],
+      "years": [
+        2007,
+        2012
+      ]
+    },
+    {
+      "id": "ducati-hypermotard-950",
+      "makeId": "ducati",
+      "name": "Hypermotard 950",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ducati-desertx",
+      "makeId": "ducati",
+      "name": "DesertX",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "ducati-monster-696",
+      "makeId": "ducati",
+      "name": "Monster 696",
+      "aliases": [],
+      "years": [
+        2008,
+        2014
+      ]
+    },
+    {
+      "id": "ducati-st2",
+      "makeId": "ducati",
+      "name": "ST2",
+      "aliases": [],
+      "years": [
+        1997,
+        2003
+      ]
+    },
+    {
+      "id": "ducati-gt1000-sportclassic",
+      "makeId": "ducati",
+      "name": "GT1000 (SportClassic)",
+      "aliases": [],
+      "years": [
+        2006,
+        2010
+      ]
+    },
+    {
+      "id": "mv-agusta-125-sport",
+      "makeId": "mv-agusta",
+      "name": "125 Sport",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "mv-agusta-600",
+      "makeId": "mv-agusta",
+      "name": "600",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "mv-agusta-750s-america",
+      "makeId": "mv-agusta",
+      "name": "750 S America",
+      "aliases": [],
+      "years": [
+        1975,
+        1977
+      ]
+    },
+    {
+      "id": "mv-agusta-f41000",
+      "makeId": "mv-agusta",
+      "name": "F4 1000",
+      "aliases": [],
+      "years": [
+        2004,
+        2018
+      ]
+    },
+    {
+      "id": "mv-agusta-f3800",
+      "makeId": "mv-agusta",
+      "name": "F3 800",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "mv-agusta-brutale-800",
+      "makeId": "mv-agusta",
+      "name": "Brutale 800",
+      "aliases": [],
+      "years": [
+        2012,
+        null
+      ]
+    },
+    {
+      "id": "mv-agusta-dragster-800",
+      "makeId": "mv-agusta",
+      "name": "Dragster 800",
+      "aliases": [],
+      "years": [
+        2014,
+        null
+      ]
+    },
+    {
+      "id": "mv-agusta-turismo-veloce-800",
+      "makeId": "mv-agusta",
+      "name": "Turismo Veloce 800",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "mv-agusta-superveloce-800",
+      "makeId": "mv-agusta",
+      "name": "Superveloce 800",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "moto-guzzi-normale",
+      "makeId": "moto-guzzi",
+      "name": "Normale",
+      "aliases": [],
+      "years": [
+        1921,
+        1924
+      ]
+    },
+    {
+      "id": "moto-guzzi-airone",
+      "makeId": "moto-guzzi",
+      "name": "Airone",
+      "aliases": [],
+      "years": [
+        1939,
+        1957
+      ]
+    },
+    {
+      "id": "moto-guzzi-lodola",
+      "makeId": "moto-guzzi",
+      "name": "Lodola",
+      "aliases": [],
+      "years": [
+        1956,
+        1966
+      ]
+    },
+    {
+      "id": "moto-guzzi-stornello",
+      "makeId": "moto-guzzi",
+      "name": "Stornello",
+      "aliases": [],
+      "years": [
+        1960,
+        1975
+      ]
+    },
+    {
+      "id": "moto-guzzi-ambassador",
+      "makeId": "moto-guzzi",
+      "name": "Ambassador",
+      "aliases": [],
+      "years": [
+        1969,
+        1971
+      ]
+    },
+    {
+      "id": "moto-guzzi-v50",
+      "makeId": "moto-guzzi",
+      "name": "V50",
+      "aliases": [],
+      "years": [
+        1977,
+        1985
+      ]
+    },
+    {
+      "id": "moto-guzzi-v11-sport",
+      "makeId": "moto-guzzi",
+      "name": "V11 Sport",
+      "aliases": [],
+      "years": [
+        1999,
+        2005
+      ]
+    },
+    {
+      "id": "moto-guzzi-daytona-1000",
+      "makeId": "moto-guzzi",
+      "name": "Daytona 1000",
+      "aliases": [],
+      "years": [
+        1992,
+        1997
+      ]
+    },
+    {
+      "id": "moto-guzzi-1100-sport",
+      "makeId": "moto-guzzi",
+      "name": "1100 Sport",
+      "aliases": [],
+      "years": [
+        1994,
+        1999
+      ]
+    },
+    {
+      "id": "moto-guzzi-centauro",
+      "makeId": "moto-guzzi",
+      "name": "Centauro",
+      "aliases": [],
+      "years": [
+        1997,
+        2001
+      ]
+    },
+    {
+      "id": "moto-guzzi-norge-1200",
+      "makeId": "moto-guzzi",
+      "name": "Norge 1200",
+      "aliases": [],
+      "years": [
+        2006,
+        2016
+      ]
+    },
+    {
+      "id": "moto-guzzi-stelvio-1200",
+      "makeId": "moto-guzzi",
+      "name": "Stelvio 1200",
+      "aliases": [],
+      "years": [
+        2008,
+        2016
+      ]
+    },
+    {
+      "id": "moto-guzzi-v9-bobber",
+      "makeId": "moto-guzzi",
+      "name": "V9 Bobber",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "benelli-tornado-650",
+      "makeId": "benelli",
+      "name": "Tornado 650",
+      "aliases": [],
+      "years": [
+        1969,
+        1974
+      ]
+    },
+    {
+      "id": "benelli-500-quattro",
+      "makeId": "benelli",
+      "name": "500 Quattro",
+      "aliases": [],
+      "years": [
+        1975,
+        1980
+      ]
+    },
+    {
+      "id": "benelli-900sei",
+      "makeId": "benelli",
+      "name": "900 Sei",
+      "aliases": [],
+      "years": [
+        1978,
+        1987
+      ]
+    },
+    {
+      "id": "benelli-tornado-tre900",
+      "makeId": "benelli",
+      "name": "Tornado Tre 900",
+      "aliases": [],
+      "years": [
+        2002,
+        2008
+      ]
+    },
+    {
+      "id": "benelli-tnt1130",
+      "makeId": "benelli",
+      "name": "TNT 1130",
+      "aliases": [],
+      "years": [
+        2005,
+        2014
+      ]
+    },
+    {
+      "id": "benelli-trk502",
+      "makeId": "benelli",
+      "name": "TRK 502",
+      "aliases": [],
+      "years": [
+        2017,
+        null
+      ]
+    },
+    {
+      "id": "benelli-imperiale-400",
+      "makeId": "benelli",
+      "name": "Imperiale 400",
+      "aliases": [],
+      "years": [
+        2019,
+        null
+      ]
+    },
+    {
+      "id": "bimota-kb1",
+      "makeId": "bimota",
+      "name": "KB1",
+      "aliases": [],
+      "years": [
+        1978,
+        1982
+      ]
+    },
+    {
+      "id": "bimota-yb4",
+      "makeId": "bimota",
+      "name": "YB4",
+      "aliases": [],
+      "years": [
+        1987,
+        1990
+      ]
+    },
+    {
+      "id": "bimota-sb6",
+      "makeId": "bimota",
+      "name": "SB6",
+      "aliases": [],
+      "years": [
+        1994,
+        1998
+      ]
+    },
+    {
+      "id": "bimota-mantra",
+      "makeId": "bimota",
+      "name": "Mantra",
+      "aliases": [],
+      "years": [
+        1995,
+        1999
+      ]
+    },
+    {
+      "id": "bimota-vdue",
+      "makeId": "bimota",
+      "name": "V Due",
+      "aliases": [],
+      "years": [
+        1997,
+        1999
+      ]
+    },
+    {
+      "id": "bimota-sb8r",
+      "makeId": "bimota",
+      "name": "SB8R",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bimota-tesi-h2",
+      "makeId": "bimota",
+      "name": "Tesi H2",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "bimota-kb4",
+      "makeId": "bimota",
+      "name": "KB4",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "aprilia-rs125",
+      "makeId": "aprilia",
+      "name": "RS125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "aprilia-rs660",
+      "makeId": "aprilia",
+      "name": "RS660",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "aprilia-tuono-660",
+      "makeId": "aprilia",
+      "name": "Tuono 660",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "aprilia-tuono-1000",
+      "makeId": "aprilia",
+      "name": "Tuono 1000",
+      "aliases": [],
+      "years": [
+        2002,
+        2011
+      ]
+    },
+    {
+      "id": "aprilia-falco-sl1000",
+      "makeId": "aprilia",
+      "name": "Falco (SL1000)",
+      "aliases": [],
+      "years": [
+        1999,
+        2005
+      ]
+    },
+    {
+      "id": "aprilia-futura-rst1000",
+      "makeId": "aprilia",
+      "name": "Futura (RST1000)",
+      "aliases": [],
+      "years": [
+        2001,
+        2004
+      ]
+    },
+    {
+      "id": "aprilia-caponord-etv1000",
+      "makeId": "aprilia",
+      "name": "Caponord (ETV1000)",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "aprilia-dorsoduro-750",
+      "makeId": "aprilia",
+      "name": "Dorsoduro 750",
+      "aliases": [],
+      "years": [
+        2008,
+        2016
+      ]
+    },
+    {
+      "id": "aprilia-mana-850",
+      "makeId": "aprilia",
+      "name": "Mana 850",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "aprilia-rs457",
+      "makeId": "aprilia",
+      "name": "RS457",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "aprilia-tuareg-wind-600",
+      "makeId": "aprilia",
+      "name": "Tuareg Wind 600",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "cagiva-sst125",
+      "makeId": "cagiva",
+      "name": "SST 125",
+      "aliases": [],
+      "years": [
+        1979,
+        1983
+      ]
+    },
+    {
+      "id": "cagiva-alazzurra-650",
+      "makeId": "cagiva",
+      "name": "Alazzurra 650",
+      "aliases": [],
+      "years": [
+        1984,
+        1988
+      ]
+    },
+    {
+      "id": "cagiva-freccia-125",
+      "makeId": "cagiva",
+      "name": "Freccia 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "cagiva-canyon-600",
+      "makeId": "cagiva",
+      "name": "Canyon 600",
+      "aliases": [],
+      "years": [
+        1996,
+        1999
+      ]
+    },
+    {
+      "id": "cagiva-gran-canyon-900",
+      "makeId": "cagiva",
+      "name": "Gran Canyon 900",
+      "aliases": [],
+      "years": [
+        1998,
+        2000
+      ]
+    },
+    {
+      "id": "cagiva-raptor-1000",
+      "makeId": "cagiva",
+      "name": "Raptor 1000",
+      "aliases": [],
+      "years": [
+        2000,
+        2005
+      ]
+    },
+    {
+      "id": "cagiva-navigator-1000",
+      "makeId": "cagiva",
+      "name": "Navigator 1000",
+      "aliases": [],
+      "years": [
+        2000,
+        2005
+      ]
+    },
+    {
+      "id": "laverda-750sfc",
+      "makeId": "laverda",
+      "name": "750 SFC",
+      "aliases": [],
+      "years": [
+        1971,
+        1976
+      ]
+    },
+    {
+      "id": "laverda-10003c",
+      "makeId": "laverda",
+      "name": "1000 3C",
+      "aliases": [],
+      "years": [
+        1973,
+        1976
+      ]
+    },
+    {
+      "id": "laverda-mirage-1200",
+      "makeId": "laverda",
+      "name": "Mirage 1200",
+      "aliases": [],
+      "years": [
+        1978,
+        1982
+      ]
+    },
+    {
+      "id": "laverda-montjuic",
+      "makeId": "laverda",
+      "name": "Montjuic",
+      "aliases": [],
+      "years": [
+        1979,
+        1983
+      ]
+    },
+    {
+      "id": "laverda-rgs1000",
+      "makeId": "laverda",
+      "name": "RGS 1000",
+      "aliases": [],
+      "years": [
+        1982,
+        1985
+      ]
+    },
+    {
+      "id": "laverda-668-ghost",
+      "makeId": "laverda",
+      "name": "668 Ghost",
+      "aliases": [],
+      "years": [
+        1996,
+        1999
+      ]
+    },
+    {
+      "id": "piaggio-vespa-98",
+      "makeId": "piaggio",
+      "name": "Vespa 98",
+      "aliases": [],
+      "years": [
+        1946,
+        1947
+      ]
+    },
+    {
+      "id": "piaggio-vespa-gs150",
+      "makeId": "piaggio",
+      "name": "Vespa GS 150",
+      "aliases": [],
+      "years": [
+        1955,
+        1961
+      ]
+    },
+    {
+      "id": "piaggio-vespa-primavera",
+      "makeId": "piaggio",
+      "name": "Vespa Primavera",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "piaggio-vespa-rally-200",
+      "makeId": "piaggio",
+      "name": "Vespa Rally 200",
+      "aliases": [],
+      "years": [
+        1972,
+        1979
+      ]
+    },
+    {
+      "id": "piaggio-vespa-px",
+      "makeId": "piaggio",
+      "name": "Vespa PX",
+      "aliases": [],
+      "years": [
+        1977,
+        2017
+      ]
+    },
+    {
+      "id": "piaggio-liberty",
+      "makeId": "piaggio",
+      "name": "Liberty",
+      "aliases": [],
+      "years": [
+        1997,
+        null
+      ]
+    },
+    {
+      "id": "piaggio-beverly",
+      "makeId": "piaggio",
+      "name": "Beverly",
+      "aliases": [],
+      "years": [
+        2001,
+        null
+      ]
+    },
+    {
+      "id": "beta-techno",
+      "makeId": "beta",
+      "name": "Techno",
+      "aliases": [],
+      "years": [
+        1994,
+        1999
+      ]
+    },
+    {
+      "id": "beta-rev3",
+      "makeId": "beta",
+      "name": "Rev 3",
+      "aliases": [],
+      "years": [
+        2000,
+        2008
+      ]
+    },
+    {
+      "id": "beta-evo300",
+      "makeId": "beta",
+      "name": "Evo 300",
+      "aliases": [],
+      "years": [
+        2009,
+        null
+      ]
+    },
+    {
+      "id": "beta-rr300",
+      "makeId": "beta",
+      "name": "RR 300",
+      "aliases": [],
+      "years": [
+        2013,
+        null
+      ]
+    },
+    {
+      "id": "beta-xtrainer",
+      "makeId": "beta",
+      "name": "Xtrainer",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "bmwr12",
+      "makeId": "bmw",
+      "name": "R12",
+      "aliases": [],
+      "years": [
+        1935,
+        1942
+      ]
+    },
+    {
+      "id": "bmwr513",
+      "makeId": "bmw",
+      "name": "R51/3",
+      "aliases": [],
+      "years": [
+        1951,
+        1954
+      ]
+    },
+    {
+      "id": "bmwr602",
+      "makeId": "bmw",
+      "name": "R60/2",
+      "aliases": [],
+      "years": [
+        1960,
+        1969
+      ]
+    },
+    {
+      "id": "bmwr100gs",
+      "makeId": "bmw",
+      "name": "R100GS",
+      "aliases": [],
+      "years": [
+        1987,
+        1996
+      ]
+    },
+    {
+      "id": "bmwk75",
+      "makeId": "bmw",
+      "name": "K75",
+      "aliases": [],
+      "years": [
+        1985,
+        1996
+      ]
+    },
+    {
+      "id": "bmwk1",
+      "makeId": "bmw",
+      "name": "K1",
+      "aliases": [],
+      "years": [
+        1988,
+        1993
+      ]
+    },
+    {
+      "id": "bmwr1100s",
+      "makeId": "bmw",
+      "name": "R1100S",
+      "aliases": [],
+      "years": [
+        1998,
+        2005
+      ]
+    },
+    {
+      "id": "bmwr1200c",
+      "makeId": "bmw",
+      "name": "R1200C",
+      "aliases": [],
+      "years": [
+        1997,
+        2004
+      ]
+    },
+    {
+      "id": "bmwr1200rt",
+      "makeId": "bmw",
+      "name": "R1200RT",
+      "aliases": [],
+      "years": [
+        2005,
+        2018
+      ]
+    },
+    {
+      "id": "bmwr1250gs",
+      "makeId": "bmw",
+      "name": "R1250GS",
+      "aliases": [],
+      "years": [
+        2019,
+        2023
+      ]
+    },
+    {
+      "id": "bmwr1300gs",
+      "makeId": "bmw",
+      "name": "R1300GS",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "bmws1000r",
+      "makeId": "bmw",
+      "name": "S1000R",
+      "aliases": [],
+      "years": [
+        2014,
+        null
+      ]
+    },
+    {
+      "id": "bmws1000xr",
+      "makeId": "bmw",
+      "name": "S1000XR",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "bmwf800gs",
+      "makeId": "bmw",
+      "name": "F800GS",
+      "aliases": [],
+      "years": [
+        2008,
+        2018
+      ]
+    },
+    {
+      "id": "bmwf900r",
+      "makeId": "bmw",
+      "name": "F900R",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "zundapp-k800",
+      "makeId": "zundapp",
+      "name": "K800",
+      "aliases": [],
+      "years": [
+        1933,
+        1938
+      ]
+    },
+    {
+      "id": "zundapp-db200",
+      "makeId": "zundapp",
+      "name": "DB200",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "zundapp-ks600",
+      "makeId": "zundapp",
+      "name": "KS600",
+      "aliases": [],
+      "years": [
+        1938,
+        1941
+      ]
+    },
+    {
+      "id": "zundapp-ks50",
+      "makeId": "zundapp",
+      "name": "KS50",
+      "aliases": [],
+      "years": [
+        1965,
+        1984
+      ]
+    },
+    {
+      "id": "zundapp-ks125",
+      "makeId": "zundapp",
+      "name": "KS125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "nsu251osl",
+      "makeId": "nsu",
+      "name": "251 OSL",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "nsulux",
+      "makeId": "nsu",
+      "name": "Lux",
+      "aliases": [],
+      "years": [
+        1951,
+        1954
+      ]
+    },
+    {
+      "id": "nsu-konsul",
+      "makeId": "nsu",
+      "name": "Konsul",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "nsu-sportmax",
+      "makeId": "nsu",
+      "name": "Sportmax",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "nsu-supermax",
+      "makeId": "nsu",
+      "name": "Supermax",
+      "aliases": [],
+      "years": [
+        1956,
+        1963
+      ]
+    },
+    {
+      "id": "dkwnz350",
+      "makeId": "dkw",
+      "name": "NZ350",
+      "aliases": [],
+      "years": [
+        1938,
+        1945
+      ]
+    },
+    {
+      "id": "dkwsb500",
+      "makeId": "dkw",
+      "name": "SB500",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "dkwrt200",
+      "makeId": "dkw",
+      "name": "RT200",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "dkwrt250",
+      "makeId": "dkw",
+      "name": "RT250",
+      "aliases": [],
+      "years": [
+        1952,
+        1957
+      ]
+    },
+    {
+      "id": "maico-taifun",
+      "makeId": "maico",
+      "name": "Taifun",
+      "aliases": [],
+      "years": [
+        1953,
+        1957
+      ]
+    },
+    {
+      "id": "maico-blizzard",
+      "makeId": "maico",
+      "name": "Blizzard",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "maico-md250",
+      "makeId": "maico",
+      "name": "MD250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "maico-490-mega-2",
+      "makeId": "maico",
+      "name": "490 Mega 2",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "mzrt125",
+      "makeId": "mz",
+      "name": "RT 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "mzes250",
+      "makeId": "mz",
+      "name": "ES 250",
+      "aliases": [],
+      "years": [
+        1956,
+        1973
+      ]
+    },
+    {
+      "id": "mzts250",
+      "makeId": "mz",
+      "name": "TS 250",
+      "aliases": [],
+      "years": [
+        1973,
+        1981
+      ]
+    },
+    {
+      "id": "mzetz125",
+      "makeId": "mz",
+      "name": "ETZ 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "mz-baghira",
+      "makeId": "mz",
+      "name": "Baghira",
+      "aliases": [],
+      "years": [
+        1998,
+        2008
+      ]
+    },
+    {
+      "id": "mz1000s",
+      "makeId": "mz",
+      "name": "1000S",
+      "aliases": [],
+      "years": [
+        2003,
+        2008
+      ]
+    },
+    {
+      "id": "harley-davidson-model-j",
+      "makeId": "harley-davidson",
+      "name": "Model J",
+      "aliases": [],
+      "years": [
+        1915,
+        1929
+      ]
+    },
+    {
+      "id": "harley-davidson-wla",
+      "makeId": "harley-davidson",
+      "name": "WLA",
+      "aliases": [],
+      "years": [
+        1940,
+        1945
+      ]
+    },
+    {
+      "id": "harley-davidson-model-k",
+      "makeId": "harley-davidson",
+      "name": "Model K",
+      "aliases": [],
+      "years": [
+        1952,
+        1956
+      ]
+    },
+    {
+      "id": "harley-davidson-hummer",
+      "makeId": "harley-davidson",
+      "name": "Hummer",
+      "aliases": [],
+      "years": [
+        1955,
+        1959
+      ]
+    },
+    {
+      "id": "harley-davidson-sprint",
+      "makeId": "harley-davidson",
+      "name": "Sprint",
+      "aliases": [],
+      "years": [
+        1961,
+        1974
+      ]
+    },
+    {
+      "id": "harley-davidson-super-glide",
+      "makeId": "harley-davidson",
+      "name": "Super Glide",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "harley-davidson-xr750",
+      "makeId": "harley-davidson",
+      "name": "XR-750",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "harley-davidson-heritage-softail-classic",
+      "makeId": "harley-davidson",
+      "name": "Heritage Softail Classic",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "harley-davidson-road-glide",
+      "makeId": "harley-davidson",
+      "name": "Road Glide",
+      "aliases": [],
+      "years": [
+        1998,
+        null
+      ]
+    },
+    {
+      "id": "harley-davidson-street-glide",
+      "makeId": "harley-davidson",
+      "name": "Street Glide",
+      "aliases": [],
+      "years": [
+        2006,
+        null
+      ]
+    },
+    {
+      "id": "harley-davidson-street-bob",
+      "makeId": "harley-davidson",
+      "name": "Street Bob",
+      "aliases": [],
+      "years": [
+        2006,
+        null
+      ]
+    },
+    {
+      "id": "harley-davidson-fatbob",
+      "makeId": "harley-davidson",
+      "name": "Fat Bob",
+      "aliases": [],
+      "years": [
+        2008,
+        2023
+      ]
+    },
+    {
+      "id": "harley-davidson-iron-883",
+      "makeId": "harley-davidson",
+      "name": "Iron 883",
+      "aliases": [],
+      "years": [
+        2009,
+        2022
+      ]
+    },
+    {
+      "id": "harley-davidson-forty-eight",
+      "makeId": "harley-davidson",
+      "name": "Forty-Eight",
+      "aliases": [],
+      "years": [
+        2010,
+        2022
+      ]
+    },
+    {
+      "id": "harley-davidson-breakout",
+      "makeId": "harley-davidson",
+      "name": "Breakout",
+      "aliases": [],
+      "years": [
+        2013,
+        null
+      ]
+    },
+    {
+      "id": "indian-scout-101",
+      "makeId": "indian",
+      "name": "Scout 101",
+      "aliases": [],
+      "years": [
+        1928,
+        1931
+      ]
+    },
+    {
+      "id": "indian-sport-scout",
+      "makeId": "indian",
+      "name": "Sport Scout",
+      "aliases": [],
+      "years": [
+        1934,
+        1942
+      ]
+    },
+    {
+      "id": "indian-four",
+      "makeId": "indian",
+      "name": "Four",
+      "aliases": [],
+      "years": [
+        1928,
+        1942
+      ]
+    },
+    {
+      "id": "indian-powerplus",
+      "makeId": "indian",
+      "name": "Powerplus",
+      "aliases": [],
+      "years": [
+        1916,
+        1924
+      ]
+    },
+    {
+      "id": "indian-scout-bobber",
+      "makeId": "indian",
+      "name": "Scout Bobber",
+      "aliases": [],
+      "years": [
+        2018,
+        null
+      ]
+    },
+    {
+      "id": "indian-springfield",
+      "makeId": "indian",
+      "name": "Springfield",
+      "aliases": [],
+      "years": [
+        2016,
+        null
+      ]
+    },
+    {
+      "id": "indian-roadmaster",
+      "makeId": "indian",
+      "name": "Roadmaster",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "indian-challenger",
+      "makeId": "indian",
+      "name": "Challenger",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "indian-pursuit",
+      "makeId": "indian",
+      "name": "Pursuit",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "victory-kingpin",
+      "makeId": "victory",
+      "name": "Kingpin",
+      "aliases": [],
+      "years": [
+        2004,
+        2012
+      ]
+    },
+    {
+      "id": "victory-hammer",
+      "makeId": "victory",
+      "name": "Hammer",
+      "aliases": [],
+      "years": [
+        2005,
+        2017
+      ]
+    },
+    {
+      "id": "victory-vision",
+      "makeId": "victory",
+      "name": "Vision",
+      "aliases": [],
+      "years": [
+        2008,
+        2017
+      ]
+    },
+    {
+      "id": "victory-cross-country",
+      "makeId": "victory",
+      "name": "Cross Country",
+      "aliases": [],
+      "years": [
+        2010,
+        2017
+      ]
+    },
+    {
+      "id": "victory-high-ball",
+      "makeId": "victory",
+      "name": "High-Ball",
+      "aliases": [],
+      "years": [
+        2012,
+        2017
+      ]
+    },
+    {
+      "id": "buell-s1-lightning",
+      "makeId": "buell",
+      "name": "S1 Lightning",
+      "aliases": [],
+      "years": [
+        1996,
+        1998
+      ]
+    },
+    {
+      "id": "buell-m2-cyclone",
+      "makeId": "buell",
+      "name": "M2 Cyclone",
+      "aliases": [],
+      "years": [
+        1997,
+        2002
+      ]
+    },
+    {
+      "id": "buell-blast",
+      "makeId": "buell",
+      "name": "Blast",
+      "aliases": [],
+      "years": [
+        2000,
+        2009
+      ]
+    },
+    {
+      "id": "buell-lightning-xb12s",
+      "makeId": "buell",
+      "name": "Lightning XB12S",
+      "aliases": [],
+      "years": [
+        2004,
+        2010
+      ]
+    },
+    {
+      "id": "buell-ulysses-xb12x",
+      "makeId": "buell",
+      "name": "Ulysses XB12X",
+      "aliases": [],
+      "years": [
+        2006,
+        2010
+      ]
+    },
+    {
+      "id": "zero-ds",
+      "makeId": "zero",
+      "name": "DS",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "zero-fx",
+      "makeId": "zero",
+      "name": "FX",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "zero-srs",
+      "makeId": "zero",
+      "name": "SR/S",
+      "aliases": [],
+      "years": [
+        2020,
+        null
+      ]
+    },
+    {
+      "id": "zero-fxe",
+      "makeId": "zero",
+      "name": "FXE",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "zero-dsrx",
+      "makeId": "zero",
+      "name": "DSR/X",
+      "aliases": [],
+      "years": [
+        2023,
+        null
+      ]
+    },
+    {
+      "id": "ktm125-duke",
+      "makeId": "ktm",
+      "name": "125 Duke",
+      "aliases": [],
+      "years": [
+        2011,
+        null
+      ]
+    },
+    {
+      "id": "ktm790-duke",
+      "makeId": "ktm",
+      "name": "790 Duke",
+      "aliases": [],
+      "years": [
+        2018,
+        null
+      ]
+    },
+    {
+      "id": "ktm990-super-duke",
+      "makeId": "ktm",
+      "name": "990 Super Duke",
+      "aliases": [],
+      "years": [
+        2005,
+        2013
+      ]
+    },
+    {
+      "id": "ktm950-adventure",
+      "makeId": "ktm",
+      "name": "950 Adventure",
+      "aliases": [],
+      "years": [
+        2003,
+        2006
+      ]
+    },
+    {
+      "id": "ktm1190-adventure",
+      "makeId": "ktm",
+      "name": "1190 Adventure",
+      "aliases": [],
+      "years": [
+        2013,
+        2016
+      ]
+    },
+    {
+      "id": "ktm1290-super-adventure",
+      "makeId": "ktm",
+      "name": "1290 Super Adventure",
+      "aliases": [],
+      "years": [
+        2015,
+        null
+      ]
+    },
+    {
+      "id": "ktm890-adventure",
+      "makeId": "ktm",
+      "name": "890 Adventure",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "ktm690-enduro-r",
+      "makeId": "ktm",
+      "name": "690 Enduro R",
+      "aliases": [],
+      "years": [
+        2008,
+        null
+      ]
+    },
+    {
+      "id": "ktmrc8",
+      "makeId": "ktm",
+      "name": "RC8",
+      "aliases": [],
+      "years": [
+        2008,
+        2015
+      ]
+    },
+    {
+      "id": "ktm300exc",
+      "makeId": "ktm",
+      "name": "300 EXC",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ktm1290-super-duke-gt",
+      "makeId": "ktm",
+      "name": "1290 Super Duke GT",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ktm990-duke",
+      "makeId": "ktm",
+      "name": "990 Duke",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "puch-800",
+      "makeId": "puch",
+      "name": "800",
+      "aliases": [],
+      "years": [
+        1936,
+        1938
+      ]
+    },
+    {
+      "id": "puch-500",
+      "makeId": "puch",
+      "name": "500",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "puch-175sv",
+      "makeId": "puch",
+      "name": "175 SV",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "puch-cobra",
+      "makeId": "puch",
+      "name": "Cobra",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "puch-magnum",
+      "makeId": "puch",
+      "name": "Magnum",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "husqvarna-silverpilen",
+      "makeId": "husqvarna",
+      "name": "Silverpilen",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "husqvarna-wr250",
+      "makeId": "husqvarna",
+      "name": "WR 250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "husqvarna-te610",
+      "makeId": "husqvarna",
+      "name": "TE 610",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "husqvarna-te300",
+      "makeId": "husqvarna",
+      "name": "TE 300",
+      "aliases": [],
+      "years": [
+        2014,
+        null
+      ]
+    },
+    {
+      "id": "husqvarna-fe350",
+      "makeId": "husqvarna",
+      "name": "FE 350",
+      "aliases": [],
+      "years": [
+        2014,
+        null
+      ]
+    },
+    {
+      "id": "husqvarna-fc450",
+      "makeId": "husqvarna",
+      "name": "FC 450",
+      "aliases": [],
+      "years": [
+        2014,
+        null
+      ]
+    },
+    {
+      "id": "husqvarna-701-enduro",
+      "makeId": "husqvarna",
+      "name": "701 Enduro",
+      "aliases": [],
+      "years": [
+        2016,
+        null
+      ]
+    },
+    {
+      "id": "husqvarna-701-supermoto",
+      "makeId": "husqvarna",
+      "name": "701 Supermoto",
+      "aliases": [],
+      "years": [
+        2016,
+        null
+      ]
+    },
+    {
+      "id": "husqvarna-svartpilen-401",
+      "makeId": "husqvarna",
+      "name": "Svartpilen 401",
+      "aliases": [],
+      "years": [
+        2018,
+        null
+      ]
+    },
+    {
+      "id": "husqvarna-norden-901",
+      "makeId": "husqvarna",
+      "name": "Norden 901",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "jawa-175-special",
+      "makeId": "jawa",
+      "name": "175 Special",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "jawa-500ohc",
+      "makeId": "jawa",
+      "name": "500 OHC",
+      "aliases": [],
+      "years": [
+        1952,
+        1958
+      ]
+    },
+    {
+      "id": "jawa-250353",
+      "makeId": "jawa",
+      "name": "250/353",
+      "aliases": [],
+      "years": [
+        1954,
+        1962
+      ]
+    },
+    {
+      "id": "jawa-350354",
+      "makeId": "jawa",
+      "name": "350/354",
+      "aliases": [],
+      "years": [
+        1954,
+        1964
+      ]
+    },
+    {
+      "id": "jawa-350-californian",
+      "makeId": "jawa",
+      "name": "350 Californian",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "jawa-350638",
+      "makeId": "jawa",
+      "name": "350/638",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "jawa-42",
+      "makeId": "jawa",
+      "name": "42",
+      "aliases": [],
+      "years": [
+        2018,
+        null
+      ]
+    },
+    {
+      "id": "cz125",
+      "makeId": "cz",
+      "name": "125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "cz350",
+      "makeId": "cz",
+      "name": "350",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "cz360",
+      "makeId": "cz",
+      "name": "360",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "cz380",
+      "makeId": "cz",
+      "name": "380",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "cfmoto-300nk",
+      "makeId": "cfmoto",
+      "name": "300NK",
+      "aliases": [],
+      "years": [
+        2018,
+        null
+      ]
+    },
+    {
+      "id": "cfmoto-650mt",
+      "makeId": "cfmoto",
+      "name": "650MT",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "cfmoto-800mt-ibex-800",
+      "makeId": "cfmoto",
+      "name": "800MT (Ibex 800)",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "cfmoto-450sr",
+      "makeId": "cfmoto",
+      "name": "450SR",
+      "aliases": [],
+      "years": [
+        2022,
+        null
+      ]
+    },
+    {
+      "id": "cfmoto-450mt",
+      "makeId": "cfmoto",
+      "name": "450MT",
+      "aliases": [],
+      "years": [
+        2024,
+        null
+      ]
+    },
+    {
+      "id": "cfmoto-250sr",
+      "makeId": "cfmoto",
+      "name": "250SR",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "kymco-agility-125",
+      "makeId": "kymco",
+      "name": "Agility 125",
+      "aliases": [],
+      "years": [
+        2005,
+        null
+      ]
+    },
+    {
+      "id": "kymco-people-250",
+      "makeId": "kymco",
+      "name": "People 250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "kymco-downtown-350",
+      "makeId": "kymco",
+      "name": "Downtown 350",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "kymco-ak550",
+      "makeId": "kymco",
+      "name": "AK 550",
+      "aliases": [],
+      "years": [
+        2017,
+        null
+      ]
+    },
+    {
+      "id": "kymco-venox-250",
+      "makeId": "kymco",
+      "name": "Venox 250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sym-symphony-125",
+      "makeId": "sym",
+      "name": "Symphony 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sym-maxsym-400",
+      "makeId": "sym",
+      "name": "Maxsym 400",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sym-symba-100",
+      "makeId": "sym",
+      "name": "Symba 100",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sym-cruisym-300",
+      "makeId": "sym",
+      "name": "Cruisym 300",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hyosung-gt250r",
+      "makeId": "hyosung",
+      "name": "GT250R",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hyosung-aquila-250",
+      "makeId": "hyosung",
+      "name": "Aquila 250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hyosung-gt125r",
+      "makeId": "hyosung",
+      "name": "GT125R",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hyosung-st7",
+      "makeId": "hyosung",
+      "name": "ST7",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hyosung-rx125",
+      "makeId": "hyosung",
+      "name": "RX125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bajaj-pulsar-150",
+      "makeId": "bajaj",
+      "name": "Pulsar 150",
+      "aliases": [],
+      "years": [
+        2001,
+        null
+      ]
+    },
+    {
+      "id": "bajaj-pulsar-ns200",
+      "makeId": "bajaj",
+      "name": "Pulsar NS200",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bajaj-avenger-220",
+      "makeId": "bajaj",
+      "name": "Avenger 220",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bajaj-discover-125",
+      "makeId": "bajaj",
+      "name": "Discover 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bajaj-platina",
+      "makeId": "bajaj",
+      "name": "Platina",
+      "aliases": [],
+      "years": [
+        2006,
+        null
+      ]
+    },
+    {
+      "id": "bajaj-boxer",
+      "makeId": "bajaj",
+      "name": "Boxer",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "tvs-apache-rtr160",
+      "makeId": "tvs",
+      "name": "Apache RTR 160",
+      "aliases": [],
+      "years": [
+        2007,
+        null
+      ]
+    },
+    {
+      "id": "tvs-apache-rr310",
+      "makeId": "tvs",
+      "name": "Apache RR 310",
+      "aliases": [],
+      "years": [
+        2017,
+        null
+      ]
+    },
+    {
+      "id": "tvs-apache-rtr180",
+      "makeId": "tvs",
+      "name": "Apache RTR 180",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "tvs-victor",
+      "makeId": "tvs",
+      "name": "Victor",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "tvsmax100",
+      "makeId": "tvs",
+      "name": "Max 100",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "tvs-raider-125",
+      "makeId": "tvs",
+      "name": "Raider 125",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "hero-cd100",
+      "makeId": "hero",
+      "name": "CD 100",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hero-cbz",
+      "makeId": "hero",
+      "name": "CBZ",
+      "aliases": [],
+      "years": [
+        1999,
+        2005
+      ]
+    },
+    {
+      "id": "hero-passion",
+      "makeId": "hero",
+      "name": "Passion",
+      "aliases": [],
+      "years": [
+        2001,
+        null
+      ]
+    },
+    {
+      "id": "hero-karizma",
+      "makeId": "hero",
+      "name": "Karizma",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hero-hf-deluxe",
+      "makeId": "hero",
+      "name": "HF Deluxe",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "hero-mavrick-440",
+      "makeId": "hero",
+      "name": "Mavrick 440",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "derbi-mulhacen-125659",
+      "makeId": "derbi",
+      "name": "Mulhacén (125/659)",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "derbi-terra-125",
+      "makeId": "derbi",
+      "name": "Terra 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "derbi-cross-city-125",
+      "makeId": "derbi",
+      "name": "Cross City 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "gasgas-pampera",
+      "makeId": "gasgas",
+      "name": "Pampera",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "gasgasec300",
+      "makeId": "gasgas",
+      "name": "EC 300",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "gasgasmc450f",
+      "makeId": "gasgas",
+      "name": "MC 450F",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "gasgasmc125",
+      "makeId": "gasgas",
+      "name": "MC 125",
+      "aliases": [],
+      "years": [
+        2021,
+        null
+      ]
+    },
+    {
+      "id": "gasgases700",
+      "makeId": "gasgas",
+      "name": "ES 700",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bultaco-pursang",
+      "makeId": "bultaco",
+      "name": "Pursang",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bultaco-matador",
+      "makeId": "bultaco",
+      "name": "Matador",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bultaco-alpina",
+      "makeId": "bultaco",
+      "name": "Alpina",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bultaco-frontera",
+      "makeId": "bultaco",
+      "name": "Frontera",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bultaco-tralla-101",
+      "makeId": "bultaco",
+      "name": "Tralla 101",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "bultaco-astro",
+      "makeId": "bultaco",
+      "name": "Astro",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "montesa-brio-110",
+      "makeId": "montesa",
+      "name": "Brio 110",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "montesa-cota-247",
+      "makeId": "montesa",
+      "name": "Cota 247",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "montesa-cota-348",
+      "makeId": "montesa",
+      "name": "Cota 348",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "montesa-cappra-250",
+      "makeId": "montesa",
+      "name": "Cappra 250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "montesa-cota-315r",
+      "makeId": "montesa",
+      "name": "Cota 315R",
+      "aliases": [],
+      "years": [
+        1997,
+        2004
+      ]
+    },
+    {
+      "id": "ossa-pioneer",
+      "makeId": "ossa",
+      "name": "Pioneer",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ossa-phantom",
+      "makeId": "ossa",
+      "name": "Phantom",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ossa-wildfire",
+      "makeId": "ossa",
+      "name": "Wildfire",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ossa-tr280i",
+      "makeId": "ossa",
+      "name": "TR 280i",
+      "aliases": [],
+      "years": [
+        2010,
+        2015
+      ]
+    },
+    {
+      "id": "sherco-st300",
+      "makeId": "sherco",
+      "name": "ST 300",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sherco-sef450",
+      "makeId": "sherco",
+      "name": "SEF 450",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sherco-sef300",
+      "makeId": "sherco",
+      "name": "SEF 300",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sherco-se250",
+      "makeId": "sherco",
+      "name": "SE 250",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "sherco-x-ride-290",
+      "makeId": "sherco",
+      "name": "X-Ride 290",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "peugeot-motocycles-django",
+      "makeId": "peugeot-motocycles",
+      "name": "Django",
+      "aliases": [],
+      "years": [
+        2014,
+        null
+      ]
+    },
+    {
+      "id": "peugeot-motocycles-satelis",
+      "makeId": "peugeot-motocycles",
+      "name": "Satelis",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "peugeot-motocycles-vivacity",
+      "makeId": "peugeot-motocycles",
+      "name": "Vivacity",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "peugeot-motocycles-jet-force",
+      "makeId": "peugeot-motocycles",
+      "name": "Jet Force",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "peugeot-motocycles-elyseo-125",
+      "makeId": "peugeot-motocycles",
+      "name": "Elyseo 125",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ural-m63",
+      "makeId": "ural",
+      "name": "M63",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ural-m67",
+      "makeId": "ural",
+      "name": "M67",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ural-tourist",
+      "makeId": "ural",
+      "name": "Tourist",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ural-patrol",
+      "makeId": "ural",
+      "name": "Patrol",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "ural-solo-st",
+      "makeId": "ural",
+      "name": "Solo sT",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "dnepr-k650",
+      "makeId": "dnepr",
+      "name": "K-650",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "dnepr-mt10",
+      "makeId": "dnepr",
+      "name": "MT-10",
+      "aliases": [],
+      "years": null
+    },
+    {
+      "id": "dnepr-mt16",
+      "makeId": "dnepr",
+      "name": "MT-16",
+      "aliases": [],
+      "years": null
     }
   ]
 }

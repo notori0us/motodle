@@ -1,8 +1,16 @@
 # Catalog expansion — plan (2026-09-12)
 
-> Status: APPROVED 2026-09-12 (operator: no new makes; ~850-model tiering as in §3). Execution
-> is an Opus run (authoring + review); see §7 for the model split and §8 for the gates. Nothing
-> in this file has been applied yet.
+> Status: APPLIED 2026-09-12 (operator: no new makes; ~850-model tiering as in §3). Executed as
+> an Opus run (authoring + independent review); see §7 for the model split and §8 for the gates.
+>
+> Results: `public/catalog.json` 333 → **816 models** (+483 added, 0 id collisions, 55 makes
+> unchanged, every pre-existing entry byte-identical, `generatedAt` 2026-09-12). Largest make is
+> Honda at 71; every make now has ≥ 5 models. Downstream edits (§6) all landed: contract bound
+> 300–1,200, PLAN §6.10 + §11.16, `CATALOG-REVIEW.md` regenerated, PRODUCT.md counts, ROADMAP,
+> CONTENT-RUNBOOK. No future puzzle gained an `acceptModelIds` entry — every near-neighbour the
+> expansion added is a different displacement/generation under the D4 rule (§6 item 5). `KTM 990
+> Adventure` absent (C9). Live-site checks in §8 (curl count + UI spot-check) are the operator's
+> after push.
 
 ## 1. Problem
 

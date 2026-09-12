@@ -28,7 +28,10 @@ candidates → 182 eligible → 125 reviewed → 46 approved → 33 shipped.
    node -e 'const c=require("./public/catalog.json");console.log(c.models.map(m=>m.id).join("\n"))' > /tmp/models.txt
    npm run fetch -- --models-file /tmp/models.txt --out data/review/$(date -u +%F)-batch01.json --per-model 8
    ```
-   Serial, rate-limited, ~8 minutes. Categories are guessed as `Category:<Make> <Model>`;
+   Serial, rate-limited, ~8 minutes for the original 333 ids; since the 2026-09-12 catalog
+   expansion (816 models) a run over every id walks ~800 categories, ~20 minutes serial. Many of
+   the new entries are guess-list depth with no Commons category at all — a miss there is
+   expected, not a bug. Categories are guessed as `Category:<Make> <Model>`;
    about 40 % of hits are the wrong bike or an unusable composition, which is what the review
    is for. Re-runs replay from the cache. `fetch` also auto-`reject`s EIGHT deterministic hard
    gates before anything reaches a human (CONTENT-WITHOUT-AI.md §5; measured 27/79 rejects

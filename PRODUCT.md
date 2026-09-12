@@ -117,7 +117,7 @@ editor, a scheduling UI (all §9 "later-phase hooks, do not build now").
 
 - **Real content:** three committed puzzle fixtures (2026-09-02 Suzuki GSX-R750, 2026-09-03 Kawasaki
   Ninja ZX-6R, 2026-09-04 Ducati 916) with their real Commons photos, licenses and authors in
-  `public/puzzles/`; a 55-make / 333-model catalog in `public/catalog.json`.
+  `public/puzzles/`; a 55-make / 816-model catalog in `public/catalog.json`.
 - **Real photography** is the product's only imagery, and it is user-contributed Commons material of
   variable framing and quality. There is no studio photography, no illustration budget and no
   brand-shot library. Nothing may be invented in its place.

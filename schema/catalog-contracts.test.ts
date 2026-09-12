@@ -192,9 +192,9 @@ describe('seed catalog authoring standard (§6.10) — sanity bounds, not exhaus
     expect(catalog.makes.length).toBeLessThanOrEqual(60);
   });
 
-  it('has 300-500 models', () => {
+  it('has 300-1200 models', () => {
     expect(catalog.models.length).toBeGreaterThanOrEqual(300);
-    expect(catalog.models.length).toBeLessThanOrEqual(500);
+    expect(catalog.models.length).toBeLessThanOrEqual(1200);
   });
 
   it('does not carry a KTM 990 Adventure entry (operator decision C9, §6.10)', () => {

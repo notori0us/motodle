@@ -104,9 +104,14 @@ so a fully model-free batch is possible only at ~80 operator-minutes per 125 can
 
 - Next batch by ~2026-09-25 so the runway never drops under two weeks (fetch → blind ID →
   adjudication → crop check, ~1 evening of agent time per 30 puzzles).
-- Catalog gaps the first batch exposed: a vintage Indian Scout (the current entry is the 2015+
+- ~~Catalog gaps the first batch exposed: a vintage Indian Scout (the current entry is the 2015+
   model), Indian Sport Scout, Norton Manx, NSU Sportmax, Triumph TR6 Trophy; more variant
-  entries where Commons categories are per variant.
+  entries where Commons categories are per variant.~~ **Done 2026-09-12** (catalog expansion,
+  PLAN §11.16, 333 → 816 models): `indian-scout-101`, `indian-sport-scout`, `nsu-sportmax`,
+  `triumph-tr6-trophy` added; `norton-manx` was already present; many per-variant entries added
+  across the big five. Ids are frozen; `aliases` stay unused.
+- Typeahead for the model select if any make passes ~100 models (Honda is at 71 after the
+  2026-09-12 expansion; a 70-option native `<select>` is the accepted trade-off until then).
 - Consider raising `CROP_BUDGET_BYTES` / `FULL_BUDGET_BYTES` or adding a pre-downscale step:
   7 of 40 approved photos failed the byte budgets only because they were large, grainy scans.
 - Puzzles #1–#3 are 800–960 px dev fixtures and look soft; replace their photos once a
