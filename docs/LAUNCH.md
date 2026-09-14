@@ -1286,12 +1286,7 @@ curl -s  https://playmotodle.com/ | grep -c 'og:image'
 curl -sI https://playmotodle.com/og.png | sed -n '1p'
 curl -s  https://playmotodle.com/robots.txt        # expect `Allow: /` and NO Disallow line
 
-# 3. The beacon pixel actually reached the bucket. NOTHING else ever exercises this path: the
-#    location.hostname guard (correctly) makes the beacon inert under `vite preview`, so neither
-#    e2e/csp.spec.ts nor Playwright fetches it. A 404 here is indistinguishable from "nobody
-#    shared" in Q5/Q6 -- and it inflates 4xxErrorRate, which can false-fire B7c's runway detector.
-curl -sI "https://playmotodle.com/assets/mtd.gif?e=w&n=1&c=test" | sed -n '1p;/^content-type/Ip;/^cache-control/Ip'
-#    expect: 200, image/gif, public, max-age=31536000, immutable
+# 3. (Beacon check dropped -- D1 decided logs only; the pixel was never built. Q5/Q6 are not available.)
 
 # 4. The card renders: paste https://playmotodle.com/?r=test into a Discord DM to yourself.
 # 5. Play one full round on a real phone (PLAN 7.5 row 10 keeps this a manual gate).
@@ -1362,9 +1357,8 @@ that model was on sale in that year), red is nothing. Only green scores.
 
 Some notes since this sub asks direct questions:
 - No account, no sign-up, no cookies, no ads, no third-party scripts, no third-party tracking.
-  Your guesses and stats live in your own browser; the only thing the site records is a first-party
-  hit when you finish or share a round (puzzle number, won/lost/gave up, which guess, score) — no
-  IP address is kept. Full detail on the About page.
+  Your guesses and stats live in your own browser. The CDN keeps a plain access log for 90 days
+  (page, referrer, browser, country — no IP addresses). Full detail on the About page.
 - Works on a phone. Colourblind palette in the settings.
 - There's an archive — the icon in the header — so you can play past days without waiting.
 - Every photo is from Wikimedia Commons under a CC or public-domain licence, credited in the
@@ -1375,7 +1369,7 @@ Feedback very welcome, especially on the year hint — that's the rule people fi
 obvious. Please don't post today's answer in the thread; spoiler tags are fine for a past day.
 ```
 
-**Notes for the poster.** Confirm the account clears rule 7 (7 days old, 10+ comment karma) before submitting `[community R5]`. Do not use the word "Wordle" in the title. Do not include a second link before the game link. **Do not restore the shorter privacy bullet** — the one claiming that nothing about your game is kept outside your own browser. With the beacon shipped (D1's default) that is false: the outcome, score, guess index and puzzle number go to CloudFront and are retained 90 days. This is the first venue, the highest-value post, and the claim is checkable by anyone with devtools open. C.3's r/motorcycle draft says only "no cookies, no third-party tracking", which is accurate as written and needs no change.
+**Notes for the poster.** Confirm the account clears rule 7 (7 days old, 10+ comment karma) before submitting `[community R5]`. Do not use the word "Wordle" in the title. Do not include a second link before the game link. The privacy bullet matches the live About page (D1: logs only, no beacon, no client IPs) — keep it in sync with `public/about.html` if either changes; the claim is checkable by anyone with devtools open.
 
 ## C.2b Draft post 2 — r/WordleSpinoffs (the venue with the one mandatory formatting rule)
 
@@ -1395,7 +1389,7 @@ https://playmotodle.com/?r=ws
 ```
 Disclosure, per rule 1: this game was built with AI assistance (Claude Code) — code, and some of this post.
 ```
-Follow it with the same body as C.2's first comment, **including C.2's corrected privacy bullet** — the one that discloses the first-party finish/share hit, not the shorter earlier wording.
+Follow it with the same body as C.2's first comment, including C.2's privacy bullet as written (logs only).
 
 **Notes for the poster.** Flair first, submit second. Wait 48 hours after r/WebGames (C.4). Do not reuse C.2's title verbatim across both subs.
 
